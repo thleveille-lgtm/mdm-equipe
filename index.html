@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="MDM Equipe"/>
+<title>MDM Equipe 🏡</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#1C1712;font-family:'DM Sans',sans-serif;color:#F2EAD8;min-height:100vh;}
+input,textarea,select,button{font-family:'DM Sans',sans-serif;}
+::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-thumb{background:#4A3D2E;border-radius:2px;}
+.card{background:#241E17;border:1px solid #3D3328;border-radius:16px;}
+.inp{background:#2E2620;border:1px solid #3D3328;border-radius:10px;padding:10px 14px;color:#F2EAD8;font-size:13px;outline:none;width:100%;display:block;}
+.inp:focus{border-color:#C8713A;}
+.btn{border:none;border-radius:10px;padding:11px 18px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;}
+.nb{background:none;border:none;cursor:pointer;}
+.tag{font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:4px;display:inline-block;}
+.pbar{height:5px;border-radius:3px;background:#3D3328;overflow:hidden;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+select option{background:#241E17;}
+@keyframes fu{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.anim{animation:fu .25s ease;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+
+<div id="login-screen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="width:100%;max-width:380px;">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="font-size:44px;margin-bottom:10px;">🏡</div>
+      <h1 style="font-size:24px;font-weight:700;">Maisons du Monde</h1>
+      <p style="color:#5C4E3A;font-size:11px;margin-top:6px;font-family:'DM Mono',monospace;">// espace équipe commerciale</p>
+    </div>
+    <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <p style="font-size:11px;color:#8C7B65;margin-bottom:6px;font-family:'DM Mono',monospace;">PRÉNOM</p>
+        <input class="inp" id="l-user" placeholder="ex: Amandine" autocomplete="off"/>
+      </div>
+      <div>
+        <p style="font-size:11px;color:#8C7B65;margin-bottom:6px;font-family:'DM Mono',monospace;">MOT DE PASSE</p>
+        <input class="inp" id="l-pass" type="password" placeholder="••••••••••"/>
+      </div>
+      <p id="l-err" style="color:#B85040;font-size:13px;font-weight:600;display:none;"></p>
+      <button class="btn" style="background:#C8713A;width:100%;padding:13px;font-size:14px;" onclick="doLogin()">Se connecter →</button>
+    </div>
+    <div class="card" id="l-list" style="margin-top:14px;padding:16px;">
+      <p style="font-size:11px;color:#5C4E3A;font-family:'DM Mono',monospace;margin-bottom:10px;">// identifiants équipe</p>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+
+<div id="app" style="display:none;flex-direction:column;min-height:100vh;">
+  <header style="padding:12px 16px;border-bottom:1px solid #3D3328;display:flex;align-items:center;justify-content:space-between;background:#1C1712;position:sticky;top:0;z-index:100;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:20px;">🏡</span>
+      <span style="font-size:15px;font-weight:700;">Maisons du Monde</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span id="h-admin" style="font-size:9px;background:#C8713A22;color:#C8713A;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace;display:none;">ADMIN</span>
+      <div id="h-av" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;"></div>
+      <span id="h-nm" style="font-size:12px;color:#8C7B65;"></span>
+      <button class="btn" style="background:#3D3328;color:#8C7B65;padding:5px 10px;font-size:11px;" onclick="doLogout()">Quitter</button>
+    </div>
+  </header>
+  <nav id="nav" style="display:flex;gap:3px;padding:8px 12px;border-bottom:1px solid #3D3328;overflow-x:auto;background:#241E17;"></nav>
+  <main id="main" style="flex:1;overflow-y:auto;padding:18px 14px;"></main>
+</div>
+
+<script>
+// ═══════════════════════════════════
+// DONNÉES PAR DÉFAUT
+// ═══════════════════════════════════
+const DEFAULT_USERS = [
+  {id:"admin",    name:"Manager",   avatar:"MG", password:"mdm2026",     role:"admin", color:"#C8713A"},
+  {id:"claudia",  name:"Claudia",   avatar:"CL", password:"claudia2026", role:"user",  color:"#8B6914"},
+  {id:"virginie", name:"Virginie",  avatar:"VI", password:"virginie2026",role:"user",  color:"#6B8E5E"},
+  {id:"sohila",   name:"Sohila",    avatar:"SO", password:"sohila2026",  role:"user",  color:"#A0522D"},
+  {id:"amandine", name:"Amandine",  avatar:"AM", password:"amandine2026",role:"user",  color:"#B8864E"},
+  {id:"jehanne",  name:"Jehanne",   avatar:"JE", password:"jehanne2026", role:"user",  color:"#7A9E7E"},
+  {id:"caroline", name:"Caroline",  avatar:"CA", password:"caroline2026",role:"user",  color:"#4E7EA8"},
+  {id:"audrey",   name:"Audrey",    avatar:"AU", password:"audrey2026",  role:"user",  color:"#9B7DB3"},
+  {id:"laurine",  name:"Laurine",   avatar:"LA", password:"laurine2026", role:"user",  color:"#C9993A"},
+  {id:"guillaume",name:"Guillaume", avatar:"GU", password:"guillm2026",  role:"user",  color:"#6B7B8D"},
+];
+
+const DEFAULT_ACTU = [
+  {id:"a1",date:"03 Mai 2026",tag:"🌿 OUTDOOR",title:"Collection Outdoor 2026 en magasin !",content:"La collection est arrivée ! Priorité aux nouveautés EZRA et MALDIVES. Formation disponible dans l'onglet Formations.",author:"Manager",hot:true},
+  {id:"a2",date:"01 Mai 2026",tag:"📋 RAPPEL",title:"Saisie chiffres avril avant vendredi",content:"Merci de mettre à jour vos chiffres CA, Canapé, Outdoor et BtoB avant vendredi soir.",author:"Manager",hot:true},
+  {id:"a3",date:"28 Avr 2026",tag:"🛋️ CANAPÉ",title:"Nouvelle formation Canapés disponible",content:"La formation complète canapés est en ligne. A voir avant les journées shopping.",author:"Manager",hot:false},
+];
+
+const DEFAULT_MSGS = [
+  {id:"m1",author:"Manager",avatar:"MG",color:"#C8713A",time:"08:30",text:"Bonjour l'équipe ! Focus Outdoor ce mois — qualifiez l'espace dès l'accueil. Bonne journée !"},
+  {id:"m2",author:"Amandine",avatar:"AM",color:"#B8864E",time:"09:12",text:"Bonjour ! Un client hésite entre EZRA et DOOLIN, des retours sur l'EZRA ?"},
+  {id:"m3",author:"Virginie",avatar:"VI",color:"#6B8E5E",time:"09:28",text:"L'EZRA est incroyable ! Le client touche le bois et c'est plié. Montre-lui les 2 bancs inclus 👌"},
+];
+
+// ═══════════════════════════════════
+// LOCALSTORAGE
+// ═══════════════════════════════════
+const ls = {
+  get: (k,d) => { try { const v=localStorage.getItem(k); return v?JSON.parse(v):d; } catch{return d;} },
+  set: (k,v) => { try { localStorage.setItem(k,JSON.stringify(v)); } catch{} }
+};
+
+// ═══════════════════════════════════
+// ÉTAT
+// ═══════════════════════════════════
+const S = {
+  user: null,
+  users:    ls.get("mdm_users",    DEFAULT_USERS),
+  actu:     ls.get("mdm_actu",     DEFAULT_ACTU),
+  msgs:     ls.get("mdm_msgs",     DEFAULT_MSGS),
+  chiffres: ls.get("mdm_chiffres", {}),
+  active: "home", mois: new Date().getMonth(),
+  membre: null, fOpen: null, fSlide: {}, atab: "actu", editU: null,
+  aForm: {title:"",content:"",tag:"📋 RAPPEL",hot:false},
+  uForm: {name:"",avatar:"",password:"",role:"user",color:"#C8713A"},
+};
+
+function save() {
+  ls.set("mdm_users",    S.users);
+  ls.set("mdm_actu",     S.actu);
+  ls.set("mdm_msgs",     S.msgs);
+  ls.set("mdm_chiffres", S.chiffres);
+}
+
+// ═══════════════════════════════════
+// OBJECTIFS EXCEL
+// ═══════════════════════════════════
+const OCA=[50000,50000,80000,75000,75000,72000,73000,55000,48000,51000,80000,37000];
+const OCN=[15000,18000,18000,18000,10000,8000,15000,30000,30000,30000,20000,10000];
+const OOU=[3500,12000,22000,40000,40000,30000,18500,10000,4600,2000,1800,1100];
+const OB2=[27700,6100,9873,17150,11738,14947,16091,4255,7777,4958,10163,5472];
+const PTS={ca:10.85,can:10.85,out:10.85,b2b:11.8};
+const PAR={
+  claudia:{ca:[0,0,0,.5,.5,.5,.5,.5,.5,.5,.5,.5],can:[0,0,0,.5,.5,.5,.5,.5,.5,.5,.5,.5],out:[0,0,0,.5,.5,.5,.5,.5,.5,.5,.5,.5],b2b:[0,0,0,.5,.5,.5,.5,.5,.5,.5,.5,.5]},
+  virginie:{ca:[1,1,1,1,1,1,1,1,1,1,1,1],can:[1,1,1,1,1,1,1,1,1,1,1,1],out:[1,1,1,1,1,1,1,1,1,1,1,1],b2b:[1,1,1,1,1,1,1,1,1,1,1,1]},
+  sohila:{ca:[.25,.25,.25,.25,.25,.25,.25,.25,.25,.25,.25,.25],can:[.25,.25,.25,.25,.25,.25,.25,.25,.25,.25,.25,.25],out:[.25,.25,.25,.25,.25,.25,.25,.25,.25,.25,.25,.25],b2b:[.2,.2,.2,.2,.2,.2,.2,.2,.2,.2,.2,.2]},
+  amandine:{ca:[3,3,3,3,3,3,3,3,3,3,3,3],can:[3,3,3,3,3,3,3,2,2,2,2,3],out:[3,3,3,3,3,3,3,3,3,3,3,3],b2b:[4,4,4,4,4,4,4,4,4,4,4,4]},
+  jehanne:{ca:[2,2,2,2,2,2,2,2,2,2,2,2],can:[2,2,2,2,2,2,2,2,2,2,2,2],out:[2,2,2,2,2,2,2,2,2,2,2,2],b2b:[2,2,2,2,2,2,2,2,2,2,2,2]},
+  caroline:{ca:[2,2,2,2,2,2,2,2,2,2,2,2],can:[2,2,2,2,2,2,2,2,2,2,2,2],out:[2,2,2,2,2,2,2,2,2,2,2,2],b2b:[2,2,2,2,2,2,2,2,2,2,2,2]},
+  audrey:{ca:[2,2,2,2,2,2,2,2,2,2,2,2],can:[2,2,2,2,2,2,2,2,2,2,2,2],out:[2,2,2,2,2,2,2,2,2,2,2,2],b2b:[2,2,2,2,2,2,2,2,2,2,2,2]},
+  laurine:{ca:[.5,.5,.5,.5,.5,.5,.5,.5,0,0,0,0],can:[.5,.5,.5,.5,.5,.5,.5,.5,0,0,0,0],out:[.5,.5,.5,.5,.5,.5,.5,.5,0,0,0,0],b2b:[.5,.5,.5,.5,.5,.5,.5,.5,0,0,0,0]},
+  guillaume:{ca:[.1,.1,.1,.1,.1,.1,.1,.1,.1,.1,.1,.1],can:[.1,.1,.1,.1,.1,.1,.1,.1,.1,.1,.1,.1],out:[.1,.1,.1,.1,.1,.1,.1,.1,.1,.1,.1,.1],b2b:[.1,.1,.1,.1,.1,.1,.1,.1,.1,.1,.1,.1]},
+};
+
+function calcObj(uid,mi){const p=PAR[uid];if(!p)return{ca:0,can:0,out:0,b2b:0};return{ca:Math.round(OCA[mi]*p.ca[mi]/PTS.ca),can:Math.round(OCN[mi]*p.can[mi]/PTS.can),out:Math.round(OOU[mi]*p.out[mi]/PTS.out),b2b:Math.round(OB2[mi]*p.b2b[mi]/PTS.b2b)};}
+
+function getC(uid,mi){
+  const key=uid+"_"+mi;
+  const saved=S.chiffres[key]||{};
+  const obj=calcObj(uid,mi);
+  return{obj_ca:obj.ca,ca:0,obj_can:obj.can,can:0,obj_out:obj.out,out:0,obj_b2b:obj.b2b,b2b:0,alma:0,tickets:0,pm:0,iv:0,...saved};
+}
+
+function setC(uid,mi,field,val){
+  const key=uid+"_"+mi;
+  if(!S.chiffres[key]) S.chiffres[key]={};
+  S.chiffres[key][field]=parseFloat(val)||0;
+  save();
+}
+
+// ═══════════════════════════════════
+// FORMATIONS
+// ═══════════════════════════════════
+const FORMATIONS=[
+  {id:"f1",title:"Collection Outdoor 2026",cat:"Outdoor",emoji:"🌿",hot:true,fichier:"Formation_Outdoor_ORDONNE_2026.pptx",desc:"Formation complète mobilier de jardin MDM 2026.",slides:[
+    {t:"EZRA — Nouveauté 2026 ★",c:"Aluminium blanc + bois massif + coussins écru\n8 places (angle + bancs)\n✓ Structure UV ultra-résistante · Bestseller 2026\n👤 Grand jardin · 8+ pers. · Client premium"},
+    {t:"ST RAPHAËL — Résine Tressée",c:"Résine tressée rotin naturel + coussins taupe · 5 places\n✓ Entretien zéro · Résistant UV/pluie\n👤 Terrasse grande · Style naturel bohème"},
+    {t:"LIDY — Ensemble Repas",c:"Table alu argile + 8 chaises résine beige\n✓ Chaises empilables · Zéro entretien alu\n👤 Repas terrasse · 6-8 convives"},
+    {t:"DOOLIN — Table Extensible",c:"Alu vert kaki + bois massif\nExtensible 185→280 cm (6-10 places)\n✓ 0 rouille · 20 ans de durée"},
+    {t:"MALDIVES — Nouveauté 2026 ★",c:"Alu beige + acacia + coussins écru · 4/5 places\n✓ Design resort haut de gamme\n👤 Terrasse moderne · Bord de piscine"},
+    {t:"BELLUNE — Design Exclusif MDM",c:"Acacia arrondi + bouclette écru · 5 places\n✓ Formes organiques — Design MDM exclusif"},
+    {t:"Substitutions",c:"EZRA → LIMASSOL ou THETIS\nST RAPHAËL → CERRADO\nBELLUNE → MALDIVES\nOLÉRON → TOSSA\nLIDY → DOOLIN"},
+    {t:"Cross-sell & ALMA",c:"Salon → Coussins 15-49€ + Housse 49-89€\nTable → Chaises + Parasol 99-199€\n💳 3x sans frais : 900€ = 3x300€\n💳 24x : 1800€ = 75€/mois"},
+    {t:"7 Questions + SONCAS",c:"1.Espace? 2.Nb pers.? 3.Usage? 4.Matériau?\n5.Budget? 6.Hivernage? 7.Style?\nS-Sécurité O-Orgueil N-Nouveauté\nC-Confort A-Argent S-Sympathie"},
+  ]},
+  {id:"f2",title:"Les Canapés MDM 2025-2026",cat:"Canapé",emoji:"🛋️",hot:false,fichier:"Formation_Canapes_MDM.pptx",desc:"Best-sellers, 3 gammes de prix, matières et écoresponsabilité.",slides:[
+    {t:"La gamme MDM",c:"Droits · Angle · Modulables · Convertibles · Méridiennes\n+12 000 références · Livraison 1-4 semaines"},
+    {t:"LILO ⭐ · BARCELONE · MODJO",c:"LILO : 999€ · Velours bouclette · Tendance 2025\nBARCELONE : 1199€ · Lin lavé · Déhoussable\nMODJO : 1399€ · Rétro 50s · 50% recyclé"},
+    {t:"BROOKE · ELVIS + Gammes",c:"BROOKE : 799€ · Scandinave · Déhoussable lavable\nELVIS : 399€ · Clic-clac · FSC · Studio\nENTRÉE 159-599€ · MILIEU 599-1199€ · HAUT 1199€+"},
+    {t:"Comparatif client → produit",c:"Étudiant → Elvis 399€\nJeune couple → Lilo 999€\nFamille → Brooke 799€ (lavable)\nRétro → Modjo 1399€\nMaison secondaire → Barcelone 1199€"},
+    {t:"Labels & Conseils",c:"🌿 Good is Beautiful · 🌳 FSC · ♻️ Recyclé · 🇫🇷 France\n1. Faites essayer (5-10 min = achat)\n2. Mesurez le salon\n3. Proposez accessoires\n4. Valorisez les promos MDM"},
+  ]},
+  {id:"f3",title:"Fiche Mémo Outdoor",cat:"Mémo",emoji:"📋",hot:true,fichier:"Fiche_Recap_Outdoor_MDM.pdf",desc:"Arguments, objections, fidélité. A mémoriser !",slides:[
+    {t:"SONCAS Outdoor",c:"S-Sécurité : Garantie 2 ans, SAV MDM\nO-Orgueil : Design signature, Bellune exclusif\nN-Nouveauté : Ezra, Maldives 2026\nC-Confort : Coussins épais, Relax 3 positions\nA-Argent : Alma 3x sans frais, fidélité -20%\nS-Sympathie : Projet global"},
+    {t:"Objections → Réponses",c:"Trop cher → 1800€/10 étés = 180€/an\nRésiste pas → Résine UV · Alu 20 ans\nJe réfléchis → Cerrado et Ezra partent avant l'été!\nMoins cher ailleurs → Garantie 2 ans SAV MDM"},
+    {t:"Programme Fidélité",c:"LIKER (0-199€/an) : -10%\nLOVER (200-999€) : -15% + Bon 15€\nADDICT (1000€+) : -20% + Relooking déco\nAvec cet achat vous passez LOVER!"},
+    {t:"5 Règles d'Or",c:"01 Pensez PROJET : panier peut doubler!\n02 Qualifiez l'ESPACE dès l'accueil\n03 Coût ANNUEL : 1800€ = 3,50€/semaine\n04 Cross-sell SYSTÉMATIQUE\n05 SUBSTITUTION prête : ne pas laisser repartir"},
+  ]},
+];
+
+// ═══════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════
+const C={accent:"#C8713A",green:"#6B9E5E",gold:"#C9993A",red:"#B85040",blue:"#4E7EA8",border:"#3D3328",bg2:"#241E17",bg3:"#2E2620",muted:"#8C7B65",dim:"#5C4E3A",text:"#F2EAD8"};
+const MOIS=["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
+const MOISF=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+const TAGS=["🌿 OUTDOOR","🛋️ CANAPÉ","📋 RAPPEL","🎯 OBJECTIF","👥 RH","🎉 RÉSULTAT","📣 ANNONCE"];
+const COLS=["#C8713A","#8B6914","#6B8E5E","#A0522D","#B8864E","#7A9E7E","#4E7EA8","#9B7DB3","#C9993A","#6B7B8D"];
+
+const fmt=n=>!n||n===0?"—":n>=1000?`${(n/1000).toFixed(n%1000===0?0:1)}K€`:`${Math.round(n)}€`;
+const pct=(r,o)=>o>0?Math.min(Math.round(r/o*100),999):0;
+const pctC=p=>p>=100?C.green:p>=75?C.gold:C.red;
+const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const $=id=>document.getElementById(id);
+
+function render(id,html){const el=$(id);if(el){el.innerHTML=html;el.className=el.className;void el.offsetWidth;el.classList.add("anim");}}
+
+// ═══════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════
+function renderLoginList(){
+  let h=`<p style="font-size:11px;color:#5C4E3A;font-family:'DM Mono',monospace;margin-bottom:10px;">// identifiants équipe</p>`;
+  S.users.forEach(u=>{
+    h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #2A2A1E;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:20px;height:20px;border-radius:50%;background:${esc(u.color)};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;">${esc(u.avatar)}</div>
+        <span style="font-size:12px;color:#8C7B65;">${esc(u.name)}</span>
+        ${u.role==="admin"?`<span style="font-size:9px;color:#C8713A;background:#C8713A22;padding:1px 5px;border-radius:3px;">admin</span>`:""}
+      </div>
+      <span style="font-size:11px;color:#5C4E3A;font-family:'DM Mono',monospace;">${esc(u.password)}</span>
+    </div>`;
+  });
+  $("l-list").innerHTML=h;
+}
+
+function doLogin(){
+  const lu=$("l-user").value.trim().toLowerCase();
+  const lp=$("l-pass").value.trim();
+  const found=S.users.find(u=>u.name.trim().toLowerCase()===lu&&u.password===lp);
+  if(found){
+    S.user=found;
+    $("login-screen").style.display="none";
+    $("app").style.display="flex";
+    $("h-av").style.background=found.color;
+    $("h-av").textContent=found.avatar;
+    $("h-nm").textContent=found.name;
+    if(found.role==="admin") $("h-admin").style.display="inline";
+    else $("h-admin").style.display="none";
+    renderNav();
+    go("home");
+  } else {
+    $("l-err").textContent="Identifiant ou mot de passe incorrect.";
+    $("l-err").style.display="block";
+  }
+}
+
+function doLogout(){
+  S.user=null;
+  $("app").style.display="none";
+  $("login-screen").style.display="flex";
+  $("l-user").value="";$("l-pass").value="";
+  $("l-err").style.display="none";
+}
+
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&!S.user)doLogin();});
+
+// ═══════════════════════════════════
+// NAV
+// ═══════════════════════════════════
+function renderNav(){
+  const isAdmin=S.user&&S.user.role==="admin";
+  const tabs=[
+    {id:"home",l:"Accueil",i:"🏠"},
+    {id:"formations",l:"Formations",i:"🎓"},
+    {id:"chiffres",l:isAdmin?"Chiffres":"Mes Chiffres",i:"📊"},
+    {id:"discussion",l:"Discussion",i:"💬"},
+    ...(isAdmin?[{id:"admin",l:"Admin",i:"⚙️"}]:[]),
+  ];
+  $("nav").innerHTML=tabs.map(t=>`
+    <button onclick="go('${t.id}')" style="padding:7px 13px;border-radius:10px;font-size:12px;font-weight:${S.active===t.id?700:400};border:none;cursor:pointer;white-space:nowrap;
+      background:${S.active===t.id?(t.id==="admin"?C.blue:C.accent):"transparent"};
+      color:${S.active===t.id?"#fff":C.muted};">${t.i} ${t.l}</button>`).join("");
+}
+
+function go(page){
+  S.active=page; S.fOpen=null; S.membre=null;
+  renderNav(); renderPage();
+}
+
+// ═══════════════════════════════════
+// RENDER PAGE
+// ═══════════════════════════════════
+function renderPage(){
+  const m=$("main");
+  m.innerHTML="";
+  if(S.active==="home")       m.innerHTML=pageHome();
+  else if(S.active==="formations") m.innerHTML=S.fOpen?pageViewer():pageFormList();
+  else if(S.active==="chiffres")   m.innerHTML=S.user&&S.user.role==="admin"?pageChifAdmin():pageChifUser();
+  else if(S.active==="discussion") {m.innerHTML=pageDiscussion();setTimeout(()=>{const e=$("msg-end");if(e)e.scrollIntoView({behavior:"smooth"});},100);}
+  else if(S.active==="admin")      m.innerHTML=pageAdmin();
+  m.classList.remove("anim"); void m.offsetWidth; m.classList.add("anim");
+}
+
+// ═══════════════════════════════════
+// HOME
+// ═══════════════════════════════════
+function pageHome(){
+  const isAdmin=S.user&&S.user.role==="admin";
+  const mi=new Date().getMonth();
+  const m=getC(S.user.id,mi);
+  let kpi="";
+  if(!isAdmin){
+    kpi=`<div class="grid2" style="margin-bottom:20px;">${[{l:`CA ${MOIS[mi]}`,v:m.ca,o:m.obj_ca,c:C.green},{l:`Outdoor ${MOIS[mi]}`,v:m.out,o:m.obj_out,c:C.gold}].map(s=>{
+      const p=pct(s.v,s.o);
+      return `<div class="card" style="padding:16px;">
+        <p style="font-size:10px;color:${C.muted};font-family:'DM Mono',monospace;margin-bottom:6px;">${s.l}</p>
+        <p style="font-size:18px;font-weight:700;color:${s.c};">${fmt(s.v)}</p>
+        <p style="font-size:10px;color:${C.dim};margin-top:2px;">obj. ${fmt(s.o)}</p>
+        <div class="pbar" style="margin-top:8px;"><div style="height:100%;border-radius:3px;background:${pctC(p)};width:${Math.min(p,100)}%;"></div></div>
+        <p style="font-size:10px;font-weight:600;color:${pctC(p)};margin-top:4px;">${p}%</p>
+      </div>`;}).join("")}</div>`;
+  }
+  const actus=S.actu.map(a=>`
+    <div class="card" style="padding:18px;position:relative;margin-bottom:12px;border-color:${a.hot?C.accent+"44":C.border};">
+      ${a.hot?`<span style="position:absolute;top:14px;right:14px;font-size:9px;color:${C.accent};background:${C.accent}22;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace;font-weight:600;">URGENT</span>`:""}
+      <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+        <span class="tag" style="background:${C.accent}22;color:${C.accent};">${esc(a.tag)}</span>
+        <span class="tag" style="background:${C.border};color:${C.muted};">${esc(a.date)}</span>
+      </div>
+      <p style="font-weight:700;font-size:15px;margin-bottom:8px;line-height:1.4;padding-right:${a.hot?50:0}px;">${esc(a.title)}</p>
+      <p style="color:${C.muted};font-size:13px;line-height:1.6;margin-bottom:8px;">${esc(a.content)}</p>
+      <p style="color:${C.dim};font-size:11px;font-family:'DM Mono',monospace;">— ${esc(a.author)}</p>
+    </div>`).join("")||`<p style="color:${C.dim};text-align:center;padding:40px;">Aucune actualité.</p>`;
+  return `
+    <p style="color:${C.muted};font-size:11px;font-family:'DM Mono',monospace;margin-bottom:4px;">// ACTUALITÉS DU MAGASIN</p>
+    <h2 style="font-size:22px;font-weight:700;margin-bottom:4px;">Bonjour ${esc(S.user.name)} 👋</h2>
+    <p style="color:${C.muted};font-size:13px;margin-bottom:20px;">${new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})}</p>
+    ${kpi}${actus}`;
+}
+
+// ═══════════════════════════════════
+// FORMATIONS
+// ═══════════════════════════════════
+function pageFormList(){
+  return `
+    <p style="color:${C.muted};font-size:11px;font-family:'DM Mono',monospace;margin-bottom:4px;">// FORMATIONS PRODUITS</p>
+    <h2 style="font-size:22px;font-weight:700;margin-bottom:18px;">Formations disponibles</h2>
+    ${FORMATIONS.map(f=>`
+      <div class="card" onclick="openForm('${f.id}')" style="padding:18px;cursor:pointer;margin-bottom:14px;border-color:${f.hot?C.accent+"44":C.border};">
+        <div style="display:flex;justify-content:space-between;gap:12px;">
+          <div style="flex:1;">
+            <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+              <span class="tag" style="background:${C.accent}22;color:${C.accent};">${f.emoji} ${f.cat}</span>
+              <span class="tag" style="background:${C.border};color:${C.muted};">${f.slides.length} slides</span>
+              ${f.hot?`<span class="tag" style="background:${C.gold}22;color:${C.gold};">🔥 Priorité</span>`:""}
+            </div>
+            <p style="font-weight:700;font-size:17px;margin-bottom:6px;">${esc(f.title)}</p>
+            <p style="color:${C.muted};font-size:13px;line-height:1.5;margin-bottom:12px;">${esc(f.desc)}</p>
+            <div style="display:inline-flex;align-items:center;gap:8px;background:${C.bg3};border:1px solid #4A3D2E;border-radius:10px;padding:8px 14px;">
+              <span>${f.fichier.endsWith(".pdf")?"📄":"📊"}</span>
+              <div>
+                <p style="font-size:10px;color:${C.muted};font-family:'DM Mono',monospace;margin-bottom:1px;">FICHIER SOURCE</p>
+                <p style="font-size:12px;font-weight:600;color:${C.gold};">${esc(f.fichier)}</p>
+              </div>
+            </div>
+          </div>
+          <div style="width:44px;height:44px;border-radius:12px;background:${C.accent}22;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">▶</div>
+        </div>
+      </div>`).join("")}`;
+}
+
+function openForm(id){S.fOpen=FORMATIONS.find(f=>f.id===id);if(!S.fSlide[id])S.fSlide[id]=0;renderPage();}
+
+function pageViewer(){
+  const f=S.fOpen,si=S.fSlide[f.id]||0,sl=f.slides[si],tot=f.slides.length;
+  return `
+    <button onclick="S.fOpen=null;renderPage();" style="background:none;border:none;color:${C.muted};font-size:13px;margin-bottom:16px;cursor:pointer;">← Retour</button>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+      <span class="tag" style="background:${C.accent}22;color:${C.accent};">${f.emoji} ${f.cat}</span>
+      <span class="tag" style="background:${C.border};color:${C.muted};">${si+1}/${tot}</span>
+    </div>
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:10px;">${esc(f.title)}</h2>
+    <div style="background:${C.bg3};border:1px solid #4A3D2E;border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:20px;">${f.fichier.endsWith(".pdf")?"📄":"📊"}</span>
+      <div>
+        <p style="font-size:10px;color:${C.muted};font-family:'DM Mono',monospace;">FICHIER ORIGINAL</p>
+        <p style="font-size:12px;font-weight:600;color:${C.gold};">${esc(f.fichier)}</p>
+      </div>
+    </div>
+    <div class="pbar" style="margin-bottom:16px;"><div style="height:100%;border-radius:3px;background:${C.accent};width:${Math.round((si+1)/tot*100)}%;transition:width .4s;"></div></div>
+    <div class="card" style="padding:24px;margin-bottom:14px;min-height:180px;border-color:${C.accent}33;">
+      <p style="color:${C.accent};font-size:11px;font-family:'DM Mono',monospace;font-weight:600;margin-bottom:8px;">SLIDE ${si+1}</p>
+      <h3 style="font-size:17px;font-weight:700;margin-bottom:14px;line-height:1.3;">${esc(sl.t)}</h3>
+      <div style="color:${C.muted};font-size:14px;line-height:1.9;white-space:pre-line;">${esc(sl.c)}</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:20px;">
+      <button onclick="prevSl()" style="background:${si===0?C.border:C.bg3};color:${si===0?C.dim:C.muted};border:none;border-radius:10px;padding:11px;flex:1;cursor:pointer;font-size:13px;" ${si===0?"disabled":""}>← Préc.</button>
+      ${si<tot-1?`<button onclick="nextSl()" style="background:${C.accent};color:#fff;border:none;border-radius:10px;padding:11px;flex:1;cursor:pointer;font-size:13px;font-weight:600;">Suivant →</button>`
+               :`<button onclick="S.fOpen=null;renderPage();" style="background:${C.green};color:#fff;border:none;border-radius:10px;padding:11px;flex:1;cursor:pointer;font-size:13px;font-weight:600;">✓ Terminé !</button>`}
+    </div>
+    ${f.slides.map((s,i)=>`
+      <div onclick="S.fSlide['${f.id}']=${i};renderPage();" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;cursor:pointer;margin-bottom:4px;
+        background:${i===si?C.accent+"22":"transparent"};border:1px solid ${i===si?C.accent+"44":"transparent"};">
+        <span style="width:20px;height:20px;border-radius:50%;background:${i<=si?C.accent:C.border};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:${i<=si?"#fff":C.dim};flex-shrink:0;">${i+1}</span>
+        <span style="font-size:12px;color:${i===si?C.text:C.muted};">${esc(s.t)}</span>
+      </div>`).join("")}`;
+}
+
+function nextSl(){const f=S.fOpen;if((S.fSlide[f.id]||0)<f.slides.length-1){S.fSlide[f.id]=(S.fSlide[f.id]||0)+1;renderPage();}}
+function prevSl(){const f=S.fOpen;if((S.fSlide[f.id]||0)>0){S.fSlide[f.id]--;renderPage();}}
+
+// ═══════════════════════════════════
+// CHIFFRES USER
+// ═══════════════════════════════════
+function pageChifUser(){
+  const m=getC(S.user.id,S.mois);
+  const mBtns=MOIS.map((ml,i)=>`<button onclick="S.mois=${i};renderPage();" style="padding:6px 12px;border-radius:8px;font-size:11px;font-weight:${S.mois===i?700:400};border:1px solid ${S.mois===i?C.accent:C.border};background:${S.mois===i?C.accent:C.bg3};color:${S.mois===i?"#fff":C.muted};white-space:nowrap;flex-shrink:0;cursor:pointer;">${ml}</button>`).join("");
+  const kpis=[{l:"CA",v:m.ca,o:m.obj_ca,c:C.green},{l:"Canapé",v:m.can,o:m.obj_can,c:C.gold},{l:"Outdoor",v:m.out,o:m.obj_out,c:C.accent},{l:"BtoB",v:m.b2b,o:m.obj_b2b,c:C.blue}].map(s=>{
+    const p=pct(s.v,s.o);
+    return `<div class="card" style="padding:16px;">
+      <p style="font-size:10px;color:${C.muted};font-family:'DM Mono',monospace;margin-bottom:6px;">${s.l} — ${MOIS[S.mois]}</p>
+      <p style="font-size:18px;font-weight:700;color:${s.c};">${fmt(s.v)}</p>
+      <p style="font-size:10px;color:${C.dim};margin-top:2px;">obj. ${fmt(s.o)}</p>
+      <div class="pbar" style="margin-top:8px;"><div style="height:100%;border-radius:3px;background:${pctC(p)};width:${Math.min(p,100)}%;"></div></div>
+      <p style="font-size:10px;font-weight:600;color:${pctC(p)};margin-top:4px;">${p}%</p>
+    </div>`;}).join("");
+  const indics=[{l:"Alma",v:fmt(m.alma)},{l:"Tickets",v:m.tickets||"—"},{l:"Panier moyen",v:m.pm?`${Math.round(m.pm)}€`:"—"},{l:"IV",v:m.iv||"—"}].map((s,i)=>`
+    <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:${i<3?`1px solid ${C.border}`:"none"};">
+      <span style="color:${C.muted};font-size:13px;">${s.l}</span>
+      <span style="font-weight:600;font-size:13px;">${s.v}</span>
+    </div>`).join("");
+  return `
+    <p style="color:${C.muted};font-size:11px;font-family:'DM Mono',monospace;margin-bottom:4px;">// MES CHIFFRES 2026</p>
+    <h2 style="font-size:22px;font-weight:700;margin-bottom:14px;">Mes performances</h2>
+    <div style="display:flex;gap:4px;overflow-x:auto;margin-bottom:20px;padding-bottom:4px;">${mBtns}</div>
+    <div class="grid2" style="margin-bottom:16px;">${kpis}</div>
+    <div class="card" style="padding:18px;"><p style="font-weight:600;font-size:13px;margin-bottom:12px;color:${C.muted};">Autres indicateurs</p>${indics}</div>`;
+}
+
+// ═══════════════════════════════════
+// CHIFFRES ADMIN
+// ═══════════════════════════════════
+function pageChifAdmin(){
+  const mi=S.mois;
+  const vendeurs=S.users.filter(u=>u.role==="user");
+  const T=vendeurs.reduce((a,u)=>{const c=getC(u.id,mi);return{obj_ca:a.obj_ca+c.obj_ca,ca:a.ca+c.ca,obj_can:a.obj_can+c.obj_can,can:a.can+c.can,obj_out:a.obj_out+c.obj_out,out:a.out+c.out,obj_b2b:a.obj_b2b+c.obj_b2b,b2b:a.b2b+c.b2b};},{obj_ca:0,ca:0,obj_can:0,can:0,obj_out:0,out:0,obj_b2b:0,b2b:0});
+  const mBtns=MOIS.map((ml,i)=>`<button onclick="S.mois=${i};S.membre=null;renderPage();" style="padding:6px 12px;border-radius:8px;font-size:11px;font-weight:${mi===i?700:400};border:1px solid ${mi===i?C.accent:C.border};background:${mi===i?C.accent:C.bg3};color:${mi===i?"#fff":C.muted};white-space:nowrap;flex-shrink:0;cursor:pointer;">${ml}</button>`).join("");
+  const tot=[{l:"CA",v:T.ca,o:T.obj_ca,c:C.green},{l:"Canapé",v:T.can,o:T.obj_can,c:C.gold},{l:"Outdoor",v:T.out,o:T.obj_out,c:C.accent},{l:"BtoB",v:T.b2b,o:T.obj_b2b,c:C.blue}].map(s=>{
+    const p=pct(s.v,s.o);
+    return `<div style="background:${C.bg3};border-radius:10px;padding:12px;">
+      <p style="font-size:10px;color:${C.muted};font-family:'DM Mono',monospace;margin-bottom:5px;">${s.l}</p>
+      <p style="font-size:16px;font-weight:700;color:${s.c};">${fmt(s.v)}</p>
+      <p style="font-size:10px;color:${C.dim};">obj. ${fmt(s.o)} · <span style="color:${pctC(p)};">${p}%</span></p>
+    </div>`;}).join("");
+
+  const membres=[...vendeurs].sort((a,b)=>(getC(b.id,mi).ca||0)-(getC(a.id,mi).ca||0)).map((mb,idx)=>{
+    const m=getC(mb.id,mi),p=pct(m.ca,m.obj_ca),open=S.membre===mb.id;
+    const tabAnn=MOIS.map((ml,i)=>{const mc=getC(mb.id,i),pp=pct(mc.ca,mc.obj_ca);return `
+      <tr onclick="S.mois=${i};renderPage();" style="background:${i===mi?C.accent+"22":"transparent"};cursor:pointer;">
+        <td style="padding:4px 6px;color:${i===mi?C.accent:C.muted};">${ml}</td>
+        <td style="padding:4px 6px;text-align:right;color:${C.dim};">${fmt(mc.obj_ca)}</td>
+        <td style="padding:4px 6px;text-align:right;font-weight:600;">${mc.ca?fmt(mc.ca):"—"}</td>
+        <td style="padding:4px 6px;text-align:right;color:${pctC(pp)};font-weight:700;">${mc.ca?`${pp}%`:"—"}</td>
+      </tr>`;}).join("");
+    const panel=open?`
+      <div style="border-top:1px solid ${C.border};padding:16px;">
+        <p style="font-size:12px;font-weight:700;color:${C.accent};margin-bottom:10px;">✏️ Réalisé — ${MOISF[mi]}</p>
+        <div class="grid2" style="margin-bottom:14px;">
+          ${[{f:"ca",l:"CA (€)"},{f:"can",l:"Canapé (€)"},{f:"out",l:"Outdoor (€)"},{f:"b2b",l:"BtoB (€)"},{f:"alma",l:"Alma (€)"},{f:"tickets",l:"Tickets"},{f:"pm",l:"Panier Moy."},{f:"iv",l:"IV"}].map(({f,l})=>`
+            <div><p style="font-size:10px;color:${C.muted};margin-bottom:4px;font-family:'DM Mono',monospace;">${l}</p>
+            <input class="inp" type="number" placeholder="0" value="${esc(String(m[f]||""))}" style="font-size:12px;padding:7px 10px;"
+              onblur="setC('${mb.id}',${mi},'${f}',this.value);renderPage();"/></div>`).join("")}
+        </div>
+        <p style="font-size:12px;font-weight:700;color:${C.blue};margin-bottom:10px;">🎯 Objectifs — ${MOISF[mi]}</p>
+        <div class="grid2" style="margin-bottom:14px;">
+          ${[{f:"obj_ca",l:"Obj. CA"},{f:"obj_can",l:"Obj. Canapé"},{f:"obj_out",l:"Obj. Outdoor"},{f:"obj_b2b",l:"Obj. BtoB"}].map(({f,l})=>`
+            <div><p style="font-size:10px;color:${C.blue};margin-bottom:4px;font-family:'DM Mono',monospace;">${l}</p>
+            <input class="inp" type="number" placeholder="0" value="${esc(String(m[f]||""))}" style="font-size:12px;padding:7px 10px;border-color:${C.blue}44;"
+              onblur="setC('${mb.id}',${mi},'${f}',this.value);renderPage();"/></div>`).join("")}
+        </div>
+        <p style="font-size:11px;color:${C.dim};font-family:'DM Mono',monospace;margin-bottom:8px;">VUE ANNUELLE — ${esc(mb.name)}</p>
+        <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:11px;font-family:'DM Mono',monospace;">
+          <thead><tr style="color:${C.dim};"><td style="padding:4px 6px;">Mois</td><td style="padding:4px 6px;text-align:right;">Obj</td><td style="padding:4px 6px;text-align:right;">Réel</td><td style="padding:4px 6px;text-align:right;">%</td></tr></thead>
+          <tbody>${tabAnn}</tbody>
+        </table></div>
+      </div>`:"";
+    return `
+      <div class="card" style="margin-bottom:10px;padding:0;overflow:hidden;">
+        <div onclick="S.membre=S.membre==='${mb.id}'?null:'${mb.id}';renderPage();" style="padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;">
+          <span style="width:22px;height:22px;border-radius:6px;background:${idx===0?C.gold:C.border};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${idx===0?"#1C1712":C.dim};flex-shrink:0;">#${idx+1}</span>
+          <div style="width:32px;height:32px;border-radius:50%;background:${mb.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${esc(mb.avatar)}</div>
+          <div style="flex:1;">
+            <p style="font-weight:600;font-size:14px;">${esc(mb.name)}</p>
+            <div style="margin-top:4px;"><div class="pbar"><div style="height:100%;border-radius:3px;background:${pctC(p)};width:${Math.min(p,100)}%;transition:width .6s;"></div></div></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <p style="font-weight:700;font-size:16px;color:${pctC(p)};">${p}%</p>
+            <p style="font-size:11px;color:${C.dim};">${fmt(m.ca)} / ${fmt(m.obj_ca)}</p>
+          </div>
+          <span style="color:${C.muted};font-size:14px;">${open?"▲":"▼"}</span>
+        </div>${panel}
+      </div>`;}).join("");
+
+  return `
+    <p style="color:${C.muted};font-size:11px;font-family:'DM Mono',monospace;margin-bottom:4px;">// TABLEAU DE BORD ÉQUIPE</p>
+    <h2 style="font-size:22px;font-weight:700;margin-bottom:14px;">Chiffres équipe</h2>
+    <div style="display:flex;gap:4px;overflow-x:auto;margin-bottom:16px;padding-bottom:4px;">${mBtns}</div>
+    <div style="background:${C.bg2};border:1px solid ${C.accent}44;border-radius:14px;padding:16px;margin-bottom:16px;">
+      <p style="font-weight:700;font-size:13px;color:${C.accent};margin-bottom:12px;">Totaux — ${MOISF[mi]}</p>
+      <div class="grid2">${tot}</div>
+    </div>
+    <p style="font-size:11px;color:${C.dim};font-family:'DM Mono',monospace;margin-bottom:10px;">INDIVIDUEL — cliquer pour saisir</p>
+    ${membres}`;
+}
+
+// ═══════════════════════════════════
+// DISCUSSION
+// ═══════════════════════════════════
+function pageDiscussion(){
+  const u=S.user;
+  const bubbles=S.msgs.map(m=>{const mine=m.author===u.name;return `
+    <div style="display:flex;gap:10px;flex-direction:${mine?"row-reverse":"row"};margin-bottom:12px;">
+      ${!mine?`<div style="width:30px;height:30px;border-radius:50%;background:${esc(m.color)};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;">${esc(m.avatar)}</div>`:""}
+      <div style="max-width:78%;">
+        ${!mine?`<p style="font-size:11px;color:${esc(m.color)};font-weight:600;margin-bottom:4px;">${esc(m.author)}</p>`:""}
+        <div style="background:${mine?esc(u.color):"#241E17"};border:${mine?"none":`1px solid ${C.border}`};border-radius:${mine?"16px 16px 4px 16px":"16px 16px 16px 4px"};padding:10px 14px;">
+          <p style="font-size:14px;line-height:1.55;color:#fff;">${esc(m.text)}</p>
+        </div>
+        <p style="font-size:10px;color:${C.dim};margin-top:4px;font-family:'DM Mono',monospace;text-align:${mine?"right":"left"};">${esc(m.time||"")}</p>
+      </div>
+    </div>`;}). join("");
+  return `
+    <p style="color:${C.muted};font-size:11px;font-family:'DM Mono',monospace;margin-bottom:4px;">// DISCUSSION</p>
+    <h2 style="font-size:22px;font-weight:700;margin-bottom:16px;">Équipe MDM <span style="font-size:12px;color:${C.dim};font-weight:400;">· local</span></h2>
+    <div style="margin-bottom:14px;">${bubbles}<div id="msg-end"></div></div>
+    <div style="display:flex;gap:10px;align-items:flex-end;position:sticky;bottom:0;background:#1C1712;padding:10px 0;">
+      <textarea id="msg-in" class="inp" rows="2" placeholder="Écrire à l'équipe..." style="resize:none;border-radius:12px;"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+
+```
+  <button onclick="sendMsg()" class="btn" style="background:${esc(u.color)};padding:12px 16px;font-size:18px;flex-shrink:0;border-radius:12px;">↑</button>
+</div>`;
+```
+
+}
+
+function sendMsg(){
+const inp=$(“msg-in”);
+if(!inp||!inp.value.trim())return;
+const time=new Date().toLocaleTimeString(“fr-FR”,{hour:“2-digit”,minute:“2-digit”});
+S.msgs.push({id:“m”+Date.now(),author:S.user.name,avatar:S.user.avatar,color:S.user.color,text:inp.value.trim(),time});
+save(); renderPage();
+}
+
+// ═══════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════
+function pageAdmin(){
+const tabs=`<div style="display:flex;gap:6px;margin-bottom:20px;"> ${[["actu","📡 Actualités"],["users","👥 Équipe"]].map(([id,l])=>`
+<button onclick=“S.atab=’${id}’;renderPage();” style=“padding:8px 14px;border-radius:10px;font-size:12px;font-weight:${S.atab===id?700:400};background:${S.atab===id?C.accent:C.bg2};color:${S.atab===id?”#fff”:C.muted};border:1px solid ${S.atab===id?C.accent:C.border};cursor:pointer;”>${l}</button>`).join(””)}
+
+  </div>`;
+
+let content=””;
+if(S.atab===“actu”){
+const af=S.aForm;
+content=` <div style="background:${C.bg2};border:1px solid ${C.accent}33;border-radius:16px;padding:20px;margin-bottom:18px;"> <p style="font-weight:700;font-size:14px;color:${C.accent};margin-bottom:14px;">➕ Publier une actualité</p> <div style="display:flex;flex-direction:column;gap:10px;"> <input class="inp" id="af-t" placeholder="Titre *" value="${esc(af.title)}" oninput="S.aForm.title=this.value"/> <textarea class="inp" id="af-c" placeholder="Contenu *" rows="3" style="resize:none;" oninput="S.aForm.content=this.value">${esc(af.content)}</textarea> <select class="inp" onchange="S.aForm.tag=this.value">${TAGS.map(t=>`<option value=”${esc(t)}” ${af.tag===t?“selected”:””}>${esc(t)}</option>`).join("")}</select> <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:${C.muted};"> <input type="checkbox" ${af.hot?"checked":""} onchange="S.aForm.hot=this.checked"/> Urgent </label> <button class="btn" style="background:${C.accent};" onclick="doAddActu()">Publier →</button> </div> </div> ${S.actu.map(a=>`
+<div style="background:${C.bg2};border:1px solid ${C.border};border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+<div style="flex:1;min-width:0;">
+<span class="tag" style="background:${C.accent}22;color:${C.accent};margin-right:8px;">${esc(a.tag)}</span>
+<span style="font-weight:600;font-size:13px;">${esc(a.title)}</span>
+</div>
+<button style="background:${C.red}22;border:none;border-radius:6px;color:${C.red};font-size:11px;padding:4px 9px;cursor:pointer;" onclick="S.actu=S.actu.filter(x=>x.id!=='${a.id}');save();renderPage();">✕</button>
+</div>`).join("")}`;
+}
+
+if(S.atab===“users”){
+const uf=S.uForm;
+const dots=COLS.map(c=>`<div onclick="S.uForm.color='${c}';renderPage();" style="width:26px;height:26px;border-radius:50%;background:${c};cursor:pointer;border:${uf.color===c?"3px solid #fff":"3px solid transparent"};"></div>`).join(””);
+content=` <div style="background:${C.bg2};border:1px solid ${C.accent}33;border-radius:16px;padding:20px;margin-bottom:18px;"> <p style="font-weight:700;font-size:14px;color:${C.accent};margin-bottom:10px;">${S.editU?"✏️ Modifier":"➕ Créer un accès"}</p> <div style="display:flex;flex-direction:column;gap:10px;"> <div class="grid2"> <input class="inp" placeholder="Prénom *" value="${esc(uf.name)}" oninput="S.uForm.name=this.value"/> <input class="inp" placeholder="Initiales (AM)" value="${esc(uf.avatar)}" oninput="S.uForm.avatar=this.value.slice(0,2).toUpperCase()"/> </div> <input class="inp" placeholder="Mot de passe *" value="${esc(uf.password)}" oninput="S.uForm.password=this.value"/> <select class="inp" onchange="S.uForm.role=this.value"> <option value="user" ${uf.role==="user"?"selected":""}>Vendeur</option> <option value="admin" ${uf.role==="admin"?"selected":""}>Manager / Admin</option> </select> <div style="display:flex;gap:8px;flex-wrap:wrap;">${dots}</div> <div style="display:flex;gap:10px;"> <button class="btn" style="background:${C.accent};flex:1;" onclick="doSaveUser()">${S.editU?"Enregistrer":"Créer"}</button> ${S.editU?`<button class="btn" style="background:#3D3328;" onclick="S.editU=null;S.uForm={name:'',avatar:'',password:'',role:'user',color:'${C.accent}'};renderPage();">Annuler</button>`:""} </div> </div> </div> ${S.users.map(u=>`
+<div style="background:${C.bg2};border:1px solid ${C.border};border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+<div style="display:flex;align-items:center;gap:10px;">
+<div style="width:28px;height:28px;border-radius:50%;background:${esc(u.color)};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;">${esc(u.avatar)}</div>
+<div>
+<p style="font-weight:600;font-size:14px;">${esc(u.name)}</p>
+<div style="display:flex;gap:6px;margin-top:2px;align-items:center;">
+<span style=“font-size:9px;background:${u.role===“admin”?C.accent+“22”:C.border};color:${u.role===“admin”?C.accent:C.dim};padding:1px 6px;border-radius:3px;”>${u.role===“admin”?“ADMIN”:“USER”}</span>
+<span style="font-size:11px;color:${C.dim};font-family:'DM Mono',monospace;">mdp: ${esc(u.password)}</span>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:6px;flex-shrink:0;">
+<button style="background:${C.blue}22;border:none;border-radius:6px;color:${C.blue};font-size:11px;padding:4px 9px;cursor:pointer;" onclick="S.editU='${u.id}';S.uForm={...${JSON.stringify(u)}};renderPage();">✏️</button>
+${u.id!==S.user.id?`<button style="background:${C.red}22;border:none;border-radius:6px;color:${C.red};font-size:11px;padding:4px 9px;cursor:pointer;" onclick="S.users=S.users.filter(x=>x.id!=='${u.id}');save();renderPage();">✕</button>`:””}
+</div>
+</div>`).join("")}`;
+}
+
+return ` <p style="color:${C.muted};font-size:11px;font-family:'DM Mono',monospace;margin-bottom:4px;">// ADMINISTRATION</p> <h2 style="font-size:22px;font-weight:700;margin-bottom:18px;">Gestion</h2> ${tabs}${content}`;
+}
+
+function doAddActu(){
+const af=S.aForm;
+if(!af.title||!af.content)return;
+const date=new Date().toLocaleDateString(“fr-FR”,{day:“2-digit”,month:“short”,year:“numeric”});
+S.actu.unshift({id:“a”+Date.now(),date,…af,author:S.user.name});
+S.aForm={title:””,content:””,tag:“📋 RAPPEL”,hot:false};
+save(); renderPage();
+}
+
+function doSaveUser(){
+const uf=S.uForm;
+if(!uf.name||!uf.password)return;
+if(S.editU){ S.users=S.users.map(u=>u.id===S.editU?{…u,…uf,id:S.editU}:u); }
+else{ S.users.push({…uf,id:uf.name.toLowerCase().replace(/\s/g,”*”)+”*”+Date.now()}); }
+S.editU=null; S.uForm={name:””,avatar:””,password:””,role:“user”,color:C.accent};
+save(); renderPage();
+}
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+renderLoginList();
+</script>
+
+</body>
+</html>
