@@ -12,9 +12,9 @@ input,button,select,textarea{font-family:Arial,sans-serif;}
 #login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
 .lbox{width:100%;max-width:360px;}
 .card{background:#241E17;border:1px solid #3D3328;border-radius:12px;padding:20px;margin-bottom:14px;}
-label{display:block;font-size:11px;color:#8C7B65;margin-bottom:4px;margin-top:10px;font-family:monospace;}
+.lbl{display:block;font-size:11px;color:#8C7B65;margin-bottom:4px;margin-top:10px;font-family:monospace;}
 .inp{width:100%;padding:12px;background:#2E2620;border:1px solid #3D3328;border-radius:8px;color:#F2EAD8;font-size:14px;}
-.btnO{width:100%;margin-top:14px;padding:14px;background:#C8713A;border:none;border-radius:8px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.btnO{width:100%;margin-top:14px;padding:14px;background:#C8713A;border:none;border-radius:8px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;}
 .urow{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #2A2A1E;font-size:12px;}
 #app{display:none;flex-direction:column;min-height:100vh;}
 header{background:#1C1712;border-bottom:1px solid #3D3328;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
@@ -31,7 +31,7 @@ main{padding:18px 14px;flex:1;overflow-y:auto;}
 .bubble{margin-bottom:12px;display:flex;gap:8px;}
 .bubble.me{flex-direction:row-reverse;}
 .bav{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#fff;flex-shrink:0;}
-.bt{max-width:75%;background:#241E17;border:1px solid #3D3328;border-radius:16px 16px 16px 4px;padding:10px 14px;font-size:14px;line-height:1.5;color:#F2EAD8;}
+.bt{max-width:75%;border:1px solid #3D3328;border-radius:16px 16px 16px 4px;padding:10px 14px;font-size:14px;line-height:1.5;color:#F2EAD8;}
 .bubble.me .bt{border-radius:16px 16px 4px 16px;border:none;}
 </style>
 </head>
@@ -43,14 +43,12 @@ main{padding:18px 14px;flex:1;overflow-y:auto;}
   <h1 style="font-size:24px;text-align:center;margin-bottom:4px;">Maisons du Monde</h1>
   <p style="text-align:center;color:#8C7B65;font-size:12px;margin-bottom:20px;font-family:monospace;">// espace équipe commerciale</p>
   <div class="card">
-   <div> 
-      <label>PRÉNOM</label>
-      <input class="inp" id="lu" type="text" placeholder="ex: Amandine" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <label>MOT DE PASSE</label>
-      <input class="inp" id="lp" type="password" placeholder="••••••••"/>
-      <p id="lerr" style="color:#B85040;font-size:13px;margin-top:8px;display:none;">Identifiant ou mot de passe incorrect.</p>
-      <button class="btnO" type="button" onclick="doLogin()">Se connecter →</button>
-    </div>
+    <span class="lbl">PRÉNOM</span>
+    <input class="inp" id="lu" type="text" placeholder="ex: Amandine" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+    <span class="lbl">MOT DE PASSE</span>
+    <input class="inp" id="lp" type="password" placeholder="••••••••" autocomplete="off"/>
+    <p id="lerr" style="color:#B85040;font-size:13px;margin-top:8px;display:none;">Identifiant ou mot de passe incorrect.</p>
+    <button class="btnO" id="lbtn">Se connecter →</button>
   </div>
   <div class="card">
     <p style="font-size:11px;color:#5C4E3A;font-family:monospace;margin-bottom:8px;">// identifiants équipe</p>
@@ -83,7 +81,7 @@ main{padding:18px 14px;flex:1;overflow-y:auto;}
 </div>
 
 <script>
-var U=[
+var USERS=[
   {id:"admin",name:"Manager",av:"MG",pwd:"mdm2026",role:"admin",col:"#C8713A"},
   {id:"claudia",name:"Claudia",av:"CL",pwd:"claudia2026",role:"user",col:"#8B6914"},
   {id:"virginie",name:"Virginie",av:"VI",pwd:"virginie2026",role:"user",col:"#6B8E5E"},
@@ -95,6 +93,16 @@ var U=[
   {id:"laurine",name:"Laurine",av:"LA",pwd:"laurine2026",role:"user",col:"#C9993A"},
   {id:"guillaume",name:"Guillaume",av:"GU",pwd:"guillm2026",role:"user",col:"#6B7B8D"}
 ];
+
+// Attache le bouton login au chargement de la page
+window.onload = function() {
+  var btn = document.getElementById("lbtn");
+  var lp = document.getElementById("lp");
+  var lu = document.getElementById("lu");
+  btn.addEventListener("click", doLogin);
+  lp.addEventListener("keydown", function(e){ if(e.keyCode===13) doLogin(); });
+  lu.addEventListener("keydown", function(e){ if(e.keyCode===13) doLogin(); });
+};
 
 var CU=null,PG="home",MI=new Date().getMonth(),MB=null,FO=null,FS=0,AT="actu";
 var MOIS=["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
@@ -142,31 +150,32 @@ function sC(uid,mi,f,v){var k=uid+"_"+mi;if(!CH[k])CH[k]={};CH[k][f]=parseFloat(
 var FOR=[
   {id:"f1",title:"Collection Outdoor 2026",emoji:"🌿",fichier:"Formation_Outdoor_ORDONNE_2026.pptx",slides:[
     {t:"EZRA — Nouveauté 2026",c:"Alu blanc + bois massif + coussins écru\n8 places · Bestseller 2026 · Client premium"},
-    {t:"ST RAPHAEL / LIDY / DOOLIN",c:"ST RAPHAEL : Résine tressée · 5 places · Entretien zéro\nLIDY : Table alu + 8 chaises · 6-8 convives\nDOOLIN : Extensible 185-280cm · 0 rouille 20 ans"},
-    {t:"MALDIVES / BELLUNE",c:"MALDIVES : Alu + acacia · Design resort · Nouveauté 2026\nBELLUNE : Acacia arrondi · Design MDM exclusif"},
-    {t:"Substitutions",c:"EZRA : LIMASSOL\nST RAPHAEL : CERRADO\nBELLUNE : MALDIVES\nOLERON : TOSSA · LIDY : DOOLIN"},
-    {t:"Cross-sell et ALMA",c:"Salon : Coussins + Housse\nTable : Chaises + Parasol\n3x sans frais : 900€ = 3x300€\n24x : 1800€ = 75€/mois"},
+    {t:"ST RAPHAEL / LIDY / DOOLIN",c:"ST RAPHAEL : Résine tressée · 5 places\nLIDY : Table alu + 8 chaises · 6-8 convives\nDOOLIN : Extensible 185-280cm · 0 rouille 20 ans"},
+    {t:"MALDIVES / BELLUNE",c:"MALDIVES : Design resort · Nouveauté 2026\nBELLUNE : Acacia arrondi · Design MDM exclusif"},
+    {t:"Substitutions",c:"EZRA : LIMASSOL · ST RAPHAEL : CERRADO\nBELLUNE : MALDIVES · OLEERON : TOSSA · LIDY : DOOLIN"},
+    {t:"Cross-sell et ALMA",c:"Salon : Coussins + Housse\nTable : Chaises + Parasol\n3x sans frais : 900€ = 3x300€ · 24x : 1800€ = 75€/mois"},
     {t:"7 Questions + SONCAS",c:"1.Espace 2.Nb pers. 3.Usage 4.Matériau 5.Budget 6.Hivernage 7.Style\nS-Sécurité O-Orgueil N-Nouveauté C-Confort A-Argent S-Sympathie"}
   ]},
   {id:"f2",title:"Canapés MDM 2025-2026",emoji:"🛋️",fichier:"Formation_Canapes_MDM.pptx",slides:[
-    {t:"La gamme MDM",c:"Droits · Angle · Modulables · Convertibles\n+12 000 références · Livraison 1-4 semaines"},
-    {t:"LILO · BARCELONE · MODJO",c:"LILO : 999€ · Velours bouclette · Tendance 2025\nBARCELONE : 1199€ · Lin lavé · Déhoussable\nMODJO : 1399€ · Rétro 50s · 50% recyclé"},
-    {t:"BROOKE · ELVIS",c:"BROOKE : 799€ · Scandinave · Lavable\nELVIS : 399€ · Clic-clac · Studio\nENTRÉE · MILIEU · HAUT DE GAMME"},
-    {t:"Comparatif + Conseils",c:"Étudiant : Elvis 399€\nFamille : Brooke 799€\nTendance : Lilo 999€\nRétro : Modjo 1399€\nFaites essayer · Mesurez · Accessoires"}
+    {t:"La gamme MDM",c:"Droits · Angle · Modulables · Convertibles · +12 000 références"},
+    {t:"LILO · BARCELONE · MODJO",c:"LILO : 999€ · Velours bouclette\nBARCELONE : 1199€ · Lin lavé · Déhoussable\nMODJO : 1399€ · Rétro 50s · 50% recyclé"},
+    {t:"BROOKE · ELVIS",c:"BROOKE : 799€ · Scandinave · Lavable\nELVIS : 399€ · Clic-clac · Studio"},
+    {t:"Comparatif + Conseils",c:"Étudiant : Elvis 399€ · Famille : Brooke 799€\nTendance : Lilo 999€ · Rétro : Modjo 1399€\nFaites essayer · Mesurez · Accessoires"}
   ]},
   {id:"f3",title:"Fiche Mémo Outdoor",emoji:"📋",fichier:"Fiche_Recap_Outdoor_MDM.pdf",slides:[
-    {t:"SONCAS Outdoor",c:"S-Sécurité : Garantie 2 ans SAV MDM\nO-Orgueil : Design signature Bellune\nN-Nouveauté : Ezra Maldives 2026\nC-Confort : Coussins épais Relax\nA-Argent : Alma 3x sans frais\nS-Sympathie : Projet global"},
+    {t:"SONCAS Outdoor",c:"S-Sécurité : Garantie 2 ans SAV MDM\nO-Orgueil : Design signature Bellune\nN-Nouveauté : Ezra Maldives 2026\nC-Confort : Coussins épais · A-Argent : Alma 3x\nS-Sympathie : Projet global"},
     {t:"Objections",c:"Trop cher : 1800€/10 étés = 180€/an\nRésiste pas : Résine UV · Alu 20 ans\nJe réfléchis : Stocks limités !\nMoins cher : Garantie 2 ans SAV MDM"},
-    {t:"Fidélité + Règles",c:"LIKER -10% · LOVER -15% · ADDICT -20%\n01 Pensez PROJET\n02 Qualifiez l'ESPACE\n03 Coût ANNUEL\n04 Cross-sell\n05 SUBSTITUTION prête"}
+    {t:"Fidélité + Règles",c:"LIKER -10% · LOVER -15% · ADDICT -20%\n01 Pensez PROJET · 02 Qualifiez l'ESPACE\n03 Coût ANNUEL · 04 Cross-sell · 05 SUBSTITUTION prête"}
   ]}
 ];
 
-function doLogin(e){
-  e.preventDefault();
+function doLogin(){
   var u=document.getElementById("lu").value.trim().toLowerCase();
   var p=document.getElementById("lp").value.trim();
   var found=null;
-  for(var i=0;i<U.length;i++){if(U[i].name.toLowerCase()===u&&U[i].pwd===p){found=U[i];break;}}
+  for(var i=0;i<USERS.length;i++){
+    if(USERS[i].name.toLowerCase()===u && USERS[i].pwd===p){found=USERS[i];break;}
+  }
   if(found){
     CU=found;
     document.getElementById("login").style.display="none";
@@ -244,11 +253,11 @@ function pCU(){
   var mb="";MOIS.forEach(function(ml,i){mb+='<button onclick="MI='+i+';rPage();" style="padding:6px 12px;border-radius:8px;font-size:11px;border:1px solid '+(MI===i?"#C8713A":"#3D3328")+';background:'+(MI===i?"#C8713A":"#2E2620")+';color:'+(MI===i?"#fff":"#8C7B65")+';white-space:nowrap;cursor:pointer;">'+ml+'</button>';});
   var kpis="";
   [{l:"CA",v:m.ca,o:m.obj_ca,c:"#6B9E5E"},{l:"Canapé",v:m.can,o:m.obj_can,c:"#C9993A"},{l:"Outdoor",v:m.out,o:m.obj_out,c:"#C8713A"},{l:"BtoB",v:m.b2b,o:m.obj_b2b,c:"#4E7EA8"}].forEach(function(s){var p=pct(s.v,s.o);kpis+='<div class="kpi"><p style="font-size:10px;color:#8C7B65;font-family:monospace;">'+s.l+' — '+MOIS[MI]+'</p><p style="font-size:20px;font-weight:bold;color:'+s.c+';margin:4px 0;">'+fmt(s.v)+'</p><p style="font-size:10px;color:#5C4E3A;">obj. '+fmt(s.o)+'</p><div class="pbar"><div style="height:100%;border-radius:3px;background:'+pc(p)+';width:'+Math.min(p,100)+'%;"></div></div><p style="font-size:11px;font-weight:bold;color:'+pc(p)+';margin-top:4px;">'+p+'%</p></div>';});
-  return '<p style="color:#8C7B65;font-size:11px;font-family:monospace;margin-bottom:4px;">// MES CHIFFRES 2026</p><h2 style="font-size:22px;font-weight:bold;margin-bottom:14px;">Mes performances</h2><div style="display:flex;gap:4px;overflow-x:auto;margin-bottom:16px;padding-bottom:4px;">'+mb+'</div><div class="g2">'+kpis+'</div><div class="ac"><p style="font-weight:bold;font-size:13px;margin-bottom:10px;color:#8C7B65;">Autres — '+MOISF[MI]+'</p><div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #3D3328;"><span style="color:#8C7B65;font-size:13px;">Alma</span><span style="font-weight:bold;">'+fmt(m.alma)+'</span></div><div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #3D3328;"><span style="color:#8C7B65;font-size:13px;">Tickets</span><span style="font-weight:bold;">'+(m.tickets||"—")+'</span></div><div style="display:flex;justify-content:space-between;padding:7px 0;"><span style="color:#8C7B65;font-size:13px;">Panier moyen</span><span style="font-weight:bold;">'+(m.pm?Math.round(m.pm)+"€":"—")+'</span></div></div>';
+  return '<p style="color:#8C7B65;font-size:11px;font-family:monospace;margin-bottom:4px;">// MES CHIFFRES 2026</p><h2 style="font-size:22px;font-weight:bold;margin-bottom:14px;">Mes performances</h2><div style="display:flex;gap:4px;overflow-x:auto;margin-bottom:16px;padding-bottom:4px;">'+mb+'</div><div class="g2">'+kpis+'</div>';
 }
 
 function pCA(){
-  var mi=MI,vendeurs=U.filter(function(u){return u.role==="user";});
+  var mi=MI,vendeurs=USERS.filter(function(u){return u.role==="user";});
   var mb="";MOIS.forEach(function(ml,i){mb+='<button onclick="MI='+i+';MB=null;rPage();" style="padding:6px 12px;border-radius:8px;font-size:11px;border:1px solid '+(mi===i?"#C8713A":"#3D3328")+';background:'+(mi===i?"#C8713A":"#2E2620")+';color:'+(mi===i?"#fff":"#8C7B65")+';white-space:nowrap;cursor:pointer;">'+ml+'</button>';});
   var T={ca:0,obj_ca:0,can:0,obj_can:0,out:0,obj_out:0,b2b:0,obj_b2b:0};
   vendeurs.forEach(function(u){var c=gC(u.id,mi);T.ca+=c.ca;T.obj_ca+=c.obj_ca;T.can+=c.can;T.obj_can+=c.obj_can;T.out+=c.out;T.obj_out+=c.obj_out;T.b2b+=c.b2b;T.obj_b2b+=c.obj_b2b;});
@@ -290,7 +299,7 @@ var tO=[“🌿 OUTDOOR”,“🛋️ CANAPÉ”,“📋 RAPPEL”,“🎯 OBJEC
 var list=””;AC.forEach(function(a,i){list+=’<div style="background:#241E17;border:1px solid #3D3328;border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;"><div style="flex:1;min-width:0;"><span class="tag">’+a.tag+’</span> <span style="font-weight:bold;font-size:13px;">’+a.title+’</span></div><button onclick="AC.splice('+i+',1);lsS();rPage();" style="background:#B8504022;border:none;border-radius:6px;color:#B85040;font-size:11px;padding:4px 9px;cursor:pointer;flex-shrink:0;">✕</button></div>’;});
 content=’<div style="background:#241E17;border:1px solid #C8713A33;border-radius:14px;padding:18px;margin-bottom:16px;"><p style="font-weight:bold;font-size:14px;color:#C8713A;margin-bottom:12px;">➕ Publier</p><div style="display:flex;flex-direction:column;gap:10px;"><input id="aft" style="padding:10px;background:#2E2620;border:1px solid #3D3328;border-radius:8px;color:#F2EAD8;font-size:13px;width:100%;" placeholder="Titre *" oninput="AF.title=this.value"/><textarea id="afc" style="padding:10px;background:#2E2620;border:1px solid #3D3328;border-radius:8px;color:#F2EAD8;font-size:13px;resize:none;width:100%;" placeholder="Contenu *" rows="3" oninput="AF.txt=this.value"></textarea><select style="padding:10px;background:#2E2620;border:1px solid #3D3328;border-radius:8px;color:#F2EAD8;font-size:13px;width:100%;" onchange="AF.tag=this.value;">’+tO+’</select><label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#8C7B65;cursor:pointer;"><input type="checkbox" onchange="AF.hot=this.checked;"/> Urgent</label><button onclick="dAA();" style="padding:12px;background:#C8713A;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:bold;cursor:pointer;width:100%;">Publier →</button></div></div>’+list;
 }
-if(AT===“users”){var ul=””;U.forEach(function(u){ul+=’<div style="background:#241E17;border:1px solid #3D3328;border-radius:10px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;"><div style="width:26px;height:26px;border-radius:50%;background:'+u.col+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:bold;color:#fff;">’+u.av+’</div><div style="flex:1;"><p style="font-weight:bold;font-size:14px;">’+u.name+’</p><div style="display:flex;gap:6px;margin-top:2px;"><span style=“font-size:9px;background:’+(u.role===“admin”?”#C8713A22”:”#3D3328”)+’;color:’+(u.role===“admin”?”#C8713A”:”#5C4E3A”)+’;padding:1px 6px;border-radius:3px;”>’+(u.role===“admin”?“ADMIN”:“USER”)+’</span><span style="font-size:11px;color:#5C4E3A;font-family:monospace;">mdp: ‘+u.pwd+’</span></div></div></div>’;});content=ul;}
+if(AT===“users”){var ul=””;USERS.forEach(function(u){ul+=’<div style="background:#241E17;border:1px solid #3D3328;border-radius:10px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;"><div style="width:26px;height:26px;border-radius:50%;background:'+u.col+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:bold;color:#fff;">’+u.av+’</div><div style="flex:1;"><p style="font-weight:bold;font-size:14px;">’+u.name+’</p><div style="display:flex;gap:6px;margin-top:2px;"><span style=“font-size:9px;background:’+(u.role===“admin”?”#C8713A22”:”#3D3328”)+’;color:’+(u.role===“admin”?”#C8713A”:”#5C4E3A”)+’;padding:1px 6px;border-radius:3px;”>’+(u.role===“admin”?“ADMIN”:“USER”)+’</span><span style="font-size:11px;color:#5C4E3A;font-family:monospace;">mdp: ‘+u.pwd+’</span></div></div></div>’;});content=ul;}
 return ‘<p style="color:#8C7B65;font-size:11px;font-family:monospace;margin-bottom:4px;">// ADMINISTRATION</p><h2 style="font-size:22px;font-weight:bold;margin-bottom:16px;">Gestion</h2>’+tabs+content;
 }
 
