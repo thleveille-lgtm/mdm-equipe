@@ -854,7 +854,10 @@ function showTeamTodos(){
   });
   html+='<a href="#" class="btn btn-ghost" data-action="closeModal();">Fermer</a>';
   showModal(html);
-});
+}
+
+function showTeamTodos(){
+  var vs=USERS.filter(function(u){return u.role==="user";});
   var html='<button class="modal-close" data-action="closeModal();">✕</button><h3>👥 Missions Équipe</h3>';
   vs.forEach(function(u){
     var todos=TODOS[u.id]||[];
