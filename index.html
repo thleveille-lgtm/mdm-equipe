@@ -330,7 +330,6 @@ function pH(){
     +'</div>';
   var lmH=lm?'<div class="card" style="padding:11px;margin-bottom:14px;cursor:pointer;" data-action="PG=\'discussion\';DS=\'pub\';rNav();rPg();"><p style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:6px;">💬 DERNIER MESSAGE</p><div style="display:flex;align-items:center;gap:9px;"><div class="av" style="width:26px;height:26px;background:'+lm.col+';font-size:9px;">'+lm.av+'</div><div style="flex:1;min-width:0;"><p style="font-size:11px;font-weight:600;color:'+lm.col+';">'+lm.au+'</p><p style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+lm.tx+'</p></div><span style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;flex-shrink:0;">'+lm.ti+'</span></div></div>':"";
 
-  // DEVIS perso (+ tous si admin)
   var dvUid=CU.id,dvList=DV[dvUid]||[];
   var dvAll=[];
   if(isA()){Object.keys(DV).forEach(function(uid){var usr=USERS.find(function(u){return u.id===uid;});(DV[uid]||[]).forEach(function(d){dvAll.push({d:d,user:usr,uid:uid});});});}
@@ -342,7 +341,6 @@ function pH(){
         :dvList.slice(0,4).map(function(d){var td=d.rappelDate===new Date().toLocaleDateString("fr-FR");return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);"><span style="font-size:13px;flex:1;">'+d.nom+' '+d.prenom+'</span>'+(td?'<span style="font-size:9px;background:rgba(200,113,58,.2);color:var(--accent);padding:1px 5px;border-radius:4px;">AUJOURD\'HUI</span>':"")+'<span style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;">'+d.rappelDate+'</span></div>';}).join("")))
     +'</div>';
 
-  // LITIGES (visibles par tous)
   var lgSrc=LG.slice(0,4);
   var lgH='<div class="card" style="padding:13px;margin-bottom:14px;border-color:rgba(184,80,64,.3);cursor:pointer;" data-action="PG=\'discussion\';DS=\'litiges\';rNav();rPg();">'
     +'<p style="font-size:10px;color:var(--red);font-family:\'DM Mono\',monospace;margin-bottom:9px;">⚠️ LITIGES EN COURS ('+LG.length+')</p>'
@@ -403,7 +401,6 @@ function pCU(){
   var bk=MB?'<a href="#" data-action="MB=null;rPg();" style="display:inline-flex;align-items:center;gap:5px;padding:6px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);color:var(--muted);font-size:13px;text-decoration:none;margin-bottom:14px;">← Retour</a>':"";
   var mi=new Date().getMonth(),cQ=Math.floor(mi/3),qS=[0,3,6,9],qCA=0,qOCA=0,annCA=0,annOCA=0;
   for(var i=0;i<=mi;i++){var mc=gC(uid,i);annCA+=mc.ca||0;annOCA+=mc.obj_ca||0;if(i>=qS[cQ]&&i<qS[cQ]+3){qCA+=mc.ca||0;qOCA+=mc.obj_ca||0;}}
-  // Chart data
   var cd=[],co=[],cl=[],qSt=[0,3,6,9];
   if(CV==="monthly"){for(var i=0;i<12;i++){var mc=gC(uid,i);cd.push(mc[CK]||0);co.push(mc["obj_"+CK]||0);cl.push(MO[i]);}}
   else if(CV==="quarterly"){for(var qi=0;qi<4;qi++){var qv=0,qo=0;for(var j=qSt[qi];j<qSt[qi]+3;j++){var mc=gC(uid,j);qv+=mc[CK]||0;qo+=mc["obj_"+CK]||0;}cd.push(qv);co.push(qo);cl.push("T"+(qi+1));}}
@@ -422,12 +419,10 @@ function pCU(){
     +'<div style="display:flex;gap:4px;margin-bottom:9px;">'+vSel+'</div>'
     +rBar(cd,co,cl,KC[CK]||"#C8713A")+rLine(cd,cl,KC[CK]||"#C8713A")
     +'</div>';
-  // Mois
   var sections=MO.map(function(ml,mi){
     var m=gC(uid,mi),pCA=pc(m.ca,m.obj_ca),isOp=AO["m"+mi];
     var kpis='<div class="g2" style="margin-bottom:9px;">'+KS.map(function(k){var v=m[k]||0,o=m["obj_"+k]||0,p=pc(v,o),iN=(k==="tickets"||k==="iv");return '<div class="kc"><p class="kl">'+KL[k]+'</p><p class="kv" style="color:'+KC[k]+';">'+fmt(v,iN)+'</p><p class="ko">obj. '+fmt(o,iN)+'</p><div class="pbar"><div class="pfill" style="width:'+Math.min(p,100)+'%;background:'+KC[k]+';"></div></div><p class="kp" style="color:'+ph(p)+'">'+p+'%</p></div>';}).join("")+'</div>';
     var dnts='<div style="display:flex;gap:2px;flex-wrap:wrap;justify-content:center;margin:7px 0;">'+[{k:"ca",l:"CA"},{k:"out",l:"Outdoor"},{k:"can",l:"Canapé"},{k:"b2b",l:"BtoB"}].map(function(s){return rDnt(m[s.k]||0,m["obj_"+s.k]||0,KC[s.k],s.l);}).join("")+'</div>';
-    // Saisie pour TOUS (vendeur + manager)
     var saisie='<div style="margin-top:11px;"><p style="font-size:11px;color:var(--accent);font-family:\'DM Mono\',monospace;margin-bottom:7px;">✏️ SAISIR LES CHIFFRES</p><div class="g2" style="margin-bottom:9px;">'+KS.map(function(k){return '<div><p style="font-size:10px;color:var(--muted);margin-bottom:2px;font-family:\'DM Mono\',monospace;">'+KL[k]+'</p><input type="number" placeholder="0" value="'+(m[k]||"")+'" style="width:100%;padding:6px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;outline:none;" onblur="sC(\''+uid+'\','+mi+',\''+k+'\',this.value);toast(\'✅\');"/></div>';}).join("")+'</div>'+(isA()?'<p style="font-size:11px;color:var(--blue);font-family:\'DM Mono\',monospace;margin-bottom:7px;">🎯 OBJECTIFS</p><div class="g2">'+KS.map(function(k){return '<div><p style="font-size:10px;color:var(--blue);margin-bottom:2px;font-family:\'DM Mono\',monospace;">'+KL[k]+'</p><input type="number" placeholder="0" value="'+(m["obj_"+k]||"")+'" style="width:100%;padding:6px;background:var(--bg3);border:1px solid rgba(78,126,168,.3);border-radius:6px;color:var(--text);font-size:12px;outline:none;" onblur="sO(\''+uid+'\','+mi+',\''+k+'\',this.value);toast(\'✅\');"/></div>';}).join("")+'</div>':'')+'</div>';
     return '<a href="#" class="ab'+(isOp?" open":"")+'" data-action="AO[\'m'+mi+'\']=!AO[\'m'+mi+'\'];rPg();">'
       +'<span style="display:flex;align-items:center;gap:9px;"><span style="font-weight:700;">'+MOF[mi]+'</span>'+(m.ca?'<span style="font-size:12px;color:'+ph(pCA)+';">'+fmt(m.ca)+' ('+pCA+'%)</span>':"")+'</span>'
@@ -518,7 +513,6 @@ function showMF(fi){
     +'<a href="#" data-action="upFile('+fi+',\'photo\');" class="btn ba" style="background:var(--blue);margin-bottom:14px;">⬆️ Uploader Photo</a>'
     +'<a href="#" class="btn bg" data-action="cM();">Fermer</a>');
 }
-
 function upFile(fi,type){
   var inputId=type==="pdf"?"upf":"uph";
   var el=document.getElementById(inputId);
@@ -550,7 +544,8 @@ function pD(){
   var tabs='<div class="tabs"><a href="#" class="tab'+(DS==="pub"?" on":"")+'" data-action="DS=\'pub\';CT=null;rPg();">💬 Équipe</a><a href="#" class="tab'+(DS==="priv"?" on":"")+'" data-action="DS=\'priv\';rPg();">🔒 Privé</a><a href="#" class="tab'+(DS==="litiges"?" on":"")+'" data-action="DS=\'litiges\';rPg();">⚠️ Litiges</a></div>';
   var c="";
   if(DS==="pub"){
-    var bs=PM.map(function(m){var mn=m.au===u.name;var dl=isA()?'<a href="#" data-action="PM=PM.filter(function(x){return x.id!==\''+m.id+'\';});lsS(\'pm\',PM);rPg();" style="font-size:9px;color:var(--red);opacity:0.5;text-decoration:none;padding:2px 4px;background:rgba(184,80,64,.1);border-radius:4px;display:block;margin-top:2px;text-align:'+(mn?"right":"left")+';">🗑️</a>':"";return '<div class="bubble '+(mn?"me":"")+'">'
+    // ✅ FIX 1 : Suppression message public — DELETE dans Supabase
+    var bs=PM.map(function(m){var mn=m.au===u.name;var dl=isA()?'<a href="#" data-action="var mid=\''+m.id+'\';PM=PM.filter(function(x){return x.id!==mid;});lsS(\'pm\',PM);sbQ(\'messages\',\'DELETE\',null,\'?id=eq.\'+mid);rPg();" style="font-size:9px;color:var(--red);opacity:0.5;text-decoration:none;padding:2px 4px;background:rgba(184,80,64,.1);border-radius:4px;display:block;margin-top:2px;text-align:'+(mn?"right":"left")+';">🗑️</a>':"";return '<div class="bubble '+(mn?"me":"")+'">'
       +(!mn?'<div class="bav" style="background:'+m.col+';">'+m.av+'</div>':"")
       +'<div>'+(!mn?'<p style="font-size:10px;color:'+m.col+';font-weight:600;margin-bottom:2px;">'+m.au+'</p>':"")
       +'<div class="bt" style="background:'+(mn?u.col:"var(--bg2)")+';color:'+(mn?"#fff":"var(--text)")+';">'+m.tx+'</div>'
@@ -561,7 +556,8 @@ function pD(){
       c='<p style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:9px;">'+(isA()?"CHOISIR UN INTERLOCUTEUR":"CONTACTER UN MANAGER")+'</p>'+cpw.map(function(v){var key=[CU.id,v.id].sort().join("_"),msgs=PV[key]||[],last=msgs.length>0?msgs[msgs.length-1]:null;return '<div class="card" style="padding:13px;margin-bottom:7px;cursor:pointer;display:flex;align-items:center;gap:9px;" data-action="CT=\''+v.id+'\';rPg();"><div class="av" style="width:32px;height:32px;background:'+v.col+';font-size:10px;flex-shrink:0;">'+v.av+'</div><div style="flex:1;"><p style="font-weight:600;font-size:13px;">'+v.name+'</p>'+(last?'<p style="font-size:12px;color:var(--muted);">'+last.tx.substring(0,35)+(last.tx.length>35?"...":"")+'</p>':'<p style="font-size:12px;color:var(--dim);">Démarrer une conversation</p>')+'</div><span style="color:var(--muted);">→</span></div>';}).join("");
     } else {
       var tgt=USERS.find(function(v){return v.id===CT;}),key=[CU.id,CT].sort().join("_"),msgs=PV[key]||[];
-      var bs=msgs.map(function(m){var mn=m.au===u.name;var dl=isA()?'<a href="#" data-action="PV[\''+key+'\']=PV[\''+key+'\'].filter(function(x){return x.id!==\''+m.id+'\';});lsS(\'pv\',PV);rPg();" style="font-size:9px;color:var(--red);opacity:0.5;text-decoration:none;padding:2px 4px;background:rgba(184,80,64,.1);border-radius:4px;display:block;margin-top:2px;text-align:'+(mn?"right":"left")+';">🗑️</a>':"";return '<div class="bubble '+(mn?"me":"")+'">'
+      // ✅ FIX 2 : Suppression message privé — DELETE dans Supabase
+      var bs=msgs.map(function(m){var mn=m.au===u.name;var dl=isA()?'<a href="#" data-action="var mid=\''+m.id+'\';PV[\''+key+'\']=PV[\''+key+'\'].filter(function(x){return x.id!==mid;});lsS(\'pv\',PV);sbQ(\'messages_prives\',\'DELETE\',null,\'?id=eq.\'+mid);rPg();" style="font-size:9px;color:var(--red);opacity:0.5;text-decoration:none;padding:2px 4px;background:rgba(184,80,64,.1);border-radius:4px;display:block;margin-top:2px;text-align:'+(mn?"right":"left")+';">🗑️</a>':"";return '<div class="bubble '+(mn?"me":"")+'">'
         +(!mn?'<div class="bav" style="background:'+m.col+';">'+m.av+'</div>':"")
         +'<div>'+(!mn?'<p style="font-size:10px;color:'+m.col+';font-weight:600;margin-bottom:2px;">'+m.au+'</p>':"")
         +'<div class="bt" style="background:'+(mn?u.col:"var(--bg2)")+';color:'+(mn?"#fff":"var(--text)")+';">'+m.tx+'</div>'
@@ -570,10 +566,12 @@ function pD(){
     }
   } else if(DS==="litiges"){
     var addLit='<div class="card" style="padding:14px;margin-bottom:14px;"><p style="font-size:11px;color:var(--red);font-family:\'DM Mono\',monospace;margin-bottom:9px;">⚠️ NOUVEAU LITIGE</p><div style="display:flex;flex-direction:column;gap:9px;"><input class="inp" id="lt-c" placeholder="N° de commande *"/><div class="g2"><input class="inp" id="lt-n" placeholder="Nom *"/><input class="inp" id="lt-p" placeholder="Prénom *"/></div><input class="inp" id="lt-e" type="email" placeholder="Email *"/><textarea class="inp" id="lt-m" placeholder="Motif du litige *" rows="3" style="resize:none;"></textarea><a href="#" data-action="addLit();" class="btn ba" style="background:var(--red);">Créer le litige →</a></div></div>';
-var lst=LG.length===0?'<p style="color:var(--dim);text-align:center;padding:28px;">Aucun litige.</p>':LG.map(function(l,i){
-  var coms=(l.comments||[]).map(function(c,ci){return '<div style="padding:5px 8px;background:var(--bg3);border-radius:6px;margin-bottom:3px;display:flex;justify-content:space-between;gap:6px;"><div><p style="font-size:12px;">'+c.txt+'</p><p style="font-size:9px;color:var(--dim);font-family:\'DM Mono\',monospace;">'+c.au+' · '+c.date+'</p></div>'+(isA()||c.au===CU.name?'<a href="#" data-action="delLitCom('+i+','+ci+');" style="color:var(--red);font-size:10px;text-decoration:none;flex-shrink:0;">✕</a>':"")+'</div>';}).join("");
-  return '<div class="card" style="padding:13px;margin-bottom:7px;border-color:rgba(184,80,64,.3);"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:9px;"><div style="flex:1;"><p style="font-size:10px;color:var(--red);font-family:\'DM Mono\',monospace;margin-bottom:3px;">⚠️ Cmd #'+l.cmd+'</p><p style="font-weight:600;font-size:14px;margin-bottom:3px;">'+l.nom+' '+l.prenom+'</p><p style="font-size:12px;color:var(--muted);margin-bottom:5px;">'+l.email+'</p><p style="font-size:13px;line-height:1.5;">'+l.motif+'</p><p style="font-size:10px;color:var(--dim);font-family:\'DM Mono\',monospace;margin-top:5px;">— '+l.au+' · '+l.date+'</p></div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;"><a href="#" data-action="showEditLit('+i+');" style="color:var(--blue);font-size:11px;padding:3px 7px;background:rgba(78,126,168,.15);border-radius:6px;text-decoration:none;">✏️</a>'+(isA()?'<a href="#" data-action="LG.splice('+i+',1);lsS(\'lg\',LG);rPg();" style="color:var(--red);font-size:11px;padding:3px 7px;background:rgba(184,80,64,.15);border-radius:6px;text-decoration:none;">✕</a>':"")+'</div></div>'+(coms?'<div style="margin-top:8px;">'+coms+'</div>':"")+'<div style="display:flex;gap:6px;margin-top:8px;"><input placeholder="Ajouter un commentaire..." id="lgc'+i+'" style="flex:1;padding:6px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;outline:none;"/><a href="#" data-action="addLitCom('+i+');" style="padding:6px 10px;background:var(--red);border-radius:7px;color:#fff;font-size:12px;text-decoration:none;flex-shrink:0;">+</a></div></div>';
-}).join("");    c=addLit+lst;
+    // ✅ FIX 3 : Suppression litige — capture id + DELETE dans Supabase
+    var lst=LG.length===0?'<p style="color:var(--dim);text-align:center;padding:28px;">Aucun litige.</p>':LG.map(function(l,i){
+      var coms=(l.comments||[]).map(function(c,ci){return '<div style="padding:5px 8px;background:var(--bg3);border-radius:6px;margin-bottom:3px;display:flex;justify-content:space-between;gap:6px;"><div><p style="font-size:12px;">'+c.txt+'</p><p style="font-size:9px;color:var(--dim);font-family:\'DM Mono\',monospace;">'+c.au+' · '+c.date+'</p></div>'+(isA()||c.au===CU.name?'<a href="#" data-action="delLitCom('+i+','+ci+');" style="color:var(--red);font-size:10px;text-decoration:none;flex-shrink:0;">✕</a>':"")+'</div>';}).join("");
+      return '<div class="card" style="padding:13px;margin-bottom:7px;border-color:rgba(184,80,64,.3);"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:9px;"><div style="flex:1;"><p style="font-size:10px;color:var(--red);font-family:\'DM Mono\',monospace;margin-bottom:3px;">⚠️ Cmd #'+l.cmd+'</p><p style="font-weight:600;font-size:14px;margin-bottom:3px;">'+l.nom+' '+l.prenom+'</p><p style="font-size:12px;color:var(--muted);margin-bottom:5px;">'+l.email+'</p><p style="font-size:13px;line-height:1.5;">'+l.motif+'</p><p style="font-size:10px;color:var(--dim);font-family:\'DM Mono\',monospace;margin-top:5px;">— '+l.au+' · '+l.date+'</p></div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;"><a href="#" data-action="showEditLit('+i+');" style="color:var(--blue);font-size:11px;padding:3px 7px;background:rgba(78,126,168,.15);border-radius:6px;text-decoration:none;">✏️</a>'+(isA()?'<a href="#" data-action="var lid=LG['+i+'].id;LG.splice('+i+',1);lsS(\'lg\',LG);sbQ(\'litiges\',\'DELETE\',null,\'?id=eq.\'+lid);rPg();" style="color:var(--red);font-size:11px;padding:3px 7px;background:rgba(184,80,64,.15);border-radius:6px;text-decoration:none;">✕</a>':"")+'</div></div>'+(coms?'<div style="margin-top:8px;">'+coms+'</div>':"")+'<div style="display:flex;gap:6px;margin-top:8px;"><input placeholder="Ajouter un commentaire..." id="lgc'+i+'" style="flex:1;padding:6px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;outline:none;"/><a href="#" data-action="addLitCom('+i+');" style="padding:6px 10px;background:var(--red);border-radius:7px;color:#fff;font-size:12px;text-decoration:none;flex-shrink:0;">+</a></div></div>';
+    }).join("");
+    c=addLit+lst;
   }
   return '<p style="color:var(--muted);font-size:11px;font-family:\'DM Mono\',monospace;margin-bottom:3px;">// MESSAGES</p><h2 style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px;">Discussion</h2>'+tabs+c;
 }
@@ -582,6 +580,7 @@ function addLitCom(idx){var el=document.getElementById("lgc"+idx);if(!el||!el.va
 function delLitCom(idx,ci){LG[idx].comments.splice(ci,1);lsS("lg",LG);sbSaveLitige(LG[idx]);rPg();}
 function showEditLit(idx){var l=LG[idx];if(!l)return;sM('<button class="mc" data-action="cM();">✕</button><h3>✏️ Modifier le litige</h3><div style="display:flex;flex-direction:column;gap:9px;"><input class="inp" id="el-c" value="'+l.cmd+'"/><div class="g2"><input class="inp" id="el-n" value="'+l.nom+'"/><input class="inp" id="el-p" value="'+l.prenom+'"/></div><input class="inp" id="el-e" value="'+l.email+'"/><textarea class="inp" id="el-m" rows="3" style="resize:none;">'+l.motif+'</textarea></div><br><a href="#" data-action="svEditLit('+idx+');" class="btn ba">Enregistrer</a>',true);}
 function svEditLit(idx){var l=LG[idx];if(!l)return;l.cmd=document.getElementById("el-c").value.trim()||l.cmd;l.nom=document.getElementById("el-n").value.trim()||l.nom;l.prenom=document.getElementById("el-p").value.trim()||l.prenom;l.email=document.getElementById("el-e").value.trim()||l.email;l.motif=document.getElementById("el-m").value.trim()||l.motif;lsS("lg",LG);sbSaveLitige(l);cM();rPg();toast("Litige mis à jour ✅");}
+
 // ═══════════════════════════════════
 // TODOS / MISSIONS
 // ═══════════════════════════════════
@@ -607,7 +606,8 @@ function pTD(){
       +'</div></div>'
       +'<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;">'
       +(isA()&&t.done&&!t.validated?'<a href="#" data-action="valTD(\''+uid+'\','+ri+');" style="font-size:10px;color:var(--green);padding:2px 6px;background:rgba(107,158,94,.15);border-radius:5px;text-decoration:none;white-space:nowrap;">✅ Valider</a>':"")
-      +'<a href="#" data-action="TD[\''+uid+'\'].splice('+ri+',1);lsS(\'td\',TD);rPg();" style="font-size:10px;color:var(--red);padding:2px 6px;background:rgba(184,80,64,.15);border-radius:5px;text-decoration:none;">✕</a>'
+      // ✅ FIX 4 : Suppression mission — capture id + DELETE dans Supabase
+      +'<a href="#" data-action="var tid=TD[\''+uid+'\']['+ri+'].id;TD[\''+uid+'\'].splice('+ri+',1);lsS(\'td\',TD);sbQ(\'todos\',\'DELETE\',null,\'?id=eq.\'+tid);rPg();" style="font-size:10px;color:var(--red);padding:2px 6px;background:rgba(184,80,64,.15);border-radius:5px;text-decoration:none;">✕</a>'
       +'</div></div>';
   }
   var pH=pend.length===0?'<p style="color:var(--dim);font-size:13px;text-align:center;padding:18px;">Aucune mission en cours.</p>':pend.map(rTI).join("");
@@ -639,7 +639,8 @@ function pDV(){
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:9px;"><div style="flex:1;"><p style="font-size:10px;color:var(--blue);font-family:\'DM Mono\',monospace;margin-bottom:3px;">📋'+(d.numCmd?" Cmd#"+d.numCmd:"")+(td?" 🔔 AUJOURD\'HUI":"")+'</p><p style="font-weight:600;font-size:14px;margin-bottom:2px;">'+d.nom+' '+d.prenom+'</p><p style="font-size:12px;color:var(--muted);margin-bottom:4px;">📞 '+d.tel+'</p>'+(d.note?'<p style="font-size:13px;line-height:1.5;margin-bottom:4px;">'+d.note+'</p>':"")+'<p style="font-size:11px;color:var(--accent);font-family:\'DM Mono\',monospace;">⏰ Rappel : '+d.rappelDate+'</p></div>'
       +'<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">'
       +'<a href="#" data-action="showEditDV(\''+uid+'\','+i+');" style="color:var(--blue);font-size:11px;padding:3px 7px;background:rgba(78,126,168,.15);border-radius:6px;text-decoration:none;">✏️</a>'
-      +'<a href="#" data-action="DV[\''+uid+'\'].splice('+i+',1);lsS(\'dv\',DV);sbSaveDevis(\''+uid+'\',null);rPg();" style="color:var(--red);font-size:11px;padding:3px 7px;background:rgba(184,80,64,.15);border-radius:6px;text-decoration:none;">✕</a>'
+      // Suppression devis — DELETE dans Supabase
+      +'<a href="#" data-action="var did=DV[\''+uid+'\']['+i+'].id;DV[\''+uid+'\'].splice('+i+',1);lsS(\'dv\',DV);sbQ(\'devis\',\'DELETE\',null,\'?id=eq.\'+did);rPg();" style="color:var(--red);font-size:11px;padding:3px 7px;background:rgba(184,80,64,.15);border-radius:6px;text-decoration:none;">✕</a>'
       +'</div></div>'
       +(coms?'<div style="margin-top:8px;">'+coms+'</div>':"")
       +'<div style="display:flex;gap:6px;margin-top:8px;"><input placeholder="Ajouter un commentaire..." id="dvc'+i+'" style="flex:1;padding:6px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;outline:none;"/><a href="#" data-action="addDVCom(\''+uid+'\','+i+');" style="padding:6px 10px;background:var(--accent);border-radius:7px;color:#fff;font-size:12px;text-decoration:none;flex-shrink:0;">+</a></div>'
@@ -652,6 +653,7 @@ function addDVCom(uid,idx){var el=document.getElementById("dvc"+idx);if(!el||!el
 function delDVCom(uid,idx,ci){DV[uid][idx].comments.splice(ci,1);sv();sbSaveDevis(uid,DV[uid][idx]);rPg();}
 function showEditDV(uid,idx){var d=DV[uid][idx];if(!d)return;sM('<button class="mc" data-action="cM();">✕</button><h3>✏️ Modifier le devis</h3><div style="display:flex;flex-direction:column;gap:9px;"><div class="g2"><input class="inp" id="ed-n" value="'+d.nom+'"/><input class="inp" id="ed-p" value="'+d.prenom+'"/></div><input class="inp" id="ed-t" value="'+d.tel+'"/><input class="inp" id="ed-c" value="'+(d.numCmd||"")+'"/><textarea class="inp" id="ed-no" rows="2" style="resize:none;">'+d.note+'</textarea><input class="inp" id="ed-d" value="'+d.rappelDate+'"/></div><br><a href="#" data-action="svEditDV(\''+uid+'\','+idx+');" class="btn ba">Enregistrer</a>',true);}
 function svEditDV(uid,idx){var d=DV[uid][idx];if(!d)return;d.nom=document.getElementById("ed-n").value.trim()||d.nom;d.prenom=document.getElementById("ed-p").value.trim()||d.prenom;d.tel=document.getElementById("ed-t").value.trim()||d.tel;d.numCmd=document.getElementById("ed-c").value.trim()||null;d.note=document.getElementById("ed-no").value.trim();d.rappelDate=document.getElementById("ed-d").value.trim()||d.rappelDate;sv();sbSaveDevis(uid,d);cM();rPg();toast("Devis mis à jour ✅");}
+
 // ═══════════════════════════════════
 // ADMIN
 // ═══════════════════════════════════
@@ -679,6 +681,7 @@ function svEU(uid){var n=document.getElementById("eu-n").value.trim(),p=document
 function delU(uid){if(!confirm("Supprimer ?"))return;USERS=USERS.filter(function(u){return u.id!==uid;});sv();rPg();toast("Supprimé");}
 function showRP(uid){var u=USERS.find(function(x){return x.id===uid;});if(!u)return;sM('<button class="mc" data-action="cM();">✕</button><h3>🔑 Reset — '+u.name+'</h3><input class="inp" id="rp" placeholder="Nouveau mot de passe *" style="margin-bottom:11px;"/><a href="#" data-action="svRP(\''+uid+'\');" class="btn ba">Confirmer</a><br><br><a href="#" data-action="cM();" class="btn bg" style="margin-top:7px;">Annuler</a>',true);}
 function svRP(uid){var p=document.getElementById("rp").value.trim();if(!p)return;USERS=USERS.map(function(u){return u.id===uid?Object.assign({},u,{pwd:p}):u;});sv();cM();toast("Mot de passe réinitialisé ✅");}
+
 // ═══════════════════════════════════
 // SUPABASE
 // ═══════════════════════════════════
