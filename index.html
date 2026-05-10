@@ -619,7 +619,22 @@ function svEU(uid){var n=document.getElementById("eu-n").value.trim(),p=document
 function delU(uid){if(!confirm("Supprimer ?"))return;USERS=USERS.filter(function(u){return u.id!==uid;});sv();rPg();toast("Supprimé");}
 function showRP(uid){var u=USERS.find(function(x){return x.id===uid;});if(!u)return;sM('<button class="mc" data-action="cM();">✕</button><h3>🔑 Reset — '+u.name+'</h3><input class="inp" id="rp" placeholder="Nouveau mot de passe *" style="margin-bottom:11px;"/><a href="#" data-action="svRP(\''+uid+'\');" class="btn ba">Confirmer</a><br><br><a href="#" data-action="cM();" class="btn bg" style="margin-top:7px;">Annuler</a>',true);}
 function svRP(uid){var p=document.getElementById("rp").value.trim();if(!p)return;USERS=USERS.map(function(u){return u.id===uid?Object.assign({},u,{pwd:p}):u;});sv();cM();toast("Mot de passe réinitialisé ✅");}
-
+// ═══════════════════════════════════
+// SUPABASE STUBS (localStorage-only)
+// ═══════════════════════════════════
+function loadAllFromSB(){return Promise.resolve();}
+function startRealtime(){}
+function sbSaveMsg(msg,type,key){}
+function sbSaveChiffre(uid,mi,field,val){}
+function sbSaveObj(uid,mi,field,val){}
+function sbSaveUser(u){}
+function sbSaveFormation(f){}
+function sbSavePlanning(p){}
+function sbSaveActu(a){}
+function sbSaveLitige(l){}
+function sbSaveTodo(uid,t){}
+function sbSaveDevis(uid,d){}
+function sbSaveNotif(n){}
 </script>
 </body>
 </html>
