@@ -971,13 +971,14 @@ function pAD(){
     var missUsersH=USERS.map(function(u){
       var uTasks=TD[u.id]||[];
       if(!uTasks.length)return'';
-      var rows=uTasks.map(function(t,ti){
+      var rows=uTasks.map(function(t){
         var od=isOD(t.deadline);
+        // Utiliser des attributs data-uid et data-tid pour éviter les problèmes de quotes
         return '<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border);">'
-          +'<div style="width:14px;height:14px;border-radius:3px;background:'+(t.done?"var(--green)":"var(--border2)")+';flex-shrink:0;"></div>'
-          +'<span style="font-size:12px;flex:1;'+(t.done?"text-decoration:line-through;color:var(--muted);":"")+'">'+t.title+'</span>'
-          +(t.deadline?'<span style="font-size:10px;color:'+(od?"var(--red)":"var(--muted)")+';font-family:\'DM Mono\',monospace;flex-shrink:0;">'+t.deadline+'</span>':"")
-          +'<a href="#" data-action="adminDelTodo(\''+u.id+'\',\''+t.id+'\');" style="color:var(--red);font-size:10px;padding:1px 5px;background:rgba(184,80,64,.12);border-radius:4px;text-decoration:none;flex-shrink:0;margin-left:4px;">✕</a>'
+          +'<div style="width:14px;height:14px;border-radius:3px;background:'+(t.done?'var(--green)':'var(--border2)')+';flex-shrink:0;"></div>'
+          +'<span style="font-size:12px;flex:1;'+(t.done?'text-decoration:line-through;color:var(--muted);':'')+'">'+(t.title||'')+'</span>'
+          +(t.deadline?'<span style="font-size:10px;color:'+(od?'var(--red)':'var(--muted)')+';font-family:DM Mono,monospace;flex-shrink:0;">'+t.deadline+'</span>':"")
+          +'<button onclick="adminDelTodo(this)" data-uid="'+u.id+'" data-tid="'+t.id+'" style="color:var(--red);font-size:10px;padding:1px 5px;background:rgba(184,80,64,.12);border-radius:4px;border:none;cursor:pointer;flex-shrink:0;margin-left:4px;">✕</button>'
           +'</div>';
       }).join("");
       return '<div style="margin-bottom:11px;">'
@@ -987,7 +988,7 @@ function pAD(){
         +'<span style="font-size:13px;font-weight:600;">'+u.name+'</span>'
         +'<span style="font-size:10px;color:var(--muted);">('+uTasks.length+')</span>'
         +'</div>'
-        +'<a href="#" data-action="adminDelAllTodos(\''+u.id+'\');" style="font-size:10px;color:var(--red);padding:2px 8px;background:rgba(184,80,64,.12);border-radius:5px;text-decoration:none;">🗑️ Tout</a>'
+        +'<button onclick="adminDelAllTodos(this)" data-uid="'+u.id+'" style="font-size:10px;color:var(--red);padding:2px 8px;background:rgba(184,80,64,.12);border-radius:5px;border:none;cursor:pointer;">🗑️ Tout</button>'
         +'</div>'+rows+'</div>';
     }).join("");
     var totalMissions=Object.keys(TD).reduce(function(a,k){return a+(TD[k]?TD[k].length:0);},0);
@@ -1122,18 +1123,21 @@ function sbSaveFormation(f){sbQ("formations","POST",{id:f.id,title:f.title,emoji
 function sbSavePlanning(p){sbQ("plannings","POST",{id:p.id,title:p.title,date:p.date,note:p.note,file:p.file||null,file_type:p.fileType||null});}
 function sbSaveActu(a){sbQ("actualites","POST",{id:a.id,date:a.date,tag:a.tag,title:a.title,txt:a.txt,au:a.au,hot:a.hot});}
 function sbSaveLitige(l){sbQ("litiges","POST",{id:l.id,cmd:l.cmd,nom:l.nom,prenom:l.prenom,email:l.email,motif:l.motif,au:l.au,date:l.date,comments:l.comments||[]});}
-function adminDelTodo(uid,tid){
+function adminDelTodo(btn){
   if(!isA())return;
+  var uid=btn.getAttribute("data-uid"),tid=btn.getAttribute("data-tid");
   TD[uid]=(TD[uid]||[]).filter(function(t){return t.id!==tid;});
   lsS("td",TD);sbQ("todos","DELETE",null,"?id=eq."+tid);rPg();toast("Mission supprimée ✅");
 }
-function adminDelAllTodos(uid){
+function adminDelAllTodos(btn){
   if(!isA())return;
-  if(!confirm("Supprimer toutes les missions de "+((USERS.find(function(u){return u.id===uid;})||{name:uid}).name)+" ?"))return;
+  var uid=btn.getAttribute("data-uid");
+  var uname=(USERS.find(function(u){return u.id===uid;})||{name:uid}).name;
+  if(!confirm("Supprimer toutes les missions de "+uname+" ?"))return;
   var ids=(TD[uid]||[]).map(function(t){return t.id;});
   TD[uid]=[];lsS("td",TD);
   ids.forEach(function(id){sbQ("todos","DELETE",null,"?id=eq."+id);});
-  rPg();toast("Missions supprimées ✅");
+  rPg();toast("Missions de "+uname+" supprimées ✅");
 }
 function adminDelAllTodosEveryone(){
   if(!isA())return;
