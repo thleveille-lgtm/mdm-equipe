@@ -355,7 +355,110 @@ function pH(){
     +(LG.length>3?'<p style="font-size:11px;color:var(--red);margin-top:6px;">+ '+(LG.length-3)+' autres</p>':"")
     +'</div>':"";
   var bdSide=up.length>0?'<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px;"><p style="font-size:9px;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:8px;">🎂 ANNIVERSAIRES</p>'+up.slice(0,7).map(function(b){return '<div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:1px solid var(--border);"><div class="av" style="width:18px;height:18px;background:'+b.user.col+';font-size:7px;flex-shrink:0;">'+b.user.av+'</div><span style="font-size:11px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+b.user.name+'</span><span style="font-size:9px;color:var(--accent);font-family:\'DM Mono\',monospace;flex-shrink:0;">'+b.days+'j</span></div>';}).join("")+'</div>':null;
-  var mainL=kpi+missH+lmH+dvH+lgH;
+
+  // ── BLOCS MANAGER (admin/adjoint uniquement) ──
+  var managerH="";
+  if(isA()){
+    // Récap missions équipe
+    var allPendingTasks=[];
+    USERS.forEach(function(usr){
+      (TD[usr.id]||[]).filter(function(t){return !t.done;}).forEach(function(t){
+        allPendingTasks.push({task:t,user:usr});
+      });
+    });
+    // Trier : deadlines dépassées en premier, puis par deadline asc, puis sans deadline
+    allPendingTasks.sort(function(a,b){
+      var aOd=isOD(a.task.deadline),bOd=isOD(b.task.deadline);
+      if(aOd&&!bOd)return -1;if(!aOd&&bOd)return 1;
+      if(a.task.deadline&&b.task.deadline)return a.task.deadline>b.task.deadline?1:-1;
+      if(a.task.deadline&&!b.task.deadline)return -1;
+      if(!a.task.deadline&&b.task.deadline)return 1;
+      return 0;
+    });
+    var missEquipeH='<div class="card" style="padding:13px;margin-bottom:14px;border-color:rgba(107,158,94,.25);cursor:pointer;" data-action="PG=\'admin\';AT=\'overview\';rNav();rPg();">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">'
+      +'<p style="font-size:10px;color:var(--green);font-family:\'DM Mono\',monospace;font-weight:700;">✅ MISSIONS ÉQUIPE EN COURS ('+allPendingTasks.length+')</p>'
+      +'<span style="font-size:10px;color:var(--muted);">→ Vue globale</span>'
+      +'</div>';
+    if(allPendingTasks.length===0){
+      missEquipeH+='<p style="color:var(--dim);font-size:13px;">Aucune mission en cours.</p>';
+    } else {
+      // Grouper par utilisateur pour affichage compact
+      var byUser={};
+      allPendingTasks.forEach(function(item){
+        if(!byUser[item.user.id])byUser[item.user.id]={user:item.user,tasks:[]};
+        byUser[item.user.id].tasks.push(item.task);
+      });
+      missEquipeH+=Object.keys(byUser).map(function(uid){
+        var grp=byUser[uid];
+        var overdueCount=grp.tasks.filter(function(t){return isOD(t.deadline);}).length;
+        return '<div style="padding:7px 0;border-bottom:1px solid var(--border);">'
+          +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;">'
+          +'<div class="av" style="width:20px;height:20px;background:'+grp.user.col+';font-size:7px;flex-shrink:0;">'+grp.user.av+'</div>'
+          +'<span style="font-size:12px;font-weight:600;flex:1;">'+grp.user.name+'</span>'
+          +'<span style="font-size:10px;color:var(--muted);">'+grp.tasks.length+' mission'+(grp.tasks.length>1?"s":"")+'</span>'
+          +(overdueCount>0?'<span style="font-size:9px;color:var(--red);background:rgba(184,80,64,.15);padding:1px 5px;border-radius:4px;font-family:\'DM Mono\',monospace;">'+overdueCount+' en retard</span>':"")
+          +'</div>'
+          +grp.tasks.slice(0,3).map(function(t){
+            return '<div style="display:flex;align-items:center;gap:6px;padding:2px 0 2px 27px;">'
+              +'<div style="width:5px;height:5px;border-radius:50%;background:'+(isOD(t.deadline)?"var(--red)":"var(--border2)")+';flex-shrink:0;"></div>'
+              +'<span style="font-size:12px;color:var(--muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+t.title+'</span>'
+              +(t.deadline?'<span style="font-size:10px;color:'+(isOD(t.deadline)?"var(--red)":"var(--dim)")+';font-family:\'DM Mono\',monospace;flex-shrink:0;">'+t.deadline+'</span>':"")
+              +'</div>';
+          }).join("")
+          +(grp.tasks.length>3?'<p style="font-size:10px;color:var(--dim);padding-left:27px;margin-top:2px;">+  '+(grp.tasks.length-3)+' autres</p>':"")
+          +'</div>';
+      }).join("");
+    }
+    missEquipeH+='</div>';
+
+    // Récap devis équipe
+    var allDevis=[];
+    var today=new Date().toLocaleDateString("fr-FR");
+    Object.keys(DV).forEach(function(uid){
+      var usr=USERS.find(function(u){return u.id===uid;});
+      (DV[uid]||[]).forEach(function(d){
+        allDevis.push({d:d,user:usr,uid:uid,isToday:d.rappelDate===today,isPast:d.rappelDate&&d.rappelDate<today});
+      });
+    });
+    // Trier : aujourd'hui d'abord, puis passés, puis futurs, puis sans date
+    allDevis.sort(function(a,b){
+      if(a.isToday&&!b.isToday)return -1;if(!a.isToday&&b.isToday)return 1;
+      if(a.d.rappelDate&&b.d.rappelDate)return a.d.rappelDate>b.d.rappelDate?1:-1;
+      if(a.d.rappelDate&&!b.d.rappelDate)return -1;
+      if(!a.d.rappelDate&&b.d.rappelDate)return 1;
+      return 0;
+    });
+    var todayCount=allDevis.filter(function(x){return x.isToday;}).length;
+    var devisEquipeH='<div class="card" style="padding:13px;margin-bottom:14px;border-color:rgba(78,126,168,.25);cursor:pointer;" data-action="PG=\'devis\';LT=\'all\';rNav();rPg();">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">'
+      +'<p style="font-size:10px;color:var(--blue);font-family:\'DM Mono\',monospace;font-weight:700;">📋 DEVIS ÉQUIPE ('+allDevis.length+')'+(todayCount>0?' · <span style="color:var(--accent);">'+todayCount+' rappel'+(todayCount>1?"s":"")+" aujourd'hui</span>":"")+'</p>'
+      +'<span style="font-size:10px;color:var(--muted);">→ Tous les devis</span>'
+      +'</div>';
+    if(allDevis.length===0){
+      devisEquipeH+='<p style="color:var(--dim);font-size:13px;">Aucun devis enregistré.</p>';
+    } else {
+      devisEquipeH+=allDevis.slice(0,8).map(function(item){
+        var d=item.d,usr=item.user;
+        var isToday=item.isToday;
+        var isPast=!isToday&&d.rappelDate&&d.rappelDate<today;
+        return '<div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--border);">'
+          +(usr?'<div class="av" style="width:18px;height:18px;background:'+usr.col+';font-size:6px;flex-shrink:0;">'+usr.av+'</div>':"")
+          +(usr?'<span style="font-size:10px;color:'+usr.col+';font-weight:600;flex-shrink:0;min-width:50px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+usr.name+'</span>':"")
+          +'<span style="font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+d.nom+' '+d.prenom+'</span>'
+          +(d.rappelDate?'<span style="font-size:10px;font-family:\'DM Mono\',monospace;flex-shrink:0;padding:1px 5px;border-radius:4px;background:'+(isToday?"rgba(200,113,58,.2)":isPast?"rgba(184,80,64,.15)":"var(--bg3)")+';color:'+(isToday?"var(--accent)":isPast?"var(--red)":"var(--muted)")+';">'+(isToday?"🔔 auj.":d.rappelDate)+'</span>':"")
+          +'</div>';
+      }).join("");
+      if(allDevis.length>8){
+        devisEquipeH+='<p style="font-size:11px;color:var(--blue);margin-top:6px;">+ '+(allDevis.length-8)+' autres devis →</p>';
+      }
+    }
+    devisEquipeH+='</div>';
+
+    managerH=missEquipeH+devisEquipeH;
+  }
+
+  var mainL=kpi+missH+lmH+(isA()?"":dvH)+lgH+managerH;
   var layout=bdSide?'<div style="display:grid;grid-template-columns:1fr 135px;gap:11px;margin-bottom:12px;"><div>'+mainL+'</div>'+bdSide+'</div>':mainL;
   var acH=AC.map(function(a){return '<div class="card" style="padding:13px;margin-bottom:9px;border-color:'+(a.hot?"rgba(200,113,58,.4)":"var(--border)")+';"><span class="tag" style="background:rgba(200,113,58,.12);color:var(--accent);">'+a.tag+'</span>'+(a.hot?'<span style="float:right;font-size:9px;background:rgba(200,113,58,.12);color:var(--accent);padding:2px 6px;border-radius:4px;animation:pulse 2s infinite;">URGENT</span>':"")+'<p style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:14px;margin:7px 0 5px;line-height:1.3;">'+a.title+'</p><p style="color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:5px;">'+a.txt+'</p><p style="color:var(--dim);font-size:11px;font-family:\'DM Mono\',monospace;">— '+a.au+' · '+a.date+'</p></div>';}).join("")||'<p style="color:var(--dim);text-align:center;padding:28px;">Aucune actualité.</p>';
   return '<p style="color:var(--muted);font-size:11px;font-family:\'DM Mono\',monospace;margin-bottom:3px;">// TABLEAU DE BORD</p>'
@@ -544,7 +647,6 @@ function pFL(){
 function pV(){
   var f=FD.find(function(x){return x.id===FO;});if(!f)return "";
   var sl=f.slides[FS],tot=f.slides.length,nt=NT[CU.id+"_"+f.id]||"";
-  // Section fichiers téléchargeables
   var mH="";
   if((f.pdfs&&f.pdfs.length)||(f.photos&&f.photos.length)){
     var pdfLinks=(f.pdfs||[]).map(function(p){
@@ -648,7 +750,6 @@ function pD(){
   if(DS==="pub"){
     var bs=PM.map(function(m){
       var mn=m.au===u.name;
-      // Chaque utilisateur peut supprimer ses propres messages ; admin peut tout supprimer
       var canDel=isA()||(m.au===u.name);
       var dl=canDel?'<a href="#" data-action="var mid=\''+m.id+'\';PM=PM.filter(function(x){return x.id!==mid;});lsS(\'pm\',PM);sbQ(\'messages\',\'DELETE\',null,\'?id=eq.\'+mid);rPg();" style="font-size:9px;color:var(--red);opacity:0.5;text-decoration:none;padding:2px 4px;background:rgba(184,80,64,.1);border-radius:4px;display:block;margin-top:2px;text-align:'+(mn?"right":"left")+';">🗑️</a>':"";
       return '<div class="bubble '+(mn?"me":"")+'">'
@@ -691,7 +792,7 @@ function pD(){
 }
 
 // ═══════════════════════════════════
-// LITIGES — onglet dédié
+// LITIGES
 // ═══════════════════════════════════
 function pLitiges(){
   var addLit='<div class="card" style="padding:14px;margin-bottom:14px;"><p style="font-size:11px;color:var(--red);font-family:\'DM Mono\',monospace;margin-bottom:9px;">⚠️ NOUVEAU LITIGE</p><div style="display:flex;flex-direction:column;gap:9px;"><input class="inp" id="lt-c" placeholder="N° de commande *"/><div class="g2"><input class="inp" id="lt-n" placeholder="Nom *"/><input class="inp" id="lt-p" placeholder="Prénom"/></div><input class="inp" id="lt-e" type="email" placeholder="Email *"/><textarea class="inp" id="lt-m" placeholder="Motif du litige *" rows="3" style="resize:none;"></textarea><a href="#" data-action="addLit();" class="btn ba" style="background:var(--red);">Créer →</a></div></div>';
@@ -785,11 +886,10 @@ function showTeamTD(){
 }
 
 // ═══════════════════════════════════
-// DEVIS — onglet dédié vendeurs + managers
+// DEVIS
 // ═══════════════════════════════════
 function pDevis(){
   var uid=CU.id;
-  // Manager voit tout, vendeur voit les siens
   var allSrc=[];
   if(isA()){
     Object.keys(DV).forEach(function(u){
@@ -917,10 +1017,8 @@ function pAD(){
   }
 
   if(AT==="overview"){
-    // Vue globale manager : devis, litiges, missions, stats
     var mi=new Date().getMonth();
     var vs=USERS.filter(function(u){return u.role==="user";});
-    // Stats globales
     var T=KS.reduce(function(a,k){a[k]=0;a["obj_"+k]=0;return a;},{});
     vs.forEach(function(u){var mc=gC(u.id,mi);KS.forEach(function(k){T[k]+=mc[k]||0;T["obj_"+k]+=mc["obj_"+k]||0;});});
     var statsH='<div class="card" style="padding:13px;margin-bottom:12px;border-color:rgba(200,113,58,.3);">'
@@ -928,7 +1026,6 @@ function pAD(){
       +'<div class="g2">'
       +[{l:"CA",k:"ca",c:"#6B9E5E"},{l:"Canapé",k:"can",c:"#C9993A"},{l:"Outdoor",k:"out",c:"#C8713A"},{l:"BtoB",k:"b2b",c:"#4E7EA8"}].map(function(s){var p=pc(T[s.k],T["obj_"+s.k]);return '<div style="background:var(--bg3);border-radius:8px;padding:10px;"><p style="font-size:10px;color:var(--muted);margin-bottom:2px;">'+s.l+'</p><p style="font-family:\'Syne\',sans-serif;font-size:15px;font-weight:800;color:'+s.c+';">'+fmt(T[s.k])+'</p><p style="font-size:10px;color:var(--dim);"><span style="color:'+ph(p)+';">'+p+'%</span></p></div>';}).join("")
       +'</div></div>';
-    // Membres KPI
     var membresH='<div class="card" style="padding:13px;margin-bottom:12px;">'
       +'<p style="font-weight:700;font-size:13px;margin-bottom:9px;">👥 Performances individuelles — '+MOF[mi]+'</p>'
       +vs.slice().sort(function(a,b){return (gC(b.id,mi).ca||0)-(gC(a.id,mi).ca||0);}).map(function(u,idx){
@@ -942,13 +1039,11 @@ function pAD(){
           +'</div>';
       }).join("")
       +'</div>';
-    // Litiges
     var litH='<div class="card" style="padding:13px;margin-bottom:12px;border-color:rgba(184,80,64,.2);cursor:pointer;" data-action="PG=\'litiges\';rNav();rPg();">'
       +'<p style="font-weight:700;font-size:13px;color:var(--red);margin-bottom:7px;">⚠️ Litiges ('+LG.length+')</p>'
       +(LG.length===0?'<p style="font-size:12px;color:var(--dim);">Aucun litige.</p>':LG.slice(0,5).map(function(l){return '<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border);"><span style="font-size:10px;color:var(--red);font-family:\'DM Mono\',monospace;flex-shrink:0;">Cmd#'+l.cmd+'</span><span style="font-size:12px;flex:1;">'+l.nom+' '+l.prenom+'</span><span style="font-size:10px;color:var(--muted);">'+l.date+'</span></div>';}).join(""))
       +(LG.length>5?'<p style="font-size:11px;color:var(--red);margin-top:6px;">→ Voir tous</p>':"")
       +'</div>';
-    // Devis et rappels
     var today=new Date().toLocaleDateString("fr-FR");
     var todayDevis=[];
     Object.keys(DV).forEach(function(u){(DV[u]||[]).forEach(function(d){if(d.rappelDate===today)todayDevis.push({d:d,uid:u});});});
@@ -967,13 +1062,11 @@ function pAD(){
       +'<p style="font-weight:700;font-size:13px;margin-bottom:3px;">📋 Devis équipe</p>'
       +'<p style="font-size:12px;color:var(--muted);">Aucun rappel aujourd\'hui · Cliquer pour voir tous</p>'
       +'</div>';
-    // Missions équipe — par personne avec suppression individuelle et globale
     var missUsersH=USERS.map(function(u){
       var uTasks=TD[u.id]||[];
       if(!uTasks.length)return'';
       var rows=uTasks.map(function(t){
         var od=isOD(t.deadline);
-        // Utiliser des attributs data-uid et data-tid pour éviter les problèmes de quotes
         return '<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border);">'
           +'<div style="width:14px;height:14px;border-radius:3px;background:'+(t.done?'var(--green)':'var(--border2)')+';flex-shrink:0;"></div>'
           +'<span style="font-size:12px;flex:1;'+(t.done?'text-decoration:line-through;color:var(--muted);':'')+'">'+(t.title||'')+'</span>'
@@ -1034,28 +1127,17 @@ function sbQ(table,method,body,filter){
   return fetch(url,{method:method||"GET",headers:{"Content-Type":"application/json","apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Prefer":method==="POST"?"resolution=merge-duplicates,return=minimal":"return=minimal"},body:body?JSON.stringify(body):undefined}).then(function(r){return r.ok?r.json().catch(function(){return null;}):null;}).catch(function(){return null;});
 }
 
-// ═══════════════════════════════════
-// RÉINITIALISATION (admin only)
-// ═══════════════════════════════════
 function resetAll(){
   if(!isA())return;
   if(!confirm("⚠️ Réinitialiser TOUTES les données (messages, litiges, devis) ? Cette action est irréversible."))return;
-  // Vider localement
   PM=[];PV={};LG=[];DV={};
   lsS("pm",PM);lsS("pv",PV);lsS("lg",LG);lsS("dv",DV);
-  // Supprimer dans Supabase
   Promise.all([
     sbQ("messages","DELETE",null,"?id=neq.NEVER"),
     sbQ("messages_prives","DELETE",null,"?id=neq.NEVER"),
     sbQ("litiges","DELETE",null,"?id=neq.NEVER"),
     sbQ("devis","DELETE",null,"?id=neq.NEVER")
-  ]).then(function(){
-    toast("✅ Données réinitialisées");
-    rPg();
-  }).catch(function(){
-    toast("✅ Réinitialisation locale effectuée");
-    rPg();
-  });
+  ]).then(function(){toast("✅ Données réinitialisées");rPg();}).catch(function(){toast("✅ Réinitialisation locale effectuée");rPg();});
 }
 
 function loadAllFromSB(){
