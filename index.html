@@ -315,30 +315,43 @@ function pH(){
   var u=gU(),mi=new Date().getMonth(),m=gC(u.id,mi);
   var bd=tBd(),up=uBd(),lm=PM.length>0?PM[PM.length-1]:null;
   var bdBan=bd.length>0?'<div style="background:linear-gradient(135deg,rgba(200,113,58,.2),rgba(201,153,58,.1));border:1px solid rgba(200,113,58,.4);border-radius:var(--r);padding:13px;margin-bottom:12px;animation:glow 3s infinite;text-align:center;"><div style="font-size:26px;margin-bottom:5px;">🎂</div><h3 style="font-family:\'Syne\',sans-serif;font-size:14px;font-weight:700;margin-bottom:3px;">Joyeux anniversaire '+bd.map(function(b){return b.name;}).join(" & ")+' !</h3><p style="color:var(--muted);font-size:12px;">Toute l\'équipe vous souhaite une excellente journée 🎉</p></div>':"";
-  // CA mois + CA annuel
   var annCA=0,annOCA=0;for(var i=0;i<=mi;i++){var mc=gC(u.id,i);annCA+=mc.ca||0;annOCA+=mc.obj_ca||0;}
   var sCA=pc(m.ca,m.obj_ca),pAnn=pc(annCA,annOCA);
   var kpi='<div class="g2" style="margin-bottom:14px;">'
     +'<div class="kc" style="border-color:rgba(200,113,58,.3);"><p class="kl">CA '+MO[mi]+'</p><p class="kv" style="color:'+ph(sCA)+'">'+fmt(m.ca)+'</p><p class="ko">obj. '+fmt(m.obj_ca)+'</p><div class="pbar" style="margin-top:4px;"><div class="pfill" style="width:'+Math.min(sCA,100)+'%;background:'+ph(sCA)+';"></div></div><p class="kp" style="color:'+ph(sCA)+'">'+sCA+'%</p></div>'
     +'<div class="kc" style="border-color:rgba(78,126,168,.3);"><p class="kl">CA ANNUEL</p><p class="kv" style="color:'+ph(pAnn)+'">'+fmt(annCA)+'</p><p class="ko">obj. '+fmt(annOCA)+'</p><div class="pbar" style="margin-top:4px;"><div class="pfill" style="width:'+Math.min(pAnn,100)+'%;background:'+ph(pAnn)+';"></div></div><p class="kp" style="color:'+ph(pAnn)+'">'+pAnn+'%</p></div>'
     +'</div>';
-  // Missions (grand cadre)
   var myT=(TD[u.id]||[]).filter(function(t){return !t.done;});
   var missH='<div class="card" style="padding:16px;margin-bottom:14px;'+(myT.length>0?"cursor:pointer;border-color:rgba(200,113,58,.3)":"")+'" '+(myT.length>0?'data-action="PG=\'todos\';rNav();rPg();"':"")+' >'
     +'<p style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:10px;">✅ MISSIONS EN COURS ('+myT.length+')</p>'
     +(myT.length===0?'<p style="color:var(--dim);font-size:13px;">Aucune mission en cours.</p>'
-      :myT.slice(0,5).map(function(t){return '<div style="display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border);">'
-        +'<div style="width:16px;height:16px;border-radius:4px;border:2px solid var(--border2);flex-shrink:0;"></div>'
-        +'<span style="font-size:13px;flex:1;">'+t.title+'</span>'
-        +(t.deadline?'<span style="font-size:10px;color:'+(isOD(t.deadline)?"var(--red)":"var(--muted)")+';font-family:\'DM Mono\',monospace;flex-shrink:0;">'+t.deadline+'</span>':"")
-        +'</div>';}).join(""))
+      :myT.slice(0,5).map(function(t){return '<div style="display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border);"><div style="width:16px;height:16px;border-radius:4px;border:2px solid var(--border2);flex-shrink:0;"></div><span style="font-size:13px;flex:1;">'+t.title+'</span>'+(t.deadline?'<span style="font-size:10px;color:'+(isOD(t.deadline)?"var(--red)":"var(--muted)")+';font-family:\'DM Mono\',monospace;flex-shrink:0;">'+t.deadline+'</span>':"")+'</div>';}).join(""))
     +(myT.length>5?'<p style="font-size:12px;color:var(--accent);margin-top:8px;">+ '+(myT.length-5)+' autres →</p>':"")
     +'</div>';
-  // Dernier message
   var lmH=lm?'<div class="card" style="padding:11px;margin-bottom:14px;cursor:pointer;" data-action="PG=\'discussion\';DS=\'pub\';rNav();rPg();"><p style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:6px;">💬 DERNIER MESSAGE</p><div style="display:flex;align-items:center;gap:9px;"><div class="av" style="width:26px;height:26px;background:'+lm.col+';font-size:9px;">'+lm.av+'</div><div style="flex:1;min-width:0;"><p style="font-size:11px;font-weight:600;color:'+lm.col+';">'+lm.au+'</p><p style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+lm.tx+'</p></div><span style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;flex-shrink:0;">'+lm.ti+'</span></div></div>':"";
-  // Sidebar anniversaires (petit)
+
+  // DEVIS perso (+ tous si admin)
+  var dvUid=CU.id,dvList=DV[dvUid]||[];
+  var dvAll=[];
+  if(isA()){Object.keys(DV).forEach(function(uid){var usr=USERS.find(function(u){return u.id===uid;});(DV[uid]||[]).forEach(function(d){dvAll.push({d:d,user:usr,uid:uid});});});}
+  var dvSrc=isA()?dvAll.filter(function(x){return x.d.rappelDate===new Date().toLocaleDateString("fr-FR")||!x.d.rSent;}).slice(0,5):dvList.slice(0,4);
+  var dvH='<div class="card" style="padding:13px;margin-bottom:14px;border-color:rgba(78,126,168,.3);cursor:pointer;" data-action="PG=\'todos\';TS=\'devis\';rNav();rPg();">'
+    +'<p style="font-size:10px;color:var(--blue);font-family:\'DM Mono\',monospace;margin-bottom:9px;">📋 RAPPELS DEVIS'+(isA()?" — ÉQUIPE":"")+'</p>'
+    +(dvSrc.length===0?'<p style="color:var(--dim);font-size:13px;">Aucun rappel de devis.</p>'
+      :(isA()?dvSrc.map(function(item){var d=item.d,usr=item.user,td=d.rappelDate===new Date().toLocaleDateString("fr-FR");return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">'+(usr?'<div class="av" style="width:18px;height:18px;background:'+usr.col+';font-size:7px;flex-shrink:0;">'+usr.av+'</div>':"")+'<span style="font-size:13px;flex:1;">'+d.nom+' '+d.prenom+'</span>'+(td?'<span style="font-size:9px;background:rgba(200,113,58,.2);color:var(--accent);padding:1px 5px;border-radius:4px;">AUJOURD\'HUI</span>':"")+'<span style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;">'+d.rappelDate+'</span></div>';}).join("")
+        :dvList.slice(0,4).map(function(d){var td=d.rappelDate===new Date().toLocaleDateString("fr-FR");return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);"><span style="font-size:13px;flex:1;">'+d.nom+' '+d.prenom+'</span>'+(td?'<span style="font-size:9px;background:rgba(200,113,58,.2);color:var(--accent);padding:1px 5px;border-radius:4px;">AUJOURD\'HUI</span>':"")+'<span style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;">'+d.rappelDate+'</span></div>';}).join("")))
+    +'</div>';
+
+  // LITIGES (visibles par tous)
+  var lgSrc=LG.slice(0,4);
+  var lgH='<div class="card" style="padding:13px;margin-bottom:14px;border-color:rgba(184,80,64,.3);cursor:pointer;" data-action="PG=\'discussion\';DS=\'litiges\';rNav();rPg();">'
+    +'<p style="font-size:10px;color:var(--red);font-family:\'DM Mono\',monospace;margin-bottom:9px;">⚠️ LITIGES EN COURS ('+LG.length+')</p>'
+    +(lgSrc.length===0?'<p style="color:var(--dim);font-size:13px;">Aucun litige.</p>'
+      :lgSrc.map(function(l){return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);"><span style="font-size:10px;color:var(--red);font-family:\'DM Mono\',monospace;flex-shrink:0;">Cmd#'+l.cmd+'</span><span style="font-size:13px;flex:1;">'+l.nom+' '+l.prenom+'</span><span style="font-size:10px;color:var(--muted);">'+l.date+'</span></div>';}).join(""))
+    +'</div>';
+
   var bdSide=up.length>0?'<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px;"><p style="font-size:9px;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:8px;">🎂 ANNIVERSAIRES</p>'+up.slice(0,7).map(function(b){return '<div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:1px solid var(--border);"><div class="av" style="width:18px;height:18px;background:'+b.user.col+';font-size:7px;flex-shrink:0;">'+b.user.av+'</div><span style="font-size:11px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+b.user.name+'</span><span style="font-size:9px;color:var(--accent);font-family:\'DM Mono\',monospace;flex-shrink:0;">'+b.days+'j</span></div>';}).join("")+'</div>':null;
-  var mainL=kpi+missH+lmH;
+  var mainL=kpi+missH+lmH+dvH+lgH;
   var layout=bdSide?'<div style="display:grid;grid-template-columns:1fr 135px;gap:11px;margin-bottom:12px;"><div>'+mainL+'</div>'+bdSide+'</div>':mainL;
   var acH=AC.map(function(a){return '<div class="card" style="padding:13px;margin-bottom:9px;border-color:'+(a.hot?"rgba(200,113,58,.4)":"var(--border)")+';"><span class="tag" style="background:rgba(200,113,58,.12);color:var(--accent);">'+a.tag+'</span>'+(a.hot?'<span style="float:right;font-size:9px;background:rgba(200,113,58,.12);color:var(--accent);padding:2px 6px;border-radius:4px;animation:pulse 2s infinite;">URGENT</span>':"")+'<p style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:14px;margin:7px 0 5px;line-height:1.3;">'+a.title+'</p><p style="color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:5px;">'+a.txt+'</p><p style="color:var(--dim);font-size:11px;font-family:\'DM Mono\',monospace;">— '+a.au+' · '+a.date+'</p></div>';}).join("")||'<p style="color:var(--dim);text-align:center;padding:28px;">Aucune actualité.</p>';
   return '<p style="color:var(--muted);font-size:11px;font-family:\'DM Mono\',monospace;margin-bottom:3px;">// TABLEAU DE BORD</p><h2 style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;margin-bottom:3px;">Bonjour '+u.name+' 👋</h2><p style="color:var(--muted);font-size:13px;margin-bottom:14px;">'+new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})+'</p>'+bdBan+layout+'<p style="color:var(--muted);font-size:11px;font-family:\'DM Mono\',monospace;margin-bottom:9px;">// ACTUALITÉS</p>'+acH;
@@ -528,13 +541,18 @@ function pD(){
     }
   } else if(DS==="litiges"){
     var addLit='<div class="card" style="padding:14px;margin-bottom:14px;"><p style="font-size:11px;color:var(--red);font-family:\'DM Mono\',monospace;margin-bottom:9px;">⚠️ NOUVEAU LITIGE</p><div style="display:flex;flex-direction:column;gap:9px;"><input class="inp" id="lt-c" placeholder="N° de commande *"/><div class="g2"><input class="inp" id="lt-n" placeholder="Nom *"/><input class="inp" id="lt-p" placeholder="Prénom *"/></div><input class="inp" id="lt-e" type="email" placeholder="Email *"/><textarea class="inp" id="lt-m" placeholder="Motif du litige *" rows="3" style="resize:none;"></textarea><a href="#" data-action="addLit();" class="btn ba" style="background:var(--red);">Créer le litige →</a></div></div>';
-    var lst=LG.length===0?'<p style="color:var(--dim);text-align:center;padding:28px;">Aucun litige.</p>':LG.map(function(l,i){return '<div class="card" style="padding:13px;margin-bottom:7px;border-color:rgba(184,80,64,.3);"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:9px;"><div style="flex:1;"><p style="font-size:10px;color:var(--red);font-family:\'DM Mono\',monospace;margin-bottom:3px;">⚠️ Cmd #'+l.cmd+'</p><p style="font-weight:600;font-size:14px;margin-bottom:3px;">'+l.nom+' '+l.prenom+'</p><p style="font-size:12px;color:var(--muted);margin-bottom:5px;">'+l.email+'</p><p style="font-size:13px;line-height:1.5;">'+l.motif+'</p><p style="font-size:10px;color:var(--dim);font-family:\'DM Mono\',monospace;margin-top:5px;">— '+l.au+' · '+l.date+'</p></div>'+(isA()?'<a href="#" data-action="LG.splice('+i+',1);lsS(\'lg\',LG);rPg();" style="color:var(--red);font-size:11px;padding:3px 7px;background:rgba(184,80,64,.15);border-radius:6px;text-decoration:none;flex-shrink:0;">✕</a>':"")+'</div></div>';}).join("");
-    c=addLit+lst;
+var lst=LG.length===0?'<p style="color:var(--dim);text-align:center;padding:28px;">Aucun litige.</p>':LG.map(function(l,i){
+  var coms=(l.comments||[]).map(function(c,ci){return '<div style="padding:5px 8px;background:var(--bg3);border-radius:6px;margin-bottom:3px;display:flex;justify-content:space-between;gap:6px;"><div><p style="font-size:12px;">'+c.txt+'</p><p style="font-size:9px;color:var(--dim);font-family:\'DM Mono\',monospace;">'+c.au+' · '+c.date+'</p></div>'+(isA()||c.au===CU.name?'<a href="#" data-action="delLitCom('+i+','+ci+');" style="color:var(--red);font-size:10px;text-decoration:none;flex-shrink:0;">✕</a>':"")+'</div>';}).join("");
+  return '<div class="card" style="padding:13px;margin-bottom:7px;border-color:rgba(184,80,64,.3);"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:9px;"><div style="flex:1;"><p style="font-size:10px;color:var(--red);font-family:\'DM Mono\',monospace;margin-bottom:3px;">⚠️ Cmd #'+l.cmd+'</p><p style="font-weight:600;font-size:14px;margin-bottom:3px;">'+l.nom+' '+l.prenom+'</p><p style="font-size:12px;color:var(--muted);margin-bottom:5px;">'+l.email+'</p><p style="font-size:13px;line-height:1.5;">'+l.motif+'</p><p style="font-size:10px;color:var(--dim);font-family:\'DM Mono\',monospace;margin-top:5px;">— '+l.au+' · '+l.date+'</p></div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;"><a href="#" data-action="showEditLit('+i+');" style="color:var(--blue);font-size:11px;padding:3px 7px;background:rgba(78,126,168,.15);border-radius:6px;text-decoration:none;">✏️</a>'+(isA()?'<a href="#" data-action="LG.splice('+i+',1);lsS(\'lg\',LG);rPg();" style="color:var(--red);font-size:11px;padding:3px 7px;background:rgba(184,80,64,.15);border-radius:6px;text-decoration:none;">✕</a>':"")+'</div></div>'+(coms?'<div style="margin-top:8px;">'+coms+'</div>':"")+'<div style="display:flex;gap:6px;margin-top:8px;"><input placeholder="Ajouter un commentaire..." id="lgc'+i+'" style="flex:1;padding:6px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;outline:none;"/><a href="#" data-action="addLitCom('+i+');" style="padding:6px 10px;background:var(--red);border-radius:7px;color:#fff;font-size:12px;text-decoration:none;flex-shrink:0;">+</a></div></div>';
+}).join("");    c=addLit+lst;
   }
   return '<p style="color:var(--muted);font-size:11px;font-family:\'DM Mono\',monospace;margin-bottom:3px;">// MESSAGES</p><h2 style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px;">Discussion</h2>'+tabs+c;
 }
-function addLit(){var cmd=document.getElementById("lt-c").value.trim(),nom=document.getElementById("lt-n").value.trim(),prenom=document.getElementById("lt-p").value.trim(),email=document.getElementById("lt-e").value.trim(),motif=document.getElementById("lt-m").value.trim();if(!cmd||!nom||!email||!motif)return;var nl={id:"l"+Date.now(),cmd:cmd,nom:nom,prenom:prenom,email:email,motif:motif,au:CU.name,date:new Date().toLocaleDateString("fr-FR")};LG.unshift(nl);lsS("lg",LG);sbSaveLitige(nl);nAll("⚠️ Nouveau litige Cmd#"+cmd+" — "+nom+" "+prenom,"litige");rPg();toast("Litige créé ✅");}
-
+function addLit(){var cmd=document.getElementById("lt-c").value.trim(),nom=document.getElementById("lt-n").value.trim(),prenom=document.getElementById("lt-p").value.trim(),email=document.getElementById("lt-e").value.trim(),motif=document.getElementById("lt-m").value.trim();if(!cmd||!nom||!email||!motif)return;var nl={id:"l"+Date.now(),cmd:cmd,nom:nom,prenom:prenom,email:email,motif:motif,au:CU.name,date:new Date().toLocaleDateString("fr-FR"),comments:[]};LG.unshift(nl);lsS("lg",LG);sbSaveLitige(nl);nAll("⚠️ Nouveau litige Cmd#"+cmd+" — "+nom+" "+prenom,"litige");rPg();toast("Litige créé ✅");}
+function addLitCom(idx){var el=document.getElementById("lgc"+idx);if(!el||!el.value.trim())return;if(!LG[idx].comments)LG[idx].comments=[];LG[idx].comments.push({txt:el.value.trim(),au:CU.name,date:new Date().toLocaleDateString("fr-FR")});lsS("lg",LG);sbSaveLitige(LG[idx]);rPg();toast("Commentaire ajouté ✅");}
+function delLitCom(idx,ci){LG[idx].comments.splice(ci,1);lsS("lg",LG);sbSaveLitige(LG[idx]);rPg();}
+function showEditLit(idx){var l=LG[idx];if(!l)return;sM('<button class="mc" data-action="cM();">✕</button><h3>✏️ Modifier le litige</h3><div style="display:flex;flex-direction:column;gap:9px;"><input class="inp" id="el-c" value="'+l.cmd+'"/><div class="g2"><input class="inp" id="el-n" value="'+l.nom+'"/><input class="inp" id="el-p" value="'+l.prenom+'"/></div><input class="inp" id="el-e" value="'+l.email+'"/><textarea class="inp" id="el-m" rows="3" style="resize:none;">'+l.motif+'</textarea></div><br><a href="#" data-action="svEditLit('+idx+');" class="btn ba">Enregistrer</a>',true);}
+function svEditLit(idx){var l=LG[idx];if(!l)return;l.cmd=document.getElementById("el-c").value.trim()||l.cmd;l.nom=document.getElementById("el-n").value.trim()||l.nom;l.prenom=document.getElementById("el-p").value.trim()||l.prenom;l.email=document.getElementById("el-e").value.trim()||l.email;l.motif=document.getElementById("el-m").value.trim()||l.motif;lsS("lg",LG);sbSaveLitige(l);cM();rPg();toast("Litige mis à jour ✅");}
 // ═══════════════════════════════════
 // TODOS / MISSIONS
 // ═══════════════════════════════════
@@ -585,13 +603,26 @@ function showTeamTD(){
 function pDV(){
   var uid=CU.id,myD=DV[uid]||[];
   var add='<div class="card" style="padding:13px;margin-bottom:14px;"><p style="font-size:11px;color:var(--blue);font-family:\'DM Mono\',monospace;margin-bottom:9px;">📋 NOUVEAU RAPPEL DEVIS</p><div style="display:flex;flex-direction:column;gap:9px;"><div class="g2"><input class="inp" id="dn" placeholder="Nom *"/><input class="inp" id="dp" placeholder="Prénom *"/></div><input class="inp" id="dt" type="tel" placeholder="Téléphone *"/><input class="inp" id="dc" placeholder="N° de commande"/><textarea class="inp" id="dno" placeholder="Note / détails" rows="2" style="resize:none;"></textarea><input class="inp" id="dd" placeholder="Date de rappel (JJ/MM/AAAA) *"/><a href="#" data-action="addDV();" class="btn ba" style="background:var(--blue);">Créer le rappel →</a></div></div>';
-  var list=myD.length===0?'<p style="color:var(--dim);text-align:center;padding:28px;">Aucun rappel de devis.</p>':myD.map(function(d,i){var td=d.rappelDate===new Date().toLocaleDateString("fr-FR");return '<div class="card" style="padding:13px;margin-bottom:7px;border-color:'+(td?"rgba(200,113,58,.4)":"var(--border)")+'">'
-    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:9px;"><div style="flex:1;"><p style="font-size:10px;color:var(--blue);font-family:\'DM Mono\',monospace;margin-bottom:3px;">📋'+(d.numCmd?" Cmd#"+d.numCmd:"")+(td?" 🔔 AUJOURD\'HUI":"")+'</p><p style="font-weight:600;font-size:14px;margin-bottom:2px;">'+d.nom+' '+d.prenom+'</p><p style="font-size:12px;color:var(--muted);margin-bottom:4px;">📞 '+d.tel+'</p>'+(d.note?'<p style="font-size:13px;line-height:1.5;margin-bottom:4px;">'+d.note+'</p>':"")+'<p style="font-size:11px;color:var(--accent);font-family:\'DM Mono\',monospace;">⏰ Rappel : '+d.rappelDate+'</p></div>'
-    +'<a href="#" data-action="DV[\''+uid+'\'].splice('+i+',1);lsS(\'dv\',DV);rPg();" style="color:var(--red);font-size:11px;padding:3px 7px;background:rgba(184,80,64,.15);border-radius:6px;text-decoration:none;flex-shrink:0;">✕</a></div></div>';}).join("");
+  var list=myD.length===0?'<p style="color:var(--dim);text-align:center;padding:28px;">Aucun rappel de devis.</p>':myD.map(function(d,i){
+    var td=d.rappelDate===new Date().toLocaleDateString("fr-FR");
+    var coms=(d.comments||[]).map(function(c,ci){return '<div style="padding:5px 8px;background:var(--bg3);border-radius:6px;margin-bottom:3px;display:flex;justify-content:space-between;gap:6px;"><div><p style="font-size:12px;">'+c.txt+'</p><p style="font-size:9px;color:var(--dim);font-family:\'DM Mono\',monospace;">'+c.au+' · '+c.date+'</p></div><a href="#" data-action="delDVCom(\''+uid+'\','+i+','+ci+');" style="color:var(--red);font-size:10px;text-decoration:none;flex-shrink:0;">✕</a></div>';}).join("");
+    return '<div class="card" style="padding:13px;margin-bottom:7px;border-color:'+(td?"rgba(200,113,58,.4)":"var(--border)")+'">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:9px;"><div style="flex:1;"><p style="font-size:10px;color:var(--blue);font-family:\'DM Mono\',monospace;margin-bottom:3px;">📋'+(d.numCmd?" Cmd#"+d.numCmd:"")+(td?" 🔔 AUJOURD\'HUI":"")+'</p><p style="font-weight:600;font-size:14px;margin-bottom:2px;">'+d.nom+' '+d.prenom+'</p><p style="font-size:12px;color:var(--muted);margin-bottom:4px;">📞 '+d.tel+'</p>'+(d.note?'<p style="font-size:13px;line-height:1.5;margin-bottom:4px;">'+d.note+'</p>':"")+'<p style="font-size:11px;color:var(--accent);font-family:\'DM Mono\',monospace;">⏰ Rappel : '+d.rappelDate+'</p></div>'
+      +'<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">'
+      +'<a href="#" data-action="showEditDV(\''+uid+'\','+i+');" style="color:var(--blue);font-size:11px;padding:3px 7px;background:rgba(78,126,168,.15);border-radius:6px;text-decoration:none;">✏️</a>'
+      +'<a href="#" data-action="DV[\''+uid+'\'].splice('+i+',1);lsS(\'dv\',DV);sbSaveDevis(\''+uid+'\',null);rPg();" style="color:var(--red);font-size:11px;padding:3px 7px;background:rgba(184,80,64,.15);border-radius:6px;text-decoration:none;">✕</a>'
+      +'</div></div>'
+      +(coms?'<div style="margin-top:8px;">'+coms+'</div>':"")
+      +'<div style="display:flex;gap:6px;margin-top:8px;"><input placeholder="Ajouter un commentaire..." id="dvc'+i+'" style="flex:1;padding:6px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;outline:none;"/><a href="#" data-action="addDVCom(\''+uid+'\','+i+');" style="padding:6px 10px;background:var(--accent);border-radius:7px;color:#fff;font-size:12px;text-decoration:none;flex-shrink:0;">+</a></div>'
+      +'</div>';
+  }).join("");
   return add+list;
 }
-function addDV(){var uid=CU.id,nom=document.getElementById("dn").value.trim(),prenom=document.getElementById("dp").value.trim(),tel=document.getElementById("dt").value.trim(),cmd=document.getElementById("dc").value.trim(),note=document.getElementById("dno").value.trim(),date=document.getElementById("dd").value.trim();if(!nom||!tel||!date)return;if(!DV[uid])DV[uid]=[];var nd={id:"d"+Date.now(),nom:nom,prenom:prenom,tel:tel,numCmd:cmd||null,note:note,rappelDate:date,rSent:false};DV[uid].unshift(nd);sv();sbSaveDevis(uid,nd);rPg();toast("Rappel créé ✅");}
-
+function addDV(){var uid=CU.id,nom=document.getElementById("dn").value.trim(),prenom=document.getElementById("dp").value.trim(),tel=document.getElementById("dt").value.trim(),cmd=document.getElementById("dc").value.trim(),note=document.getElementById("dno").value.trim(),date=document.getElementById("dd").value.trim();if(!nom||!tel||!date)return;if(!DV[uid])DV[uid]=[];var nd={id:"d"+Date.now(),nom:nom,prenom:prenom,tel:tel,numCmd:cmd||null,note:note,rappelDate:date,rSent:false,comments:[]};DV[uid].unshift(nd);sv();sbSaveDevis(uid,nd);rPg();toast("Rappel créé ✅");}
+function addDVCom(uid,idx){var el=document.getElementById("dvc"+idx);if(!el||!el.value.trim())return;if(!DV[uid][idx].comments)DV[uid][idx].comments=[];DV[uid][idx].comments.push({txt:el.value.trim(),au:CU.name,date:new Date().toLocaleDateString("fr-FR")});sv();sbSaveDevis(uid,DV[uid][idx]);rPg();toast("Commentaire ajouté ✅");}
+function delDVCom(uid,idx,ci){DV[uid][idx].comments.splice(ci,1);sv();sbSaveDevis(uid,DV[uid][idx]);rPg();}
+function showEditDV(uid,idx){var d=DV[uid][idx];if(!d)return;sM('<button class="mc" data-action="cM();">✕</button><h3>✏️ Modifier le devis</h3><div style="display:flex;flex-direction:column;gap:9px;"><div class="g2"><input class="inp" id="ed-n" value="'+d.nom+'"/><input class="inp" id="ed-p" value="'+d.prenom+'"/></div><input class="inp" id="ed-t" value="'+d.tel+'"/><input class="inp" id="ed-c" value="'+(d.numCmd||"")+'"/><textarea class="inp" id="ed-no" rows="2" style="resize:none;">'+d.note+'</textarea><input class="inp" id="ed-d" value="'+d.rappelDate+'"/></div><br><a href="#" data-action="svEditDV(\''+uid+'\','+idx+');" class="btn ba">Enregistrer</a>',true);}
+function svEditDV(uid,idx){var d=DV[uid][idx];if(!d)return;d.nom=document.getElementById("ed-n").value.trim()||d.nom;d.prenom=document.getElementById("ed-p").value.trim()||d.prenom;d.tel=document.getElementById("ed-t").value.trim()||d.tel;d.numCmd=document.getElementById("ed-c").value.trim()||null;d.note=document.getElementById("ed-no").value.trim();d.rappelDate=document.getElementById("ed-d").value.trim()||d.rappelDate;sv();sbSaveDevis(uid,d);cM();rPg();toast("Devis mis à jour ✅");}
 // ═══════════════════════════════════
 // ADMIN
 // ═══════════════════════════════════
@@ -620,21 +651,78 @@ function delU(uid){if(!confirm("Supprimer ?"))return;USERS=USERS.filter(function
 function showRP(uid){var u=USERS.find(function(x){return x.id===uid;});if(!u)return;sM('<button class="mc" data-action="cM();">✕</button><h3>🔑 Reset — '+u.name+'</h3><input class="inp" id="rp" placeholder="Nouveau mot de passe *" style="margin-bottom:11px;"/><a href="#" data-action="svRP(\''+uid+'\');" class="btn ba">Confirmer</a><br><br><a href="#" data-action="cM();" class="btn bg" style="margin-top:7px;">Annuler</a>',true);}
 function svRP(uid){var p=document.getElementById("rp").value.trim();if(!p)return;USERS=USERS.map(function(u){return u.id===uid?Object.assign({},u,{pwd:p}):u;});sv();cM();toast("Mot de passe réinitialisé ✅");}
 // ═══════════════════════════════════
-// SUPABASE STUBS (localStorage-only)
+// SUPABASE
 // ═══════════════════════════════════
-function loadAllFromSB(){return Promise.resolve();}
-function startRealtime(){}
-function sbSaveMsg(msg,type,key){}
-function sbSaveChiffre(uid,mi,field,val){}
-function sbSaveObj(uid,mi,field,val){}
-function sbSaveUser(u){}
-function sbSaveFormation(f){}
-function sbSavePlanning(p){}
-function sbSaveActu(a){}
-function sbSaveLitige(l){}
-function sbSaveTodo(uid,t){}
-function sbSaveDevis(uid,d){}
-function sbSaveNotif(n){}
+var SB_URL="https://owvuoddgincdqmdmebng.supabase.co";
+var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93dnVvZGRnaW5jZHFtZG1lYm5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzNTY1MzcsImV4cCI6MjA2MTkzMjUzN30.Pyd2tMnTvYkXhFuJRVuBv3TqFyqRHJ-5bJTOAkCKTBQ";
+
+function sbQ(table,method,body,filter){
+  var url=SB_URL+"/rest/v1/"+table+(filter||"");
+  return fetch(url,{method:method||"GET",headers:{"Content-Type":"application/json","apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Prefer":method==="POST"?"resolution=merge-duplicates,return=minimal":"return=minimal"},body:body?JSON.stringify(body):undefined}).then(function(r){return r.ok?r.json().catch(function(){return null;}):null;}).catch(function(){return null;});
+}
+
+function loadAllFromSB(){
+  return Promise.all([
+    sbQ("messages","GET",null,"?order=created_at.asc&limit=200"),
+    sbQ("chiffres","GET",null,"?limit=1000"),
+    sbQ("objectifs","GET",null,"?limit=1000"),
+    sbQ("actualites","GET",null,"?order=created_at.desc&limit=100"),
+    sbQ("formations","GET",null,"?limit=50"),
+    sbQ("plannings","GET",null,"?order=created_at.desc&limit=50"),
+    sbQ("litiges","GET",null,"?order=created_at.desc&limit=200"),
+    sbQ("todos","GET",null,"?limit=500"),
+    sbQ("devis","GET",null,"?limit=500"),
+    sbQ("notifications","GET",null,"?limit=200"),
+    sbQ("messages_prives","GET",null,"?limit=500")
+  ]).then(function(res){
+    // messages publics
+    if(res[0]&&res[0].length){PM=res[0].map(function(r){return{id:r.id,au:r.au,av:r.av,col:r.col,ti:r.ti,tx:r.tx};});}
+    // chiffres
+    if(res[1]&&res[1].length){res[1].forEach(function(r){var k=r.uid+"_"+r.mois;if(!CH[k])CH[k]={};CH[k][r.kpi]=r.valeur;});}
+    // objectifs
+    if(res[2]&&res[2].length){res[2].forEach(function(r){if(!OC[r.uid])OC[r.uid]={};OC[r.uid][r.mois+"_"+r.kpi]=r.valeur;});}
+    // actualites
+    if(res[3]&&res[3].length){AC=res[3].map(function(r){return{id:r.id,date:r.date,tag:r.tag,title:r.title,txt:r.txt,au:r.au,hot:r.hot};});}
+    // formations
+    if(res[4]&&res[4].length){FD=res[4].map(function(r){return{id:r.id,title:r.title,emoji:r.emoji,desc:r.desc,slides:r.slides||[],pdfs:r.pdfs||[],photos:r.photos||[]};});}
+    // plannings
+    if(res[5]&&res[5].length){PL=res[5].map(function(r){return{id:r.id,title:r.title,date:r.date,note:r.note};});}
+    // litiges
+    if(res[6]&&res[6].length){LG=res[6].map(function(r){return{id:r.id,cmd:r.cmd,nom:r.nom,prenom:r.prenom,email:r.email,motif:r.motif,au:r.au,date:r.date,comments:r.comments||[]};});}
+    // todos
+    if(res[7]&&res[7].length){res[7].forEach(function(r){if(!TD[r.uid])TD[r.uid]=[];var ex=TD[r.uid].find(function(t){return t.id===r.id;});if(!ex)TD[r.uid].push({id:r.id,title:r.title,desc:r.desc,deadline:r.deadline,from:r.from,done:r.done,validated:r.validated,self:r.self,comments:r.comments||[]});});}
+    // devis
+    if(res[8]&&res[8].length){res[8].forEach(function(r){if(!DV[r.uid])DV[r.uid]=[];var ex=DV[r.uid].find(function(d){return d.id===r.id;});if(!ex)DV[r.uid].push({id:r.id,nom:r.nom,prenom:r.prenom,tel:r.tel,numCmd:r.numCmd,note:r.note,rappelDate:r.rappelDate,rSent:r.rSent,comments:r.comments||[]});});}
+    // notifications
+    if(res[9]&&res[9].length){NF=res[9].map(function(r){return{id:r.id,to:r.to,from:r.from,text:r.text,type:r.type,read:r.read,date:r.date};});}
+    // messages privés
+    if(res[10]&&res[10].length){res[10].forEach(function(r){if(!PV[r.conv_key])PV[r.conv_key]=[];var ex=PV[r.conv_key].find(function(m){return m.id===r.id;});if(!ex)PV[r.conv_key].push({id:r.id,au:r.au,av:r.av,col:r.col,ti:r.ti,tx:r.tx});});}
+    sv();
+  });
+}
+
+function startRealtime(){
+  setInterval(function(){
+    if(!CU)return;
+    sbQ("messages","GET",null,"?order=created_at.asc&limit=200").then(function(r){if(r&&r.length>PM.length){PM=r.map(function(x){return{id:x.id,au:x.au,av:x.av,col:x.col,ti:x.ti,tx:x.tx};});lsS("pm",PM);if(PG==="discussion"&&DS==="pub")rPg();}});
+    sbQ("notifications","GET",null,"?limit=200").then(function(r){if(r&&r.length){NF=r.map(function(x){return{id:x.id,to:x.to,from:x.from,text:x.text,type:x.type,read:x.read,date:x.date};});lsS("nf",NF);updBadge();}});
+  },15000);
+}
+
+function sbSaveMsg(msg,type,key){
+  if(type==="public")sbQ("messages","POST",{id:msg.id,au:msg.au,av:msg.av,col:msg.col,ti:msg.ti,tx:msg.tx});
+  else sbQ("messages_prives","POST",{id:msg.id,conv_key:key,au:msg.au,av:msg.av,col:msg.col,ti:msg.ti,tx:msg.tx});
+}
+function sbSaveChiffre(uid,mi,field,val){sbQ("chiffres","POST",{id:uid+"_"+mi+"_"+field,uid:uid,mois:mi,kpi:field,valeur:val});}
+function sbSaveObj(uid,mi,field,val){sbQ("objectifs","POST",{id:uid+"_"+mi+"_"+field,uid:uid,mois:mi,kpi:field,valeur:val});}
+function sbSaveUser(u){sbQ("users","POST",{id:u.id,name:u.name,av:u.av,pwd:u.pwd,role:u.role,col:u.col,bday:u.bday,theme:u.theme,ac:u.ac});}
+function sbSaveFormation(f){sbQ("formations","POST",{id:f.id,title:f.title,emoji:f.emoji,desc:f.desc,slides:f.slides,pdfs:f.pdfs,photos:f.photos});}
+function sbSavePlanning(p){sbQ("plannings","POST",{id:p.id,title:p.title,date:p.date,note:p.note});}
+function sbSaveActu(a){sbQ("actualites","POST",{id:a.id,date:a.date,tag:a.tag,title:a.title,txt:a.txt,au:a.au,hot:a.hot});}
+function sbSaveLitige(l){sbQ("litiges","POST",{id:l.id,cmd:l.cmd,nom:l.nom,prenom:l.prenom,email:l.email,motif:l.motif,au:l.au,date:l.date,comments:l.comments||[]});}
+function sbSaveTodo(uid,t){sbQ("todos","POST",{id:t.id,uid:uid,title:t.title,desc:t.desc,deadline:t.deadline,from:t.from,done:t.done,validated:t.validated,self:t.self||false,comments:t.comments||[]});}
+function sbSaveDevis(uid,d){if(!d)return;sbQ("devis","POST",{id:d.id,uid:uid,nom:d.nom,prenom:d.prenom,tel:d.tel,numCmd:d.numCmd,note:d.note,rappelDate:d.rappelDate,rSent:d.rSent,comments:d.comments||[]});}
+function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,to:n.to,from:n.from,text:n.text,type:n.type,read:n.read,date:n.date});}
 </script>
 </body>
 </html>
