@@ -505,9 +505,38 @@ function svEF(fi){var f=FD[fi];if(!f)return;var t=document.getElementById("ef-t"
 function delF(fi){if(!confirm("Supprimer ?"))return;FD.splice(fi,1);sv();rPg();toast("Supprimée");}
 function showMF(fi){
   var f=FD[fi];if(!f)return;
-  var pds=(f.pdfs||[]).map(function(p,i){return '<div style="display:flex;align-items:center;gap:6px;padding:5px;background:var(--bg3);border-radius:6px;margin-bottom:4px;"><span>📄</span><span style="flex:1;font-size:12px;">'+p+'</span><a href="#" data-action="FD['+fi+'].pdfs.splice('+i+',1);sv();showMF('+fi+');" style="color:var(--red);font-size:11px;text-decoration:none;">✕</a></div>';}).join("");
-  var pts=(f.photos||[]).map(function(p,i){return '<div style="display:flex;align-items:center;gap:6px;padding:5px;background:var(--bg3);border-radius:6px;margin-bottom:4px;"><span>🖼️</span><span style="flex:1;font-size:12px;">'+p+'</span><a href="#" data-action="FD['+fi+'].photos.splice('+i+',1);sv();showMF('+fi+');" style="color:var(--red);font-size:11px;text-decoration:none;">✕</a></div>';}).join("");
-  sM('<button class="mc" data-action="cM();">✕</button><h3>📎 Médias — '+f.title+'</h3><p style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:5px;">PDFs</p>'+(pds||'<p style="font-size:12px;color:var(--dim);margin-bottom:7px;">Aucun.</p>')+'<div style="display:flex;gap:7px;margin-bottom:12px;"><input class="inp" id="np" placeholder="Nom PDF (ex: formation.pdf)"/><a href="#" data-action="var n=document.getElementById(\'np\').value.trim();if(n){if(!FD['+fi+'].pdfs)FD['+fi+'].pdfs=[];FD['+fi+'].pdfs.push(n);sv();showMF('+fi+');}" style="padding:9px 12px;background:var(--accent);border-radius:var(--rs);color:#fff;font-size:12px;text-decoration:none;white-space:nowrap;display:flex;align-items:center;">+ PDF</a></div><p style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:5px;">Photos</p>'+(pts||'<p style="font-size:12px;color:var(--dim);margin-bottom:7px;">Aucune.</p>')+'<div style="display:flex;gap:7px;margin-bottom:12px;"><input class="inp" id="nph" placeholder="Nom photo (ex: ezra.jpg)"/><a href="#" data-action="var n=document.getElementById(\'nph\').value.trim();if(n){if(!FD['+fi+'].photos)FD['+fi+'].photos=[];FD['+fi+'].photos.push(n);sv();showMF('+fi+');}" style="padding:9px 12px;background:var(--blue);border-radius:var(--rs);color:#fff;font-size:12px;text-decoration:none;white-space:nowrap;display:flex;align-items:center;">+ Photo</a></div><p style="font-size:11px;color:var(--dim);margin-bottom:12px;">📎 Upload réel → après connexion Supabase</p><a href="#" class="btn bg" data-action="cM();">Fermer</a>');
+  var pds=(f.pdfs||[]).map(function(p,i){return '<div style="display:flex;align-items:center;gap:6px;padding:5px;background:var(--bg3);border-radius:6px;margin-bottom:4px;"><span>📄</span><a href="'+SB_URL+'/storage/v1/object/public/uploads/'+p+'" target="_blank" style="flex:1;font-size:12px;color:var(--gold);text-decoration:none;">'+p+'</a><a href="#" data-action="FD['+fi+'].pdfs.splice('+i+',1);sv();sbSaveFormation(FD['+fi+']);showMF('+fi+');" style="color:var(--red);font-size:11px;text-decoration:none;">✕</a></div>';}).join("");
+  var pts=(f.photos||[]).map(function(p,i){return '<div style="display:flex;align-items:center;gap:6px;padding:5px;background:var(--bg3);border-radius:6px;margin-bottom:4px;"><img src="'+SB_URL+'/storage/v1/object/public/uploads/'+p+'" style="width:40px;height:40px;object-fit:cover;border-radius:5px;"/><span style="flex:1;font-size:12px;">'+p+'</span><a href="#" data-action="FD['+fi+'].photos.splice('+i+',1);sv();sbSaveFormation(FD['+fi+']);showMF('+fi+');" style="color:var(--red);font-size:11px;text-decoration:none;">✕</a></div>';}).join("");
+  sM('<button class="mc" data-action="cM();">✕</button><h3>📎 Médias — '+f.title+'</h3>'
+    +'<p style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:5px;">PDFs</p>'
+    +(pds||'<p style="font-size:12px;color:var(--dim);margin-bottom:7px;">Aucun.</p>')
+    +'<input type="file" id="upf" accept=".pdf" style="width:100%;padding:7px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-size:12px;margin-bottom:7px;"/>'
+    +'<a href="#" data-action="upFile('+fi+',\'pdf\');" class="btn ba" style="margin-bottom:14px;">⬆️ Uploader PDF</a>'
+    +'<p style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:5px;">Photos</p>'
+    +(pts||'<p style="font-size:12px;color:var(--dim);margin-bottom:7px;">Aucune.</p>')
+    +'<input type="file" id="uph" accept="image/*" style="width:100%;padding:7px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-size:12px;margin-bottom:7px;"/>'
+    +'<a href="#" data-action="upFile('+fi+',\'photo\');" class="btn ba" style="background:var(--blue);margin-bottom:14px;">⬆️ Uploader Photo</a>'
+    +'<a href="#" class="btn bg" data-action="cM();">Fermer</a>');
+}
+
+function upFile(fi,type){
+  var inputId=type==="pdf"?"upf":"uph";
+  var el=document.getElementById(inputId);
+  if(!el||!el.files||!el.files[0]){toast("Sélectionne un fichier d'abord");return;}
+  var file=el.files[0];
+  var fname=Date.now()+"_"+file.name.replace(/\s/g,"_");
+  toast("Upload en cours...");
+  fetch(SB_URL+"/storage/v1/object/uploads/"+fname,{
+    method:"POST",
+    headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":file.type,"x-upsert":"true"},
+    body:file
+  }).then(function(r){
+    if(r.ok){
+      if(type==="pdf"){if(!FD[fi].pdfs)FD[fi].pdfs=[];FD[fi].pdfs.push(fname);}
+      else{if(!FD[fi].photos)FD[fi].photos=[];FD[fi].photos.push(fname);}
+      sv();sbSaveFormation(FD[fi]);showMF(fi);toast("Upload réussi ✅");
+    }else{r.text().then(function(t){toast("Erreur : "+t);});}
+  }).catch(function(){toast("Erreur réseau");});
 }
 
 // ═══════════════════════════════════
