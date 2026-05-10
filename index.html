@@ -482,14 +482,53 @@ function pCA(){
 // PLANNING
 // ═══════════════════════════════════
 function pPL(){
-  var add=isA()?'<div class="card" style="padding:14px;margin-bottom:14px;"><p style="font-size:11px;color:var(--accent);font-family:\'DM Mono\',monospace;margin-bottom:9px;">➕ DIFFUSER</p><div style="display:flex;flex-direction:column;gap:9px;"><input class="inp" id="pl-t" placeholder="Titre *"/><input class="inp" id="pl-d" placeholder="Période (ex: 12-16 Mai 2026)"/><input class="inp" id="pl-n" placeholder="Note (optionnel)"/><a href="#" data-action="addPL();" class="btn ba">Publier →</a></div></div>':"";
-  var list=PL.length===0?'<p style="color:var(--dim);text-align:center;padding:28px;">Aucun planning publié.</p>':PL.map(function(p,i){return '<div class="ps"><div style="width:42px;height:42px;background:rgba(200,113,58,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📅</div><div style="flex:1;"><p style="font-weight:600;font-size:14px;">'+p.title+'</p><p style="font-size:12px;color:var(--muted);">'+p.date+'</p>'+(p.note?'<p style="font-size:11px;color:var(--dim);margin-top:2px;">'+p.note+'</p>':"")+'</div>'+(isA()?'<a href="#" data-action="PL.splice('+i+',1);lsS(\'pl\',PL);sbQ(\'plannings\',\'DELETE\',null,\'?id=eq.\'+PL['+i+'].id);rPg();" style="color:var(--red);font-size:11px;padding:3px 7px;background:rgba(184,80,64,.15);border-radius:6px;text-decoration:none;">✕</a>':"")+'</div>';}).join("");
+  var add=isA()?'<div class="card" style="padding:14px;margin-bottom:14px;"><p style="font-size:11px;color:var(--accent);font-family:\'DM Mono\',monospace;margin-bottom:9px;">➕ DIFFUSER UN PLANNING</p><div style="display:flex;flex-direction:column;gap:9px;"><input class="inp" id="pl-t" placeholder="Titre *"/><input class="inp" id="pl-d" placeholder="Période (ex: 12-16 Mai 2026)"/><input class="inp" id="pl-n" placeholder="Note (optionnel)"/><label style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;">FICHIER (photo ou PDF)</label><input type="file" id="pl-f" accept="image/*,.pdf" style="width:100%;padding:7px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-size:12px;"/><a href="#" data-action="addPL();" class="btn ba">Publier →</a></div></div>':"";
+  var list=PL.length===0?'<p style="color:var(--dim);text-align:center;padding:28px;">Aucun planning publié.</p>':PL.map(function(p,i){
+    var isImg=p.file&&(p.file.match(/\.(jpg|jpeg|png|gif|webp)$/i)||p.fileType==="image");
+    var isPdf=p.file&&(p.file.match(/\.pdf$/i)||p.fileType==="pdf");
+    var fileUrl=p.file?SB_URL+"/storage/v1/object/public/uploads/"+p.file:null;
+    var preview=isImg&&fileUrl?'<img src="'+fileUrl+'" style="width:100%;max-height:220px;object-fit:contain;border-radius:8px;margin:8px 0;background:var(--bg3);"/>':'';
+    var dlBtn=fileUrl?'<a href="'+fileUrl+'" target="_blank" download style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;background:'+(isPdf?"rgba(201,153,58,.15)":"rgba(78,126,168,.15)")+';border-radius:6px;color:'+(isPdf?"var(--gold)":"var(--blue)")+';font-size:12px;font-weight:600;text-decoration:none;margin-top:6px;">'+(isPdf?"📄 Ouvrir PDF":"🖼️ Voir image")+'</a>':"";
+    return '<div class="card" style="padding:13px;margin-bottom:9px;">'
+      +'<div style="display:flex;align-items:flex-start;gap:11px;">'
+      +'<div style="width:42px;height:42px;background:rgba(200,113,58,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">'+(isPdf?"📄":isImg?"🖼️":"📅")+'</div>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<p style="font-weight:600;font-size:14px;">'+p.title+'</p>'
+      +'<p style="font-size:12px;color:var(--muted);">'+p.date+'</p>'
+      +(p.note?'<p style="font-size:11px;color:var(--dim);margin-top:2px;">'+p.note+'</p>':"")
+      +preview+dlBtn
+      +'</div>'
+      +(isA()?'<a href="#" data-action="var pid=PL['+i+'].id;PL.splice('+i+',1);lsS(\'pl\',PL);sbQ(\'plannings\',\'DELETE\',null,\'?id=eq.\'+pid);rPg();" style="color:var(--red);font-size:11px;padding:3px 7px;background:rgba(184,80,64,.15);border-radius:6px;text-decoration:none;flex-shrink:0;">✕</a>':"")
+      +'</div></div>';
+  }).join("");
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">'
     +'<div><p style="color:var(--muted);font-size:11px;font-family:\'DM Mono\',monospace;margin-bottom:3px;">// PLANNING</p><h2 style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;">Planning Équipe</h2></div>'
     +'<a href="#" class="rfbtn" data-action="refreshAll();">🔄</a>'
     +'</div>'+add+list;
 }
-function addPL(){var t=document.getElementById("pl-t").value.trim(),d=document.getElementById("pl-d").value.trim(),n=document.getElementById("pl-n").value.trim();if(!t||!d)return;var np={id:"p"+Date.now(),title:t,date:d,note:n};PL.unshift(np);lsS("pl",PL);sbSavePlanning(np);nAll("📅 Nouveau planning : "+t,"planning");rPg();toast("Planning publié ✅");}
+function addPL(){
+  var t=document.getElementById("pl-t").value.trim(),d=document.getElementById("pl-d").value.trim(),n=document.getElementById("pl-n").value.trim();
+  if(!t||!d)return;
+  var fi=document.getElementById("pl-f");
+  var np={id:"p"+Date.now(),title:t,date:d,note:n,file:null,fileType:null};
+  if(fi&&fi.files&&fi.files[0]){
+    var file=fi.files[0];
+    var fname=Date.now()+"_"+file.name.replace(/\s/g,"_");
+    np.file=fname;
+    np.fileType=file.type.startsWith("image")?"image":"pdf";
+    toast("Upload en cours...");
+    fetch(SB_URL+"/storage/v1/object/uploads/"+fname,{
+      method:"POST",
+      headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":file.type,"x-upsert":"true"},
+      body:file
+    }).then(function(r){
+      if(r.ok){PL.unshift(np);lsS("pl",PL);sbSavePlanning(np);nAll("📅 Nouveau planning : "+t,"planning");rPg();toast("Planning publié ✅");}
+      else{toast("Erreur upload fichier");}
+    }).catch(function(){toast("Erreur réseau");});
+  } else {
+    PL.unshift(np);lsS("pl",PL);sbSavePlanning(np);nAll("📅 Nouveau planning : "+t,"planning");rPg();toast("Planning publié ✅");
+  }
+}
 
 // ═══════════════════════════════════
 // FORMATIONS
@@ -928,20 +967,36 @@ function pAD(){
       +'<p style="font-weight:700;font-size:13px;margin-bottom:3px;">📋 Devis équipe</p>'
       +'<p style="font-size:12px;color:var(--muted);">Aucun rappel aujourd\'hui · Cliquer pour voir tous</p>'
       +'</div>';
-    // Missions en cours
-    var allMissions=[];
-    USERS.forEach(function(u){(TD[u.id]||[]).filter(function(t){return !t.done;}).forEach(function(t){allMissions.push({t:t,user:u});});});
-    var missH='<div class="card" style="padding:13px;margin-bottom:12px;">'
-      +'<p style="font-weight:700;font-size:13px;margin-bottom:7px;">✅ Missions en cours ('+allMissions.length+')</p>'
-      +(allMissions.length===0?'<p style="font-size:12px;color:var(--dim);">Aucune mission.</p>':allMissions.slice(0,8).map(function(item){
-        var od=isOD(item.t.deadline);
+    // Missions équipe — par personne avec suppression individuelle et globale
+    var missUsersH=USERS.map(function(u){
+      var uTasks=TD[u.id]||[];
+      if(!uTasks.length)return'';
+      var rows=uTasks.map(function(t,ti){
+        var od=isOD(t.deadline);
         return '<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border);">'
-          +'<div class="av" style="width:18px;height:18px;background:'+item.user.col+';font-size:6px;flex-shrink:0;">'+item.user.av+'</div>'
-          +'<span style="font-size:12px;flex:1;">'+item.t.title+'</span>'
-          +(item.t.deadline?'<span style="font-size:10px;color:'+(od?"var(--red)":"var(--muted)")+';font-family:\'DM Mono\',monospace;">'+item.t.deadline+'</span>':"")
+          +'<div style="width:14px;height:14px;border-radius:3px;background:'+(t.done?"var(--green)":"var(--border2)")+';flex-shrink:0;"></div>'
+          +'<span style="font-size:12px;flex:1;'+(t.done?"text-decoration:line-through;color:var(--muted);":"")+'">'+t.title+'</span>'
+          +(t.deadline?'<span style="font-size:10px;color:'+(od?"var(--red)":"var(--muted)")+';font-family:\'DM Mono\',monospace;flex-shrink:0;">'+t.deadline+'</span>':"")
+          +'<a href="#" data-action="adminDelTodo(\''+u.id+'\',\''+t.id+'\');" style="color:var(--red);font-size:10px;padding:1px 5px;background:rgba(184,80,64,.12);border-radius:4px;text-decoration:none;flex-shrink:0;margin-left:4px;">✕</a>'
           +'</div>';
-      }).join(""))
-      +(allMissions.length>8?'<p style="font-size:11px;color:var(--accent);margin-top:6px;">+ '+(allMissions.length-8)+' autres</p>':"")
+      }).join("");
+      return '<div style="margin-bottom:11px;">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">'
+        +'<div style="display:flex;align-items:center;gap:6px;">'
+        +'<div class="av" style="width:22px;height:22px;background:'+u.col+';font-size:7px;flex-shrink:0;">'+u.av+'</div>'
+        +'<span style="font-size:13px;font-weight:600;">'+u.name+'</span>'
+        +'<span style="font-size:10px;color:var(--muted);">('+uTasks.length+')</span>'
+        +'</div>'
+        +'<a href="#" data-action="adminDelAllTodos(\''+u.id+'\');" style="font-size:10px;color:var(--red);padding:2px 8px;background:rgba(184,80,64,.12);border-radius:5px;text-decoration:none;">🗑️ Tout</a>'
+        +'</div>'+rows+'</div>';
+    }).join("");
+    var totalMissions=Object.keys(TD).reduce(function(a,k){return a+(TD[k]?TD[k].length:0);},0);
+    var missH='<div class="card" style="padding:13px;margin-bottom:12px;">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;">'
+      +'<p style="font-weight:700;font-size:13px;">✅ Missions équipe ('+totalMissions+')</p>'
+      +'<a href="#" data-action="adminDelAllTodosEveryone();" style="font-size:11px;color:var(--red);padding:4px 10px;background:rgba(184,80,64,.15);border-radius:6px;text-decoration:none;font-weight:600;">🗑️ Tout effacer</a>'
+      +'</div>'
+      +(totalMissions===0?'<p style="font-size:12px;color:var(--dim);">Aucune mission.</p>':missUsersH)
       +'</div>';
     c=statsH+membresH+litH+devH+missH;
   }
@@ -1021,7 +1076,7 @@ function loadAllFromSB(){
     if(res[2]&&res[2].length){res[2].forEach(function(r){if(!OC[r.uid])OC[r.uid]={};OC[r.uid][r.mois+"_"+r.kpi]=r.valeur;});}
     if(res[3]&&res[3].length){AC=res[3].map(function(r){return{id:r.id,date:r.date,tag:r.tag,title:r.title,txt:r.txt,au:r.au,hot:r.hot};});}
     if(res[4]&&res[4].length){FD=res[4].map(function(r){return{id:r.id,title:r.title,emoji:r.emoji,desc:r.description,slides:r.slides||[],pdfs:r.pdfs||[],photos:r.photos||[]};});}
-    if(res[5]&&res[5].length){PL=res[5].map(function(r){return{id:r.id,title:r.title,date:r.date,note:r.note};});}
+    if(res[5]&&res[5].length){PL=res[5].map(function(r){return{id:r.id,title:r.title,date:r.date,note:r.note,file:r.file||null,fileType:r.file_type||null};});}
     if(res[6]&&res[6].length){LG=res[6].map(function(r){return{id:r.id,cmd:r.cmd,nom:r.nom,prenom:r.prenom,email:r.email,motif:r.motif,au:r.au,date:r.date,comments:r.comments||[]};});}
     if(res[7]&&res[7].length){res[7].forEach(function(r){if(!TD[r.uid])TD[r.uid]=[];if(!TD[r.uid].find(function(t){return t.id===r.id;}))TD[r.uid].push({id:r.id,title:r.title,desc:r.detail,deadline:r.deadline,from:r.assigned_from,done:r.done,validated:r.validated,self:r.self,comments:r.comments||[]});});}
     if(res[8]&&res[8].length){DV={};res[8].forEach(function(r){if(!DV[r.uid])DV[r.uid]=[];if(!DV[r.uid].find(function(d){return d.id===r.id;}))DV[r.uid].push({id:r.id,nom:r.nom,prenom:r.prenom,tel:r.tel,numCmd:r.num_cmd,note:r.note,rappelDate:r.rappel_date,rSent:r.r_sent,comments:r.comments||[]});});}
@@ -1064,9 +1119,31 @@ function sbSaveChiffre(uid,mi,field,val){sbQ("chiffres","POST",{id:uid+"_"+mi+"_
 function sbSaveObj(uid,mi,field,val){sbQ("objectifs","POST",{id:uid+"_"+mi+"_"+field,uid:uid,mois:mi,kpi:field,valeur:val});}
 function sbSaveUser(u){sbQ("users","POST",{id:u.id,name:u.name,av:u.av,role:u.role,col:u.col,bday:u.bday,theme:u.theme,ac:u.ac});}
 function sbSaveFormation(f){sbQ("formations","POST",{id:f.id,title:f.title,emoji:f.emoji,description:f.desc,slides:f.slides,pdfs:f.pdfs,photos:f.photos});}
-function sbSavePlanning(p){sbQ("plannings","POST",{id:p.id,title:p.title,date:p.date,note:p.note});}
+function sbSavePlanning(p){sbQ("plannings","POST",{id:p.id,title:p.title,date:p.date,note:p.note,file:p.file||null,file_type:p.fileType||null});}
 function sbSaveActu(a){sbQ("actualites","POST",{id:a.id,date:a.date,tag:a.tag,title:a.title,txt:a.txt,au:a.au,hot:a.hot});}
 function sbSaveLitige(l){sbQ("litiges","POST",{id:l.id,cmd:l.cmd,nom:l.nom,prenom:l.prenom,email:l.email,motif:l.motif,au:l.au,date:l.date,comments:l.comments||[]});}
+function adminDelTodo(uid,tid){
+  if(!isA())return;
+  TD[uid]=(TD[uid]||[]).filter(function(t){return t.id!==tid;});
+  lsS("td",TD);sbQ("todos","DELETE",null,"?id=eq."+tid);rPg();toast("Mission supprimée ✅");
+}
+function adminDelAllTodos(uid){
+  if(!isA())return;
+  if(!confirm("Supprimer toutes les missions de "+((USERS.find(function(u){return u.id===uid;})||{name:uid}).name)+" ?"))return;
+  var ids=(TD[uid]||[]).map(function(t){return t.id;});
+  TD[uid]=[];lsS("td",TD);
+  ids.forEach(function(id){sbQ("todos","DELETE",null,"?id=eq."+id);});
+  rPg();toast("Missions supprimées ✅");
+}
+function adminDelAllTodosEveryone(){
+  if(!isA())return;
+  if(!confirm("⚠️ Supprimer TOUTES les missions de TOUS les membres ?"))return;
+  var ids=[];
+  Object.keys(TD).forEach(function(uid){(TD[uid]||[]).forEach(function(t){ids.push(t.id);});TD[uid]=[];});
+  lsS("td",TD);
+  ids.forEach(function(id){sbQ("todos","DELETE",null,"?id=eq."+id);});
+  rPg();toast("Toutes les missions supprimées ✅");
+}
 function sbSaveTodo(uid,t){sbQ("todos","POST",{id:t.id,uid:uid,title:t.title,detail:t.desc,deadline:t.deadline,assigned_from:t.from,done:t.done,validated:t.validated,self:t.self||false,comments:t.comments||[]});}
 function sbSaveDevis(uid,d){if(!d)return;sbQ("devis","POST",{id:d.id,uid:uid,nom:d.nom,prenom:d.prenom,tel:d.tel,num_cmd:d.numCmd,note:d.note,rappel_date:d.rappelDate,r_sent:d.rSent,comments:d.comments||[]});}
 function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,dest:n.to,sender:n.from,txt:n.text,type:n.type,read:n.read,date:n.date});}
