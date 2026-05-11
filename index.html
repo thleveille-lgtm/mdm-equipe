@@ -1222,11 +1222,12 @@ function startRealtime(){
       var newN=r.filter(function(n){return!NF.find(function(x){return x.id===n.id;});});
       if(newN.length){newN.forEach(function(n){NF.unshift({id:n.id,to:n.dest,from:n.sender,text:n.txt,type:n.type,read:n.read,date:n.date});});lsS("nf",NF);updBadge();}
     });
- // Sync planning
-sbQ("plannings","GET",null,"?order=created_at.desc&limit=50").then(function(r){
+ sbQ("plannings","GET",null,"?order=created_at.desc&limit=50").then(function(r){
   if(r!==null&&r!==undefined){
     var newPL=r.map(function(x){return{id:x.id,title:x.title,date:x.date,note:x.note,file:x.file||null,file_type:x.file_type||null};});
-    if(JSON.stringify(newPL)!==JSON.stringify(PL)){PL=newPL;lsS("pl",PL);if(PG==="planning")rPg();}
+    var curIds=PL.map(function(p){return p.id;}).join(",");
+    var newIds=newPL.map(function(p){return p.id;}).join(",");
+    if(curIds!==newIds){PL=newPL;lsS("pl",PL);if(PG==="planning")rPg();}
   }
 }); },8000);
 }
