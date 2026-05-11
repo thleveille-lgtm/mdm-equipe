@@ -1236,6 +1236,11 @@ function startRealtime(){
       var newN=r.filter(function(n){return!NF.find(function(x){return x.id===n.id;});});
       if(newN.length){newN.forEach(function(n){NF.unshift({id:n.id,to:n.dest,from:n.sender,text:n.txt,type:n.type,read:n.read,date:n.date});});lsS("nf",NF);updBadge();}
     });
+    sbQ("formations","GET",null,"?limit=50").then(function(r){
+  if(!r)return;
+  var newFD=r.map(function(x){return{id:x.id,title:x.title,emoji:x.emoji,desc:x.description,slides:x.slides||[],pdfs:x.pdfs||[],photos:x.photos||[]};});
+  if(JSON.stringify(newFD)!==JSON.stringify(FD)){FD=newFD;lsS("fd",FD);if(PG==="formations")rPg();}
+});
     sbQ("todos","GET",null,"?limit=500").then(function(r){
   if(!r)return;
   var newTD={};
