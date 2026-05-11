@@ -1238,8 +1238,7 @@ function sbSaveMsg(msg,type,key){
 }
 function sbSaveChiffre(uid,mi,field,val){sbQ("chiffres","POST",{id:uid+"_"+mi+"_"+field,uid:uid,mois:mi,kpi:field,valeur:val});}
 function sbSaveObj(uid,mi,field,val){sbQ("objectifs","POST",{id:uid+"_"+mi+"_"+field,uid:uid,mois:mi,kpi:field,valeur:val});}
-function sbSaveUser(u){sbQ("users","POST",{id:u.id,name:u.name,av:u.av,role:u.role,col:u.col,bday:u.bday,theme:u.theme,ac:u.ac});}
-function sbSaveFormation(f){sbQ("formations","POST",{id:f.id,title:f.title,emoji:f.emoji,description:f.desc,slides:f.slides,pdfs:f.pdfs,photos:f.photos});}
+function sbSaveUser(u){sbQ("users","POST",{id:u.id,name:u.name,av:u.av,pwd:u.pwd,role:u.role,col:u.col,bday:u.bday,theme:u.theme,ac:u.ac});}function sbSaveFormation(f){sbQ("formations","POST",{id:f.id,title:f.title,emoji:f.emoji,description:f.desc,slides:f.slides,pdfs:f.pdfs,photos:f.photos});}
 function sbSavePlanning(p){sbQ("plannings","POST",{id:p.id,title:p.title,date:p.date,note:p.note,file_url:p.file||null,file_type:p.file_type||null});}function sbSaveActu(a){sbQ("actualites","POST",{id:a.id,date:a.date,tag:a.tag,title:a.title,txt:a.txt,au:a.au,hot:a.hot});}
 function sbSaveLitige(l){sbQ("litiges","POST",{id:l.id,cmd:l.cmd,nom:l.nom,prenom:l.prenom,email:l.email,motif:l.motif,au:l.au,date:l.date,comments:l.comments||[]});}
 function adminDelTodo(btn){
