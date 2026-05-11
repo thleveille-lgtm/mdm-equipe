@@ -1195,7 +1195,8 @@ function loadAllFromSB(){
     if(res[7]&&res[7].length){res[7].forEach(function(r){if(!TD[r.uid])TD[r.uid]=[];if(!TD[r.uid].find(function(t){return t.id===r.id;}))TD[r.uid].push({id:r.id,title:r.title,desc:r.detail,deadline:r.deadline,from:r.assigned_from,done:r.done,validated:r.validated,self:r.self,comments:r.comments||[]});});}
     if(res[8]&&res[8].length){DV={};res[8].forEach(function(r){if(!DV[r.uid])DV[r.uid]=[];if(!DV[r.uid].find(function(d){return d.id===r.id;}))DV[r.uid].push({id:r.id,nom:r.nom,prenom:r.prenom,tel:r.tel,numCmd:r.num_cmd,note:r.note,rappelDate:r.rappel_date,rSent:r.r_sent,comments:r.comments||[]});});}
     if(res[9]&&res[9].length){NF=res[9].map(function(r){return{id:r.id,to:r.dest,from:r.sender,text:r.txt,type:r.type,read:r.read,date:r.date};});}
-    if(res[10]&&res[10].length){PV={};res[10].forEach(function(r){if(!PV[r.conv_key])PV[r.conv_key]=[];if(!PV[r.conv_key].find(function(m){return m.id===r.id;}))PV[r.conv_key].push({id:r.id,au:r.au,av:r.av,col:r.col,ti:r.ti,tx:r.tx});});}
+    if(res[11]&&res[11].length){res[11].forEach(function(r){USERS=USERS.map(function(u){return u.id===r.id?Object.assign({},u,{pwd:r.pwd,name:r.name,av:r.av,role:r.role,col:r.col,bday:r.bday,theme:r.theme,ac:r.ac}):u;});});lsS("u",USERS);}
+if(res[10]&&res[10].length){PV={};res[10].forEach(function(r){if(!PV[r.conv_key])PV[r.conv_key]=[];if(!PV[r.conv_key].find(function(m){return m.id===r.id;}))PV[r.conv_key].push({id:r.id,au:r.au,av:r.av,col:r.col,ti:r.ti,tx:r.tx});});}
     sv();
   });
 }
