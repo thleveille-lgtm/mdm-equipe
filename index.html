@@ -1191,13 +1191,6 @@ function loadAllFromSB(){
     sbQ("objectifs","GET",null,"?limit=1000"),
     sbQ("actualites","GET",null,"?order=created_at.desc&limit=100"),
     sbQ("formations","GET",null,"?limit=50"),
-    sbQ("todos","GET",null,"?limit=500").then(function(r){
-  if(!r)return;
-  var newTD={};
-  r.forEach(function(x){if(!newTD[x.uid])newTD[x.uid]=[];newTD[x.uid].push({id:x.id,title:x.title,desc:x.detail,deadline:x.deadline,from:x.assigned_from,done:x.done,validated:x.validated,self:x.self,comments:x.comments||[]});});
-  var changed=JSON.stringify(newTD)!==JSON.stringify(TD);
-  if(changed){TD=newTD;lsS("td",TD);if(PG==="todos")rPg();}
-});
     sbQ("plannings","GET",null,"?order=created_at.desc&limit=50"),
     sbQ("litiges","GET",null,"?order=created_at.desc&limit=200"),
     sbQ("todos","GET",null,"?limit=500"),
