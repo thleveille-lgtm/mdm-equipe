@@ -203,8 +203,22 @@ document.getElementById("lbtn").onclick=function(e){
   e.preventDefault();
   var u=document.getElementById("lu").value.trim().toLowerCase();
   var p=document.getElementById("lp").value.trim();
-  var f=USERS.find(function(x){return x.name.toLowerCase()===u&&x.pwd===p;});
-  if(f){
+ var f=USERS.find(function(x){return x.name.toLowerCase()===u&&x.pwd===p;});
+if(!f){
+  // Tentative avec Supabase
+  var sbU=null;
+  fetch(SB_URL+"/rest/v1/users?name=ilike."+encodeURIComponent(u)+"&limit=1",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+  .then(function(r){return r.json();}).then(function(rows){
+    if(rows&&rows[0]&&rows[0].pwd===p){
+      sbU=rows[0];
+      USERS=USERS.map(function(x){return x.id===sbU.id?Object.assign({},x,{pwd:sbU.pwd}):x;});
+      lsS("u",USERS);
+      document.getElementById("lbtn").onclick({preventDefault:function(){}});
+    } else {document.getElementById("lerr").style.display="block";}
+  }).catch(function(){document.getElementById("lerr").style.display="block";});
+  return;
+}
+if(f){
     CU=f;
     document.getElementById("login").style.display="none";
     document.getElementById("app").style.display="flex";
