@@ -1047,21 +1047,6 @@ function pAD(){
     var lst=AC.map(function(a,i){return '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;gap:9px;"><div style="flex:1;min-width:0;"><span class="tag" style="background:rgba(200,113,58,.12);color:var(--accent);">'+a.tag+'</span> <span style="font-weight:600;font-size:13px;">'+a.title+'</span></div><a href="#" data-action="delAC(\''+a.id+'\');" style="background:rgba(184,80,64,.15);border-radius:6px;color:var(--red);font-size:11px;padding:3px 8px;text-decoration:none;flex-shrink:0;">✕</a></div>';}).join("");
     c='<div class="card" style="padding:13px;margin-bottom:13px;"><p style="font-size:11px;color:var(--accent);font-family:\'DM Mono\',monospace;margin-bottom:10px;">➕ PUBLIER</p><div style="display:flex;flex-direction:column;gap:9px;"><input class="inp" id="af-t" placeholder="Titre *"/><textarea class="inp" id="af-c" placeholder="Contenu *" rows="3" style="resize:none;"></textarea><select class="inp" id="af-g" style="background:var(--bg3);">'+tO+'</select><label style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);cursor:pointer;"><input type="checkbox" id="af-h"/> Urgent</label><a href="#" data-action="addAC();" class="btn ba">Publier →</a></div></div>'+lst;
   }
-  if(AT==="connexions"){
-sbQ("connexions","GET",null,"?order=id.desc&limit=100").then(function(r){
-  var rows=r&&r.length?r.map(function(cx){
-    var usr=USERS.find(function(u){return u.id===cx.uid;});
-    return '<div style="display:flex;align-items:center;gap:9px;padding:9px;background:var(--bg3);border-radius:10px;margin-bottom:6px;">'
-      +(usr?'<div class="av" style="width:28px;height:28px;background:'+usr.col+';font-size:9px;flex-shrink:0;">'+usr.av+'</div>':"")
-      +'<div style="flex:1;"><p style="font-size:13px;font-weight:600;">'+cx.name+'</p><p style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;">'+cx.date+' à '+cx.heure+'</p></div>'
-      +'<span style="font-size:12px;">'+cx.device+'</span>'
-      +'</div>';
-  }).join(""):'<p style="color:var(--dim);text-align:center;padding:28px;">Aucune connexion.</p>';
-  var el=document.getElementById("cx-list");
-  if(el)el.innerHTML=rows;
-});
-  c='<div class="card" style="padding:13px;"><p style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:13px;color:var(--accent);margin-bottom:11px;">🔐 Historique des connexions</p><div id="cx-list"><p style="color:var(--muted);font-size:13px;">Chargement...</p></div></div>';
-  }
 
   if(AT==="users"){
     var ul=USERS.map(function(u){return '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px;margin-bottom:7px;display:flex;align-items:center;gap:9px;"><div class="av" style="width:28px;height:28px;background:'+u.col+';font-size:9px;flex-shrink:0;">'+u.av+'</div><div style="flex:1;"><p style="font-weight:600;font-size:13px;">'+u.name+(u.bday?" 🎂":"")+'</p><div style="display:flex;gap:5px;margin-top:2px;align-items:center;"><span style="font-size:9px;background:'+(u.role==="admin"?"rgba(200,113,58,.15)":u.role==="adjoint"?"rgba(78,126,168,.15)":"var(--border)")+';color:'+(u.role==="admin"?"var(--accent)":u.role==="adjoint"?"var(--blue)":"var(--muted)")+';padding:1px 5px;border-radius:3px;font-family:\'DM Mono\',monospace;">'+(u.role==="admin"?"ADMIN":u.role==="adjoint"?"ADJOINT":"USER")+'</span><span style="font-size:11px;color:var(--dim);font-family:\'DM Mono\',monospace;">mdp: '+u.pwd+'</span></div></div><div style="display:flex;gap:4px;flex-shrink:0;"><a href="#" data-action="showEU(\''+u.id+'\');" style="background:rgba(78,126,168,.15);border-radius:6px;color:var(--blue);font-size:11px;padding:3px 7px;text-decoration:none;">✏️</a>'+(u.id!==CU.id?'<a href="#" data-action="delU(\''+u.id+'\');" style="background:rgba(184,80,64,.15);border-radius:6px;color:var(--red);font-size:11px;padding:3px 7px;text-decoration:none;">✕</a>':"")+'</div></div>';}).join("");
