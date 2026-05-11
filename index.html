@@ -300,14 +300,14 @@ function svP(){
 // ═══════════════════════════════════
 function rNav(){
   var ts=[
-    {id:"home",l:"🏠 Accueil"},
+   {id:"home",l:"🏠 Accueil"},
     {id:"chiffres",l:isA()?"📊 Chiffres":"📊 Mes Chiffres"},
-    {id:"planning",l:"📅 Planning"},
-    {id:"formations",l:"🎓 Formations"},
-    {id:"discussion",l:"💬 Messages"},
-    {id:"todos",l:"✅ Missions"},
     {id:"devis",l:"📋 Devis"},
-    {id:"litiges",l:"⚠️ Litiges"}
+    {id:"todos",l:"✅ Missions"},
+    {id:"litiges",l:"⚠️ Litiges"},
+    {id:"formations",l:"🎓 Formations"},
+    {id:"planning",l:"📅 Planning"},
+    {id:"discussion",l:"💬 Messages"}
   ];
   if(isA())ts.push({id:"admin",l:"⚙️ Manager"});
   document.getElementById("nav").innerHTML=ts.map(function(t){return '<a href="#" class="'+(PG===t.id?"on":"")+'" data-pg="'+t.id+'">'+t.l+'</a>';}).join("");
