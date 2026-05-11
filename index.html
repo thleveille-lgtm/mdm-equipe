@@ -1136,7 +1136,21 @@ function pAD(){
       +'</div>';
     c=statsH+membresH+litH+devH+missH;
   }
-
+if(AT==="connexions"){
+    sbQ("connexions","GET",null,"?order=id.desc&limit=100").then(function(r){
+      var el=document.getElementById("cx-list");
+      if(!el||!r)return;
+      el.innerHTML=r.length===0?'<p style="color:var(--dim);text-align:center;padding:28px;">Aucune connexion.</p>':r.map(function(c){
+        var usr=USERS.find(function(u){return u.id===c.uid;});
+        return '<div style="display:flex;align-items:center;gap:9px;padding:9px;background:var(--bg3);border-radius:10px;margin-bottom:6px;">'
+          +(usr?'<div class="av" style="width:28px;height:28px;background:'+usr.col+';font-size:9px;flex-shrink:0;">'+usr.av+'</div>':"")
+          +'<div style="flex:1;"><p style="font-size:13px;font-weight:600;">'+c.name+'</p><p style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;">'+c.date+' à '+c.heure+'</p></div>'
+          +'<span style="font-size:12px;">'+c.device+'</span>'
+          +'</div>';
+      }).join("");
+    });
+    c='<div class="card" style="padding:13px;"><p style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:13px;color:var(--accent);margin-bottom:11px;">🔐 Historique des connexions</p><div id="cx-list"><p style="color:var(--muted);font-size:13px;">Chargement...</p></div></div>';
+  }
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
     +'<div>'
     +'<div class="manager-banner"><span style="font-size:18px;">👑</span><div><p style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:14px;">Espace Manager</p><p style="font-size:11px;color:var(--muted);">Accès complet à toutes les données</p></div></div>'
