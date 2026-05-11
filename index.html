@@ -1045,7 +1045,19 @@ function pAD(){
   if(AT==="actu"){
     var tO=TAGS.map(function(t){return'<option value="'+t+'">'+t+'</option>';}).join("");
     var lst=AC.map(function(a,i){return '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;gap:9px;"><div style="flex:1;min-width:0;"><span class="tag" style="background:rgba(200,113,58,.12);color:var(--accent);">'+a.tag+'</span> <span style="font-weight:600;font-size:13px;">'+a.title+'</span></div><a href="#" data-action="delAC(\''+a.id+'\');" style="background:rgba(184,80,64,.15);border-radius:6px;color:var(--red);font-size:11px;padding:3px 8px;text-decoration:none;flex-shrink:0;">✕</a></div>';}).join("");
-  
+  if(AT==="connexions"){
+sbQ("connexions","GET",null,"?order=id.desc&limit=100").then(function(r){
+  var rows=r&&r.length?r.map(function(cx){
+    var usr=USERS.find(function(u){return u.id===cx.uid;});
+    return '<div style="display:flex;align-items:center;gap:9px;padding:9px;background:var(--bg3);border-radius:10px;margin-bottom:6px;">'
+      +(usr?'<div class="av" style="width:28px;height:28px;background:'+usr.col+';font-size:9px;flex-shrink:0;">'+usr.av+'</div>':"")
+      +'<div style="flex:1;"><p style="font-size:13px;font-weight:600;">'+cx.name+'</p><p style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;">'+cx.date+' à '+cx.heure+'</p></div>'
+      +'<span style="font-size:12px;">'+cx.device+'</span>'
+      +'</div>';
+  }).join(""):'<p style="color:var(--dim);text-align:center;padding:28px;">Aucune connexion.</p>';
+  var el=document.getElementById("cx-list");
+  if(el)el.innerHTML=rows;
+});
   c='<div class="card" style="padding:13px;"><p style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:13px;color:var(--accent);margin-bottom:11px;">🔐 Historique des connexions</p><div id="cx-list"><p style="color:var(--muted);font-size:13px;">Chargement...</p></div></div>';
   }
 
