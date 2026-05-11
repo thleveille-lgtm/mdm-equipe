@@ -1235,8 +1235,7 @@ function startRealtime(){
     sbQ("formations","GET",null,"?limit=50").then(function(r){
   if(!r)return;
   var newFD=r.map(function(x){return{id:x.id,title:x.title,emoji:x.emoji,desc:x.description,slides:x.slides||[],pdfs:x.pdfs||[],photos:x.photos||[]};});
-  if(JSON.stringify(newFD)!==JSON.stringify(FD)){FD=newFD;lsS("fd",FD);if(PG==="formations")rPg();}
-});
+if(JSON.stringify(newFD.map(function(x){return x.id;}))!==JSON.stringify(FD.map(function(x){return x.id;}))){FD=newFD.reverse();lsS("fd",FD);if(PG==="formations")rPg();}});
     sbQ("todos","GET",null,"?limit=500").then(function(r){
   if(!r)return;
   var newTD={};
