@@ -156,6 +156,7 @@ function lsS(k,v){try{localStorage.setItem("m6_"+k,JSON.stringify(v));}catch(e){
 var USERS=lsG("u",UD);
 var AC=lsG("ac",[{id:"a1",date:"09 Mai 2026",tag:"🌿 OUTDOOR",title:"Collection Outdoor 2026 en magasin !",txt:"Formation disponible dans l'onglet Formations.",au:"Thibaut",hot:true}]);
 var FD=lsG("fd",[{id:"f1",title:"Collection Outdoor 2026",emoji:"🌿",desc:"Formation complète mobilier de jardin.",slides:[{t:"EZRA — Nouveauté 2026",c:"Alu blanc + bois massif + coussins écru\n8 places · Bestseller 2026 · Client premium"},{t:"MALDIVES / BELLUNE",c:"MALDIVES : Design resort · Nouveauté 2026\nBELLUNE : Acacia arrondi · Design MDM exclusif"},{t:"Cross-sell et ALMA",c:"Salon : Coussins + Housse\n3x sans frais : 900€=3x300€ · 24x : 1800€=75€/mois"},{t:"SONCAS",c:"S-Sécurité O-Orgueil N-Nouveauté C-Confort A-Argent S-Sympathie"}],pdfs:[],photos:[]},{id:"f2",title:"Canapés MDM",emoji:"🛋️",desc:"Gammes et argumentaires canapés.",slides:[{t:"La gamme MDM",c:"Droits · Angle · Modulables · Convertibles · +12 000 références"},{t:"Best-sellers",c:"LILO : 999€ · BARCELONE : 1199€ · MODJO : 1399€\nBROOKE : 799€ · ELVIS : 399€"}],pdfs:[],photos:[]}]);
+FD=FD.reverse();
 var PM=lsG("pm",[]);
 var PV=lsG("pv",{});
 var LG=lsG("lg",[]);
