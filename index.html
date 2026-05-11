@@ -1237,6 +1237,12 @@ function startRealtime(){
       var newN=r.filter(function(n){return!NF.find(function(x){return x.id===n.id;});});
       if(newN.length){newN.forEach(function(n){NF.unshift({id:n.id,to:n.dest,from:n.sender,text:n.txt,type:n.type,read:n.read,date:n.date});});lsS("nf",NF);updBadge();}
     });
+    sbQ("todos","GET",null,"?limit=500").then(function(r){
+  if(!r)return;
+  var newTD={};
+  r.forEach(function(x){if(!newTD[x.uid])newTD[x.uid]=[];newTD[x.uid].push({id:x.id,title:x.title,desc:x.detail,deadline:x.deadline,from:x.assigned_from,done:x.done,validated:x.validated,self:x.self,comments:x.comments||[]});});
+  if(JSON.stringify(newTD)!==JSON.stringify(TD)){TD=newTD;lsS("td",TD);if(PG==="todos")rPg();}
+});
  sbQ("plannings","GET",null,"?order=created_at.desc&limit=50").then(function(r){
   if(r!==null&&r!==undefined){
     var newPL=r.map(function(x){return{id:x.id,title:x.title,date:x.date,note:x.note,file:x.file||null,file_type:x.file_type||null};});
