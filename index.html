@@ -639,11 +639,27 @@ function addPL(){
       headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":file.type,"x-upsert":"true"},
       body:file
     }).then(function(r){
-      if(r.ok){PL.unshift(np);lsS("pl",PL);sbSavePlanning(np);nAll("📅 Nouveau planning : "+t,"planning");rPg();toast("Planning publié ✅");}
+      if(r.ok){
+        sbSavePlanning(np);
+        setTimeout(function(){
+          sbQ("plannings","GET",null,"?order=created_at.desc&limit=50").then(function(res){
+            if(res){PL=res.map(function(x){return{id:x.id,title:x.title,date:x.date,note:x.note,file:x.file||null,file_type:x.file_type||null};});lsS("pl",PL);}
+            else{PL.unshift(np);lsS("pl",PL);}
+            nAll("📅 Nouveau planning : "+t,"planning");rPg();toast("Planning publié ✅");
+          });
+        },1500);
+      }
       else{toast("Erreur upload fichier");}
     }).catch(function(){toast("Erreur réseau");});
   } else {
-    PL.unshift(np);lsS("pl",PL);sbSavePlanning(np);nAll("📅 Nouveau planning : "+t,"planning");rPg();toast("Planning publié ✅");
+    sbSavePlanning(np);
+    setTimeout(function(){
+      sbQ("plannings","GET",null,"?order=created_at.desc&limit=50").then(function(res){
+        if(res){PL=res.map(function(x){return{id:x.id,title:x.title,date:x.date,note:x.note,file:x.file||null,file_type:x.file_type||null};});lsS("pl",PL);}
+        else{PL.unshift(np);lsS("pl",PL);}
+        nAll("📅 Nouveau planning : "+t,"planning");rPg();toast("Planning publié ✅");
+      });
+    },1200);
   }
 }
 
