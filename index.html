@@ -1508,5 +1508,335 @@ function sbSaveTodo(uid,t){sbQ("todos","POST",{id:t.id,uid:uid,title:t.title,det
 function sbSaveDevis(uid,d){if(!d)return;sbQ("devis","POST",{id:d.id,uid:uid,nom:d.nom,prenom:d.prenom,tel:d.tel,num_cmd:d.numCmd,note:d.note,rappel_date:d.rappelDate,r_sent:d.rSent,comments:d.comments||[]});}
 function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,dest:n.to,sender:n.from,txt:n.text,type:n.type,read:n.read,date:n.date});}
 </script>
+  <!--
+  ═══════════════════════════════════════════════════════════════
+  MDM ÉQUIPE — PATCH VISUEL COLLECTION 2026
+  Colle ce bloc juste avant </body> dans ton fichier HTML principal
+  ═══════════════════════════════════════════════════════════════
+-->
+
+<style>
+/* ── Bannière & images ── */
+#mdm-visual-banner{animation:fadeUp .5s ease both;cursor:default;}
+#mdm-visual-banner img{display:block;}
+.mdm-thumb{animation:fadeIn .4s ease both;transition:filter .3s;}
+.card:hover .mdm-thumb{filter:brightness(1) saturate(1.1) !important;}
+#mdm-form-strip,#mdm-plan-strip{animation:fadeUp .4s ease both;}
+
+/* ── Page login : fond image collection fondu ── */
+#login::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1400&q=50');
+  background-size:cover;
+  background-position:center 40%;
+  opacity:.09;
+  pointer-events:none;
+  z-index:0;
+}
+.light #login::after{opacity:.05;}
+
+/* ── Header : micro-texture chaude ── */
+header{
+  background:linear-gradient(90deg,var(--bg) 60%,rgba(200,113,58,.05) 100%) !important;
+}
+
+/* ── Login box au-dessus du fond ── */
+.lbox{z-index:1;}
+
+/* ── Bouton login : image fondue ── */
+#lbtn{overflow:hidden;position:relative;}
+#lbtn::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=30');
+  background-size:cover;
+  opacity:.12;
+  pointer-events:none;
+}
+
+/* ── Cartes actualités avec bord coloré selon tag ── */
+.mdm-actu-outdoor{border-left:3px solid #6B9E5E !important;}
+.mdm-actu-canape {border-left:3px solid #C9993A !important;}
+.mdm-actu-formation{border-left:3px solid #4E7EA8 !important;}
+.mdm-actu-hot   {border-left:3px solid #C8713A !important;}
+
+/* ── Strip produit dans les cards formation ── */
+.mdm-prod-strip{
+  display:flex;
+  gap:3px;
+  height:75px;
+  border-radius:8px;
+  overflow:hidden;
+  margin:10px 0 0;
+}
+.mdm-prod-strip img{
+  flex:1;
+  min-width:0;
+  object-fit:cover;
+  filter:brightness(.75) saturate(.85);
+  transition:filter .3s;
+}
+.mdm-prod-strip img:hover{filter:brightness(.95) saturate(1.05);}
+
+/* ── Watermark collection dans nav ── */
+#mdm-nav-coll{
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  color:var(--dim);
+  padding:7px 8px;
+  white-space:nowrap;
+  letter-spacing:.5px;
+  display:none;
+}
+@media(min-width:480px){#mdm-nav-coll{display:inline-block;}}
+</style>
+
+<script>
+(function(){
+
+/* ── Config images (Unsplash — libre de droit, style MDM) ── */
+var IMGS = {
+  outdoor : [
+    "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=900&q=75",  // salon jardin rotin
+    "https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&q=75", // terrasse lumineuse
+    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=75"    // jardin design
+  ],
+  canape  : [
+    "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=900&q=75", // canapé beige salon
+    "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800&q=75"  // canapé velours
+  ],
+  deco    : [
+    "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=900&q=75", // salon déco
+    "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=75", // salon modern
+    "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=75"  // chambre
+  ]
+};
+
+/* tag → image */
+var TAG_IMG = {
+  "OUTDOOR"  : IMGS.outdoor[0],
+  "CANAPÉ"   : IMGS.canape[0],
+  "FORMATION": IMGS.deco[2],
+  "RÉSULTAT" : IMGS.outdoor[1],
+  "ANNONCE"  : IMGS.deco[0],
+  "RAPPEL"   : IMGS.deco[1],
+  "OBJECTIF" : IMGS.outdoor[1],
+  "RH"       : IMGS.deco[1]
+};
+
+/* ── Bannière 3 colonnes — homepage ── */
+function injectHomeBanner(){
+  var main = document.getElementById("main");
+  if(!main || document.getElementById("mdm-vbanner")) return;
+  var h2 = main.querySelector("h2");
+  if(!h2 || h2.textContent.indexOf("Bonjour")<0) return;
+
+  var cols = [
+    {src:IMGS.deco[0],   lbl:"🏡 Collection 2026"},
+    {src:IMGS.outdoor[0],lbl:"🌿 Outdoor"},
+    {src:IMGS.canape[0], lbl:"🛋️ Canapés"}
+  ];
+  var w = ["42%","30%","28%"];
+
+  var banner = document.createElement("div");
+  banner.id   = "mdm-vbanner";
+  banner.style.cssText = [
+    "border-radius:14px","overflow:hidden","margin-bottom:14px",
+    "position:relative","height:130px","display:flex","gap:3px"
+  ].join(";");
+
+  cols.forEach(function(c,i){
+    var wrap = document.createElement("div");
+    wrap.style.cssText = "flex:0 0 "+w[i]+";overflow:hidden;position:relative;";
+
+    var img = document.createElement("img");
+    img.src = c.src;
+    img.loading = "lazy";
+    img.style.cssText = [
+      "width:100%","height:100%","object-fit:cover",
+      "filter:brightness(.7) saturate(.8)","transition:filter .4s","display:block"
+    ].join(";");
+    img.onmouseover=function(){this.style.filter="brightness(.9) saturate(1.05)";};
+    img.onmouseout =function(){this.style.filter="brightness(.7) saturate(.8)";};
+
+    var lbl = document.createElement("span");
+    lbl.textContent = c.lbl;
+    lbl.style.cssText = [
+      "position:absolute","bottom:7px","left:8px",
+      "font-family:'DM Mono',monospace","font-size:10px","color:#fff",
+      "background:rgba(0,0,0,.5)","padding:2px 7px","border-radius:5px"
+    ].join(";");
+
+    wrap.appendChild(img);
+    wrap.appendChild(lbl);
+    banner.appendChild(wrap);
+  });
+
+  main.insertBefore(banner, main.firstChild);
+}
+
+/* ── Miniatures sur les cartes actualités ── */
+function enrichActuCards(){
+  document.querySelectorAll("#main .card").forEach(function(card){
+    if(card.querySelector(".mdm-thumb")) return;
+    var tagEl = card.querySelector(".tag");
+    if(!tagEl) return;
+    var txt = tagEl.textContent.toUpperCase();
+    var src = null;
+    for(var k in TAG_IMG){ if(txt.indexOf(k)>=0){src=TAG_IMG[k];break;} }
+    if(!src) return;
+
+    var img = document.createElement("img");
+    img.src = src;
+    img.className = "mdm-thumb";
+    img.loading = "lazy";
+    img.style.cssText = [
+      "width:70px","height:50px","object-fit:cover","border-radius:7px",
+      "float:right","margin:0 0 8px 10px","filter:brightness(.8) saturate(.85)"
+    ].join(";");
+
+    card.insertBefore(img, card.firstChild);
+  });
+}
+
+/* ── Bande visuelle Formations ── */
+function enrichFormations(){
+  var main = document.getElementById("main");
+  if(!main || document.getElementById("mdm-vform")) return;
+  var h2 = main.querySelector("h2");
+  if(!h2 || h2.textContent.indexOf("Formation")<0) return;
+
+  var strip = document.createElement("div");
+  strip.id = "mdm-vform";
+  strip.className = "mdm-prod-strip";
+  strip.style.marginBottom = "14px";
+
+  [IMGS.canape[0], IMGS.outdoor[0], IMGS.deco[1]].forEach(function(src){
+    var img = document.createElement("img");
+    img.src = src;
+    img.loading = "lazy";
+    strip.appendChild(img);
+  });
+
+  main.insertBefore(strip, main.firstChild);
+}
+
+/* ── Bande visuelle Planning ── */
+function enrichPlanning(){
+  var main = document.getElementById("main");
+  if(!main || document.getElementById("mdm-vplan")) return;
+  var h2 = main.querySelector("h2");
+  if(!h2 || h2.textContent.indexOf("Planning")<0) return;
+
+  var wrap = document.createElement("div");
+  wrap.id = "mdm-vplan";
+  wrap.style.cssText = [
+    "height:75px","border-radius:12px","overflow:hidden",
+    "margin-bottom:14px","position:relative"
+  ].join(";");
+
+  var img = document.createElement("img");
+  img.src = IMGS.deco[1];
+  img.loading = "lazy";
+  img.style.cssText = "width:100%;height:100%;object-fit:cover;object-position:50% 30%;filter:brightness(.55) saturate(.7);display:block;";
+
+  var ovl = document.createElement("div");
+  ovl.style.cssText = [
+    "position:absolute","inset:0","display:flex","align-items:center","padding:0 16px",
+    "font-family:'DM Mono',monospace","font-size:10px",
+    "color:rgba(255,255,255,.65)","letter-spacing:1.5px"
+  ].join(";");
+  ovl.textContent = "// COLLECTION PRINTEMPS-ÉTÉ 2026 · MAISONS DU MONDE";
+
+  wrap.appendChild(img);
+  wrap.appendChild(ovl);
+  main.insertBefore(wrap, main.firstChild);
+}
+
+/* ── Bande visuelle Chiffres ── */
+function enrichChiffres(){
+  var main = document.getElementById("main");
+  if(!main || document.getElementById("mdm-vchiffres")) return;
+  var h2 = main.querySelector("h2");
+  if(!h2) return;
+  var txt = h2.textContent;
+  if(txt.indexOf("Chiffres")<0 && txt.indexOf("Performances")<0) return;
+
+  var wrap = document.createElement("div");
+  wrap.id = "mdm-vchiffres";
+  wrap.style.cssText = [
+    "height:55px","border-radius:10px","overflow:hidden",
+    "margin-bottom:14px","position:relative","display:flex","gap:2px"
+  ].join(";");
+
+  [IMGS.outdoor[1], IMGS.deco[0], IMGS.canape[0]].forEach(function(src){
+    var div = document.createElement("div");
+    div.style.cssText = "flex:1;overflow:hidden;";
+    var img = document.createElement("img");
+    img.src = src;
+    img.loading = "lazy";
+    img.style.cssText = "width:100%;height:55px;object-fit:cover;filter:brightness(.55) saturate(.7);display:block;";
+    div.appendChild(img);
+    wrap.appendChild(div);
+  });
+
+  var ovl = document.createElement("div");
+  ovl.style.cssText = [
+    "position:absolute","inset:0","display:flex","align-items:center","padding:0 14px",
+    "font-family:'DM Mono',monospace","font-size:9px",
+    "color:rgba(245,236,216,.6)","letter-spacing:1px"
+  ].join(";");
+  ovl.textContent = "// PERFORMANCES ÉQUIPE 2026";
+  wrap.appendChild(ovl);
+
+  main.insertBefore(wrap, main.firstChild);
+}
+
+/* ── Badge collection dans nav ── */
+function enrichNav(){
+  var nav = document.getElementById("nav");
+  if(!nav || nav.querySelector("#mdm-nav-coll")) return;
+  var badge = document.createElement("span");
+  badge.id = "mdm-nav-coll";
+  badge.textContent = "OUTDOOR 2026 ↗";
+  badge.style.cursor = "pointer";
+  badge.onclick = function(){
+    if(typeof PG!=="undefined"){PG="formations";if(typeof rNav==="function")rNav();if(typeof rPg==="function")rPg();}
+  };
+  nav.appendChild(badge);
+}
+
+/* ── Hook sur rPg ── */
+var _pgHook = null;
+function installHook(){
+  if(typeof rPg === "undefined"){setTimeout(installHook, 300); return;}
+  if(_pgHook) return;
+  _pgHook = rPg;
+  rPg = function(){
+    _pgHook();
+    setTimeout(function(){
+      enrichNav();
+      var pg = typeof PG !== "undefined" ? PG : "";
+      if(pg === "home")       injectHomeBanner();
+      if(pg === "formations") enrichFormations();
+      if(pg === "planning")   enrichPlanning();
+      if(pg === "chiffres")   enrichChiffres();
+      enrichActuCards();
+    }, 90);
+  };
+}
+
+/* Démarrage */
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", installHook);
+} else {
+  installHook();
+}
+
+})();
+</script>
 </body>
 </html>
