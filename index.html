@@ -230,7 +230,7 @@ if(f){
     if(bd.length>0){setTimeout(cfx,500);bd.forEach(function(b){nAll("🎂 Anniversaire de "+b.name+" aujourd'hui !","bday");});}
     chkDvR();
 sbQ("connexions","POST",{id:"c"+Date.now(),uid:f.id,name:f.name,date:new Date().toLocaleDateString("fr-FR"),heure:new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),device:navigator.userAgent.includes("Mobile")?"📱 Mobile":"💻 PC"});
-loadAllFromSB().then(function(){rNav();rPg();updBadge();startRealtime();});  }else{document.getElementById("lerr").style.display="block";}
+loadAllFromSB().then(function(){rNav();rPg();updBadge();startRealtime();setTimeout(function(){rPg();},500);});  }else{document.getElementById("lerr").style.display="block";}
 };
 document.getElementById("lp").addEventListener("keydown",function(e){if(e.keyCode===13)document.getElementById("lbtn").onclick(e);});
 document.getElementById("forgot-btn").onclick=function(e){
