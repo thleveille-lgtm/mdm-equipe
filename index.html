@@ -607,7 +607,7 @@ detailH+='</div>';
     +'<div><p style="color:var(--muted);font-size:11px;font-family:\'DM Mono\',monospace;margin-bottom:3px;">// CHIFFRES 2026'+(MB?" — "+usr.name:"")+'</p><h2 style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;">'+(MB?usr.name+' 👤':'Mes Performances')+'</h2></div>'
     +'<a href="#" class="rfbtn" data-action="loadAllFromSB().then(function(){rPg();toast(\'✅ Actualisé\')});">🔄</a>'
     +'</div>'
-    +cumSec+'<p style="color:var(--muted);font-size:11px;font-family:\'DM Mono\',monospace;margin:12px 0 7px;">// PAR MOIS</p>'+sections;
+   +cumSec+'<p style="color:var(--muted);font-size:11px;font-family:\'DM Mono\',monospace;margin:12px 0 7px;">// PAR MOIS</p>'+sections+(isA()?detailH:"");
 }
 
 // ═══════════════════════════════════
@@ -634,7 +634,7 @@ function pCA(){
     +'</div>'
     +'<div style="display:flex;gap:3px;overflow-x:auto;margin-bottom:12px;padding-bottom:3px;">'+mB+'</div>'
     +'<div class="card" style="padding:13px;margin-bottom:12px;border-color:rgba(200,113,58,.3);"><p style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:13px;color:var(--accent);margin-bottom:9px;">Totaux — '+MOF[mi]+'</p><div class="g2">'+tot+'</div></div>'
-+mbrs+detailH;
++mbrs;
 }
 
 // ═══════════════════════════════════
