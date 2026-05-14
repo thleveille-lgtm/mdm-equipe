@@ -969,9 +969,9 @@ return '<div style="display:flex;align-items:center;justify-content:space-betwee
     +aBtn+sBtn
     +'<p style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:9px;">EN COURS ('+pend.length+')</p>'+pH
     +(dH?'<p style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;margin:12px 0 9px;">TERMINÉES ('+done.length+')</p>'+dH:"")
- +teamH;
++teamH;
 }
-function tgTD(uid,idx){if(!TD[uid])return;
+function tgTD(uid,idx){if(!TD[uid])return;TD[uid][idx].done=!TD[uid][idx].done;lsS("td",TD);sbSaveTodo(uid,TD[uid][idx]);rPg();}
 function valTD(uid,idx){if(!TD[uid])return;TD[uid][idx].validated=true;lsS("td",TD);sbSaveTodo(uid,TD[uid][idx]);addN(uid,"✅ Mission \""+TD[uid][idx].title+"\" validée par "+CU.name,"validated");rPg();toast("Validée ✅");}
 function addTD(){var who=document.getElementById("tw").value,t=document.getElementById("tt").value.trim(),d=document.getElementById("td2").value.trim(),l=document.getElementById("tl").value.trim();if(!t)return;if(!TD[who])TD[who]=[];var nt={id:"t"+Date.now(),title:t,desc:d,deadline:l||null,from:CU.name,done:false,validated:false,createdAt:new Date().toLocaleDateString("fr-FR")};TD[who].unshift(nt);sv();sbSaveTodo(who,nt);var tgt=USERS.find(function(u){return u.id===who;});if(tgt&&tgt.id!==CU.id)addN(tgt.id,"✅ Nouvelle mission : "+t+(l?" — deadline : "+l:""),"todo");rPg();toast("Mission assignée ✅");}
 function showST(){sM('<button class="mc" data-action="cM();">✕</button><h3>+ Ma propre mission</h3><div style="display:flex;flex-direction:column;gap:9px;"><input class="inp" id="st-t" placeholder="Mission *"/><textarea class="inp" id="st-d" placeholder="Description" rows="2" style="resize:none;"></textarea><input class="inp" id="st-l" placeholder="Deadline (ex: 16/05/2026)"/></div><br><a href="#" data-action="svST();" class="btn ba">Créer</a>',true);}
