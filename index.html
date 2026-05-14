@@ -915,8 +915,7 @@ function pTD(){
   var sub='<div class="tabs"><a href="#" class="tab'+(TS==="missions"?" on":"")+'" data-action="TS=\'missions\';rPg();">✅ Missions</a></div>';
   var aBtn=isA()?'<div class="card" style="padding:13px;margin-bottom:14px;"><p style="font-size:11px;color:var(--accent);font-family:\'DM Mono\',monospace;margin-bottom:9px;">➕ ASSIGNER UNE MISSION</p><div style="display:flex;flex-direction:column;gap:9px;"><select class="inp" id="tw" style="background:var(--bg3);">'+USERS.map(function(u){return '<option value="'+u.id+'">'+u.name+'</option>';}).join("")+'</select><input class="inp" id="tt" placeholder="Mission *"/><textarea class="inp" id="td2" placeholder="Description / Détails" rows="2" style="resize:none;"></textarea><input class="inp" id="tl" placeholder="Deadline (ex: 16/05/2026)"/><a href="#" data-action="addTD();" class="btn ba">Assigner →</a></div></div>':"";
   var sBtn='<a href="#" data-action="showST();" style="display:inline-flex;align-items:center;gap:6px;padding:8px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);color:var(--muted);font-size:12px;text-decoration:none;margin-bottom:12px;">+ Créer ma propre mission</a> ';
-  var vBtn=isA()?'<a href="#" data-action="showTeamTD();" style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);color:var(--muted);font-size:12px;text-decoration:none;margin-bottom:12px;">👥 Équipe</a><br><br>':'<br><br>';
-  var pend=myT.filter(function(t){return !t.done;}),done=myT.filter(function(t){return t.done;});
+var vBtn="";  var pend=myT.filter(function(t){return !t.done;}),done=myT.filter(function(t){return t.done;});
   function rTI(t){
     var ri=myT.indexOf(t),od=isOD(t.deadline);
     return '<div class="ti" style="border-color:'+(od?"rgba(184,80,64,.4)":"var(--border)")+(t.done?";opacity:0.65":"")+'">'
