@@ -586,14 +586,15 @@ function pCU(){
       +'<div class="abn'+(isOp?" open":"")+'">'
       +kpis+dnts+saisie+'</div>';
   }).join("");
-  var detailOp=AO["eqDetail"];
+var detailOp=AO["eqDetail"];
+var vs2=USERS.filter(function(u){return u.role==="user";});
 var detailH='<a href="#" class="ab'+(detailOp?" open":"")+'" data-action="AO[\'eqDetail\']=!AO[\'eqDetail\'];rPg();">'
   +'<span style="font-weight:700;">📋 Détail mensuel complet — Équipe</span><span style="color:var(--muted);">'+(detailOp?"▲":"▼")+'</span></a>'
   +'<div class="abn'+(detailOp?" open":"")+'">';
 var annT=KS.reduce(function(a,k){a[k]=0;a["obj_"+k]=0;return a;},{});
 detailH+=MO.map(function(ml,mii){
   var mT=KS.reduce(function(a,k){a[k]=0;a["obj_"+k]=0;return a;},{});
-  vs.forEach(function(u){var mc=gC(u.id,mii);KS.forEach(function(k){mT[k]+=mc[k]||0;mT["obj_"+k]+=mc["obj_"+k]||0;});});
+  vs2.forEach(function(u){var mc=gC(u.id,mii);KS.forEach(function(k){mT[k]+=mc[k]||0;mT["obj_"+k]+=mc["obj_"+k]||0;});});
   KS.forEach(function(k){annT[k]+=mT[k];annT["obj_"+k]+=mT["obj_"+k];});
   var pM=pc(mT.ca,mT.obj_ca);
   return '<div style="margin-bottom:10px;"><p style="font-size:11px;font-weight:700;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:5px;">'+ml.toUpperCase()+' <span style="color:'+ph(pM)+';">'+pM+'%</span></p>'
