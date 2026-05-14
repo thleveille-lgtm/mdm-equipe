@@ -586,6 +586,21 @@ function pCU(){
       +'<div class="abn'+(isOp?" open":"")+'">'
       +kpis+dnts+saisie+'</div>';
   }).join("");
+  var detailOp=AO["eqDetail"];
+var detailH='<a href="#" class="ab'+(detailOp?" open":"")+'" data-action="AO[\'eqDetail\']=!AO[\'eqDetail\'];rPg();">'
+  +'<span style="font-weight:700;">📋 Détail mensuel complet — Équipe</span><span style="color:var(--muted);">'+(detailOp?"▲":"▼")+'</span></a>'
+  +'<div class="abn'+(detailOp?" open":"")+'">';
+var annT=KS.reduce(function(a,k){a[k]=0;a["obj_"+k]=0;return a;},{});
+detailH+=MO.map(function(ml,mii){
+  var mT=KS.reduce(function(a,k){a[k]=0;a["obj_"+k]=0;return a;},{});
+  vs.forEach(function(u){var mc=gC(u.id,mii);KS.forEach(function(k){mT[k]+=mc[k]||0;mT["obj_"+k]+=mc["obj_"+k]||0;});});
+  KS.forEach(function(k){annT[k]+=mT[k];annT["obj_"+k]+=mT["obj_"+k];});
+  var pM=pc(mT.ca,mT.obj_ca);
+  return '<div style="margin-bottom:10px;"><p style="font-size:11px;font-weight:700;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:5px;">'+ml.toUpperCase()+' <span style="color:'+ph(pM)+';">'+pM+'%</span></p>'
+    +'<div class="g2">'+KS.map(function(k){var p2=pc(mT[k],mT["obj_"+k]),iN=(k==="tickets"||k==="iv");return '<div style="background:var(--bg3);border-radius:7px;padding:7px;"><p style="font-size:9px;color:var(--muted);font-family:\'DM Mono\',monospace;">'+KL[k]+'</p><p style="font-size:13px;font-weight:700;color:'+KC[k]+';">'+fmt(mT[k],iN)+'</p><p style="font-size:9px;color:var(--dim);">'+p2+'%</p></div>';}).join("")+'</div></div>';
+}).join("");
+detailH+='<div style="margin-top:9px;padding-top:9px;border-top:2px solid var(--border);"><p style="font-size:11px;font-weight:700;color:var(--accent);font-family:\'DM Mono\',monospace;margin-bottom:5px;">TOTAL ANNUEL</p><div class="g2">'+KS.map(function(k){var p2=pc(annT[k],annT["obj_"+k]),iN=(k==="tickets"||k==="iv");return '<div style="background:rgba(200,113,58,.08);border-radius:7px;padding:7px;border:1px solid rgba(200,113,58,.2);"><p style="font-size:9px;color:var(--muted);font-family:\'DM Mono\',monospace;">'+KL[k]+'</p><p style="font-size:13px;font-weight:700;color:'+KC[k]+';">'+fmt(annT[k],iN)+'</p><p style="font-size:9px;color:var(--dim);">'+p2+'%</p></div>';}).join("")+'</div></div>';
+detailH+='</div>';
   return bk
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">'
     +'<div><p style="color:var(--muted);font-size:11px;font-family:\'DM Mono\',monospace;margin-bottom:3px;">// CHIFFRES 2026'+(MB?" — "+usr.name:"")+'</p><h2 style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;">'+(MB?usr.name+' 👤':'Mes Performances')+'</h2></div>'
