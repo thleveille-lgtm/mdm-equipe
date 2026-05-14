@@ -935,15 +935,43 @@ var vBtn="";  var pend=myT.filter(function(t){return !t.done;}),done=myT.filter(
   }
   var pH=pend.length===0?'<p style="color:var(--dim);font-size:13px;text-align:center;padding:18px;">Aucune mission en cours.</p>':pend.map(rTI).join("");
   var dH=done.length===0?"":done.map(rTI).join("");
-  return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
+  var teamH="";
+if(isA()){
+  var allU=USERS.filter(function(u){return u.id!==CU.id;});
+  teamH='<p style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;margin:16px 0 9px;">👥 MISSIONS ÉQUIPE</p>'
+  +allU.map(function(u){
+    var uT=TD[u.id]||[];
+    if(!uT.length)return'';
+    return '<div style="margin-bottom:10px;">'
+      +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">'
+      +'<div class="av" style="width:22px;height:22px;background:'+u.col+';font-size:7px;">'+u.av+'</div>'
+      +'<span style="font-size:13px;font-weight:600;">'+u.name+'</span>'
+      +'<span style="font-size:10px;color:var(--muted);">('+uT.filter(function(t){return !t.done;}).length+' en cours)</span>'
+      +'</div>'
+      +uT.map(function(t,ri){
+        var od=isOD(t.deadline);
+        return '<div class="ti" style="border-color:'+(od?"rgba(184,80,64,.4)":"var(--border)")+(t.done?";opacity:0.65":"")+'">'
+          +'<div class="tcb'+(t.done?" done":"")+'" data-action="tgTD(\''+u.id+'\','+ri+');">'+(t.done?"✓":"")+'</div>'
+          +'<div style="flex:1;min-width:0;">'
+          +'<p style="font-weight:600;font-size:13px;'+(t.done?"text-decoration:line-through;color:var(--muted);":"")+'">'+t.title+'</p>'
+          +(t.deadline?'<span style="font-size:10px;color:'+(od?"var(--red)":"var(--muted)")+';font-family:\'DM Mono\',monospace;">⏰ '+t.deadline+'</span>':"")
+          +'</div>'
+          +'<a href="#" data-action="var tid=TD[\''+u.id+'\']['+ri+'].id;TD[\''+u.id+'\'].splice('+ri+',1);lsS(\'td\',TD);sbQ(\'todos\',\'DELETE\',null,\'?id=eq.\'+tid);rPg();" style="font-size:10px;color:var(--red);padding:2px 6px;background:rgba(184,80,64,.15);border-radius:5px;text-decoration:none;">✕</a>'
+          +'</div>';
+      }).join("")
+      +'</div>';
+  }).join("");
+}
+return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
     +'<div><p style="color:var(--muted);font-size:11px;font-family:\'DM Mono\',monospace;margin-bottom:3px;">// MISSIONS</p><h2 style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;">Missions</h2></div>'
     +'<a href="#" class="rfbtn" data-action="refreshAll();">🔄</a>'
     +'</div>'
-    +aBtn+sBtn+vBtn
+    +aBtn+sBtn
     +'<p style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;margin-bottom:9px;">EN COURS ('+pend.length+')</p>'+pH
-    +(dH?'<p style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;margin:12px 0 9px;">TERMINÉES ('+done.length+')</p>'+dH:"");
+    +(dH?'<p style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;margin:12px 0 9px;">TERMINÉES ('+done.length+')</p>'+dH:"")
+ +teamH;
 }
-function tgTD(uid,idx){if(!TD[uid])return;TD[uid][idx].done=!TD[uid][idx].done;lsS("td",TD);sbSaveTodo(uid,TD[uid][idx]);rPg();}
+function tgTD(uid,idx){if(!TD[uid])return;
 function valTD(uid,idx){if(!TD[uid])return;TD[uid][idx].validated=true;lsS("td",TD);sbSaveTodo(uid,TD[uid][idx]);addN(uid,"✅ Mission \""+TD[uid][idx].title+"\" validée par "+CU.name,"validated");rPg();toast("Validée ✅");}
 function addTD(){var who=document.getElementById("tw").value,t=document.getElementById("tt").value.trim(),d=document.getElementById("td2").value.trim(),l=document.getElementById("tl").value.trim();if(!t)return;if(!TD[who])TD[who]=[];var nt={id:"t"+Date.now(),title:t,desc:d,deadline:l||null,from:CU.name,done:false,validated:false,createdAt:new Date().toLocaleDateString("fr-FR")};TD[who].unshift(nt);sv();sbSaveTodo(who,nt);var tgt=USERS.find(function(u){return u.id===who;});if(tgt&&tgt.id!==CU.id)addN(tgt.id,"✅ Nouvelle mission : "+t+(l?" — deadline : "+l:""),"todo");rPg();toast("Mission assignée ✅");}
 function showST(){sM('<button class="mc" data-action="cM();">✕</button><h3>+ Ma propre mission</h3><div style="display:flex;flex-direction:column;gap:9px;"><input class="inp" id="st-t" placeholder="Mission *"/><textarea class="inp" id="st-d" placeholder="Description" rows="2" style="resize:none;"></textarea><input class="inp" id="st-l" placeholder="Deadline (ex: 16/05/2026)"/></div><br><a href="#" data-action="svST();" class="btn ba">Créer</a>',true);}
