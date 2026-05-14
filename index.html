@@ -384,6 +384,21 @@ function pH(){
   // ── BLOCS MANAGER (admin/adjoint uniquement) ──
   var managerH="";
   if(isA()){
+    var mi2=new Date().getMonth();
+var eqCA=0,eqOCA=0,eqAnnCA=0,eqAnnOCA=0;
+USERS.forEach(function(u){
+  if(u.role==="user"){
+    var mc=gC(u.id,mi2);
+    eqCA+=mc.ca||0;eqOCA+=mc.obj_ca||0;
+    for(var i=0;i<=mi2;i++){var mc2=gC(u.id,i);eqAnnCA+=mc2.ca||0;eqAnnOCA+=mc2.obj_ca||0;}
+  }
+});
+var pEqM=pc(eqCA,eqOCA),pEqA=pc(eqAnnCA,eqAnnOCA);
+var eqKpiH='<div class="g2" style="margin-bottom:12px;">'
+  +'<div class="kc" style="border-color:rgba(107,158,94,.3);"><p class="kl">ÉQUIPE '+MO[mi2]+'</p><p class="kv" style="color:var(--green);">'+fmt(eqCA)+'</p><p class="ko">obj. '+fmt(eqOCA)+'</p><div class="pbar"><div class="pfill" style="width:'+Math.min(pEqM,100)+'%;background:var(--green);"></div></div><p class="kp" style="color:'+ph(pEqM)+'">'+pEqM+'%</p></div>'
+  +'<div class="kc" style="border-color:rgba(78,126,168,.3);"><p class="kl">ÉQUIPE ANNUEL</p><p class="kv" style="color:var(--blue);">'+fmt(eqAnnCA)+'</p><p class="ko">obj. '+fmt(eqAnnOCA)+'</p><div class="pbar"><div class="pfill" style="width:'+Math.min(pEqA,100)+'%;background:var(--blue);"></div></div><p class="kp" style="color:'+ph(pEqA)+'">'+pEqA+'%</p></div>'
+  +'</div>';
+managerH+=eqKpiH;
     // Récap missions équipe
     var allPendingTasks=[];
     USERS.forEach(function(usr){
