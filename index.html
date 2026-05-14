@@ -388,9 +388,10 @@ function pH(){
 var eqCA=0,eqOCA=0,eqAnnCA=0,eqAnnOCA=0;
 USERS.forEach(function(u){
   if(u.role==="user"){
-    var mc=gC(u.id,mi2);
-    eqCA+=mc.ca||0;eqOCA+=mc.obj_ca||0;
-    for(var i=0;i<=mi2;i++){var mc2=gC(u.id,i);eqAnnCA+=mc2.ca||0;eqAnnOCA+=mc2.obj_ca||0;}
+    for(var i=0;i<=mi2;i++){
+      var mc2=gC(u.id,i);
+      if(i===mi2){eqCA+=mc2.ca||0;eqOCA+=mc2.obj_ca||0;}
+      eqAnnCA+=mc2.ca||0;eqAnnOCA+=mc2.obj_ca||0;}
   }
 });
 var pEqM=pc(eqCA,eqOCA),pEqA=pc(eqAnnCA,eqAnnOCA);
