@@ -496,8 +496,7 @@ managerH+=eqKpiH;
     }
     devisEquipeH+='</div>';
 
-    managerH=missEquipeH+devisEquipeH;
-  }
+managerH=eqKpiH+missEquipeH+devisEquipeH;  }
 
   var mainL=kpi+missH+lmH+(isA()?"":dvH)+lgH+managerH;
   var layout=bdSide?'<div style="display:grid;grid-template-columns:1fr 135px;gap:11px;margin-bottom:12px;"><div>'+mainL+'</div>'+bdSide+'</div>':mainL;
