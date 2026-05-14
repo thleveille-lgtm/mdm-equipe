@@ -354,10 +354,17 @@ function pH(){
   var bd=tBd(),up=uBd(),lm=PM.length>0?PM[PM.length-1]:null;
   var bdBan=bd.length>0?'<div style="background:linear-gradient(135deg,rgba(200,113,58,.2),rgba(201,153,58,.1));border:1px solid rgba(200,113,58,.4);border-radius:var(--r);padding:13px;margin-bottom:12px;animation:glow 3s infinite;text-align:center;"><div style="font-size:26px;margin-bottom:5px;">🎂</div><h3 style="font-family:\'Syne\',sans-serif;font-size:14px;font-weight:700;margin-bottom:3px;">Joyeux anniversaire '+bd.map(function(b){return b.name;}).join(" & ")+' !</h3><p style="color:var(--muted);font-size:12px;">Toute l\'équipe vous souhaite une excellente journée 🎉</p></div>':"";
   var annCA=0,annOCA=0;for(var i=0;i<=mi;i++){var mc=gC(u.id,i);annCA+=mc.ca||0;annOCA+=mc.obj_ca||0;}
-  var sCA=pc(m.ca,m.obj_ca),pAnn=pc(annCA,annOCA);
-  var kpi='<div class="g2" style="margin-bottom:14px;">'
-    +'<div class="kc" style="border-color:rgba(200,113,58,.3);"><p class="kl">CA '+MO[mi]+'</p><p class="kv" style="color:'+ph(sCA)+'">'+fmt(m.ca)+'</p><p class="ko">obj. '+fmt(m.obj_ca)+'</p><div class="pbar" style="margin-top:4px;"><div class="pfill" style="width:'+Math.min(sCA,100)+'%;background:'+ph(sCA)+';"></div></div><p class="kp" style="color:'+ph(sCA)+'">'+sCA+'%</p></div>'
-    +'<div class="kc" style="border-color:rgba(78,126,168,.3);"><p class="kl">CA ANNUEL</p><p class="kv" style="color:'+ph(pAnn)+'">'+fmt(annCA)+'</p><p class="ko">obj. '+fmt(annOCA)+'</p><div class="pbar" style="margin-top:4px;"><div class="pfill" style="width:'+Math.min(pAnn,100)+'%;background:'+ph(pAnn)+';"></div></div><p class="kp" style="color:'+ph(pAnn)+'">'+pAnn+'%</p></div>'
+  // Cumul équipe
+var eqMCA=0,eqMOCA=0,eqACA=0,eqAOCA=0;
+USERS.forEach(function(uu){
+  if(uu.role==="user"){
+    for(var ii=0;ii<=mi;ii++){var mmc=gC(uu.id,ii);if(ii===mi){eqMCA+=mmc.ca||0;eqMOCA+=mmc.obj_ca||0;}eqACA+=mmc.ca||0;eqAOCA+=mmc.obj_ca||0;}
+  }
+});
+var sCA=pc(eqMCA,eqMOCA),pAnn=pc(eqACA,eqAOCA);
+var kpi='<div class="g2" style="margin-bottom:14px;">'
+    +'<div class="kc" style="border-color:rgba(200,113,58,.3);"><p class="kl">ÉQUIPE '+MO[mi]+'</p><p class="kv" style="color:'+ph(sCA)+'">'+fmt(eqMCA)+'</p><p class="ko">obj. '+fmt(eqMOCA)+'</p><div class="pbar" style="margin-top:4px;"><div class="pfill" style="width:'+Math.min(sCA,100)+'%;background:'+ph(sCA)+';"></div></div><p class="kp" style="color:'+ph(sCA)+'">'+sCA+'%</p></div>'
+    +'<div class="kc" style="border-color:rgba(78,126,168,.3);"><p class="kl">ÉQUIPE ANNUEL</p><p class="kv" style="color:'+ph(pAnn)+'">'+fmt(eqACA)+'</p><p class="ko">obj. '+fmt(eqAOCA)+'</p><div class="pbar" style="margin-top:4px;"><div class="pfill" style="width:'+Math.min(pAnn,100)+'%;background:'+ph(pAnn)+';"></div></div><p class="kp" style="color:'+ph(pAnn)+'">'+pAnn+'%</p></div>'
     +'</div>';
   var myT=(TD[u.id]||[]).filter(function(t){return !t.done;});
   var missH='<div class="card" style="padding:16px;margin-bottom:14px;'+(myT.length>0?"cursor:pointer;border-color:rgba(200,113,58,.3)":"")+'" '+(myT.length>0?'data-action="PG=\'todos\';rNav();rPg();"':"")+' >'
