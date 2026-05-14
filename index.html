@@ -1258,7 +1258,7 @@ function resetAll(){
 function loadAllFromSB(){
   return Promise.all([
     sbQ("messages","GET",null,"?order=created_at.asc&limit=200"),
-    sbQ("chiffres","GET",null,"?limit=1000"),
+    sbQ("chiffres","GET",null,"?order=created_at.asc&limit=1000"),
     sbQ("objectifs","GET",null,"?limit=1000"),
     sbQ("actualites","GET",null,"?order=created_at.desc&limit=100"),
     sbQ("formations","GET",null,"?limit=50"),
