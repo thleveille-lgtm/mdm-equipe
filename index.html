@@ -1516,26 +1516,30 @@ function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,dest:n.to,sender:n.f
 <style>
 
 /* ═══════════════════════════════
-   FOND TRANSPARENT — laisser l'overlay visible
+   FOND — rendre toute la page transparente
+   pour que l'overlay soit visible partout
 ═══════════════════════════════ */
-html, body { background: var(--bg); }
+html { background: var(--bg) !important; }
+body { background: transparent !important; }
 #app { background: transparent !important; }
+/* La zone sticky header+nav doit aussi être transparente
+   pour que l'overlay passe en dessous */
+header { background: rgba(15,13,10,.82) !important; backdrop-filter: blur(12px); }
+nav    { background: rgba(26,22,16,.78) !important; backdrop-filter: blur(8px); }
 
 /* ═══════════════════════════════
    OVERLAY PHOTO FLOUE
-   - z-index:2 passe au-dessus du fond blanc de #app
-   - brightness(.52) = photo visible, assombrie
-   - blur(20px) = flou doux, on reconnaît une photo
-   - opacity animée en JS après chargement
+   z-index:0 → html a le vrai bg coloré
+   L'overlay est ENTRE html et #app
 ═══════════════════════════════ */
 #mdm-ov {
   position: fixed !important;
   top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: none !important;
-  z-index: 2 !important;
+  z-index: 0 !important;
   background-size: cover !important;
   background-position: center !important;
-  filter: blur(20px) saturate(.7) brightness(.52) !important;
+  filter: blur(20px) saturate(.7) brightness(.48) !important;
   transform: scale(1.06) !important;
   opacity: 0;
   transition: opacity .8s ease;
@@ -1554,7 +1558,7 @@ nav    { position: relative !important; z-index: 250 !important; }
   opacity: .1; pointer-events: none; z-index: 0;
 }
 .lbox { z-index: 1 !important; }
-header { background: linear-gradient(90deg, var(--bg) 55%, rgba(200,113,58,.06) 100%) !important; }
+
 
 /* ═══════════════════════════════
    BOUTON ADMIN FOND
