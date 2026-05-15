@@ -1508,11 +1508,11 @@ function sbSaveTodo(uid,t){sbQ("todos","POST",{id:t.id,uid:uid,title:t.title,det
 function sbSaveDevis(uid,d){if(!d)return;sbQ("devis","POST",{id:d.id,uid:uid,nom:d.nom,prenom:d.prenom,tel:d.tel,num_cmd:d.numCmd,note:d.note,rappel_date:d.rappelDate,r_sent:d.rSent,comments:d.comments||[]});}
 function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,dest:n.to,sender:n.from,txt:n.text,type:n.type,read:n.read,date:n.date});}
 </script>
- <!--
-  MDM ÉQUIPE — PATCH VISUEL v3
-  ► Colle ce bloc juste AVANT </body>
-  ► Remplace l'ancien patch v1 ou v2
-  ► Ce patch N'EFFACE PAS les images existantes
+<!--
+  MDM ÉQUIPE — PATCH VISUEL v4
+  ► Supprime l'ancien patch (tout le bloc entre les balises MDM ÉQUIPE PATCH VISUEL v3 et </body>)
+  ► Colle CE bloc juste AVANT </body>
+  ► Fond flou sur TOUTES les pages + modifiable par l'admin
 -->
 
 <style>
@@ -1525,22 +1525,34 @@ function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,dest:n.to,sender:n.f
 .light #login::after{opacity:.04;}
 .lbox{z-index:1;}
 
-/* ── Header chaud ── */
+/* ── Header ── */
 header{background:linear-gradient(90deg,var(--bg) 55%,rgba(200,113,58,.06) 100%) !important;}
 
-/* ── Overlay fond par page ── */
+/* ── Overlay fond flou (toutes pages) ── */
 #mdm-ov{
   position:fixed;top:57px;left:0;right:0;bottom:0;
   pointer-events:none;z-index:0;
   background-size:cover;background-position:center;
-  filter:blur(24px) saturate(.45) brightness(.3);
-  transform:scale(1.12);
-  opacity:0;transition:opacity .7s ease,background-image .5s ease;
+  filter:blur(28px) saturate(.4) brightness(.28);
+  transform:scale(1.14);
+  opacity:0;transition:opacity .7s ease,background-image .6s ease;
 }
+/* Bouton éditeur fond (admin seulement) */
+#mdm-bg-edit{
+  position:fixed;bottom:18px;right:15px;
+  background:rgba(200,113,58,.82);color:#fff;
+  border:none;border-radius:50%;width:38px;height:38px;
+  font-size:16px;cursor:pointer;z-index:300;
+  box-shadow:0 4px 14px rgba(0,0,0,.4);
+  display:none;align-items:center;justify-content:center;
+  transition:transform .2s,opacity .3s;
+}
+#mdm-bg-edit:hover{transform:scale(1.1);}
+
 #main>*{position:relative;z-index:1;}
 #main{position:relative;}
 
-/* ── Bande images ── */
+/* ── Bandes images ── */
 .mdm-band{
   display:flex;gap:3px;border-radius:12px;overflow:hidden;
   margin-bottom:14px;position:relative;
@@ -1548,11 +1560,8 @@ header{background:linear-gradient(90deg,var(--bg) 55%,rgba(200,113,58,.06) 100%)
 }
 .mdm-band img{
   flex:1;min-width:0;height:88px;object-fit:cover;display:block;
-  filter:brightness(.68) saturate(.78);transition:filter .3s,transform .3s;
+  filter:brightness(.68) saturate(.78);transition:filter .3s;
 }
-.mdm-band img:hover{filter:brightness(.88) saturate(1.05);}
-.mdm-band img.can-edit{cursor:pointer;}
-.mdm-band img.can-edit:hover{outline:2px solid rgba(200,113,58,.7);outline-offset:-2px;}
 .mdm-band-lbl{
   position:absolute;bottom:7px;left:9px;
   font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.7px;
@@ -1565,13 +1574,17 @@ header{background:linear-gradient(90deg,var(--bg) 55%,rgba(200,113,58,.06) 100%)
   color:rgba(255,255,255,.5);background:rgba(200,113,58,.38);
   padding:2px 7px;border-radius:4px;pointer-events:none;
 }
+.mdm-band img.can-edit{cursor:pointer;}
+.mdm-band img.can-edit:hover{
+  filter:brightness(.9) saturate(1.05);
+  outline:2px solid rgba(200,113,58,.7);outline-offset:-2px;
+}
 
-/* ── Miniature actualité ── */
+/* ── Miniatures actualités ── */
 .mdm-actu-img{
   width:64px;height:47px;object-fit:cover;border-radius:7px;
   float:right;margin:0 0 6px 9px;
-  filter:brightness(.78) saturate(.82);
-  transition:filter .3s;
+  filter:brightness(.78) saturate(.82);transition:filter .3s;
 }
 .mdm-actu-img.can-edit{cursor:pointer;}
 .mdm-actu-img.can-edit:hover{filter:brightness(.95);outline:2px solid var(--accent);}
@@ -1593,15 +1606,15 @@ header{background:linear-gradient(90deg,var(--bg) 55%,rgba(200,113,58,.06) 100%)
 #mdm-modal.on{display:flex;animation:fadeIn .2s ease;}
 .mdm-mbox{
   background:var(--bg2);border:1px solid var(--border2);
-  border-radius:18px;padding:22px;width:92%;max-width:400px;
+  border-radius:18px;padding:22px;width:92%;max-width:420px;
   max-height:88vh;overflow-y:auto;animation:popIn .25s ease;
 }
 .mdm-mbox h4{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:12px;}
-#mdm-prev{width:100%;height:120px;object-fit:cover;border-radius:9px;margin-bottom:11px;display:block;filter:brightness(.85);}
+#mdm-prev{width:100%;height:110px;object-fit:cover;border-radius:9px;margin-bottom:11px;display:block;filter:brightness(.85);}
 .mdm-presets{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px;}
 .mdm-ps{
   width:46px;height:46px;object-fit:cover;border-radius:6px;
-  cursor:pointer;border:2px solid transparent;filter:brightness(.75);transition:all .2s;
+  cursor:pointer;border:2px solid transparent;filter:brightness(.72);transition:all .2s;
 }
 .mdm-ps:hover,.mdm-ps.on{filter:brightness(1);border-color:var(--accent);transform:scale(1.08);}
 .mdm-inp{
@@ -1621,22 +1634,26 @@ header{background:linear-gradient(90deg,var(--bg) 55%,rgba(200,113,58,.06) 100%)
 .mdm-btns{display:flex;gap:7px;}
 .mdm-ok{flex:1;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
 .mdm-no{flex:1;padding:10px;background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;}
+.mdm-section-lbl{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:5px;display:block;}
 </style>
 
-<!-- Overlay fond -->
+<!-- Overlay fond flou -->
 <div id="mdm-ov"></div>
+
+<!-- Bouton admin éditeur fond -->
+<button id="mdm-bg-edit" title="Modifier l'image de fond" onclick="mdmOpenBg()">🖼️</button>
 
 <!-- Modal éditeur -->
 <div id="mdm-modal">
   <div class="mdm-mbox">
-    <h4>🖼️ Modifier l'image</h4>
+    <h4 id="mdm-title">🖼️ Modifier l'image</h4>
     <img id="mdm-prev" src="" alt=""/>
-    <p style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:6px;">PRÉRÉGLAGES</p>
+    <span class="mdm-section-lbl">PRÉRÉGLAGES</span>
     <div class="mdm-presets" id="mdm-ps-box"></div>
-    <p style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:5px;">URL</p>
-    <input class="mdm-inp" id="mdm-url" placeholder="https://..." oninput="mdmUrl(this.value)"/>
+    <span class="mdm-section-lbl">URL PERSONNALISÉE</span>
+    <input class="mdm-inp" id="mdm-url" placeholder="https://images.unsplash.com/…" oninput="mdmUrl(this.value)"/>
     <label class="mdm-uplbl">
-      📎 Photo locale
+      📎 Photo locale (convertie en base64)
       <input type="file" accept="image/*" style="display:none" onchange="mdmFile(this)"/>
     </label>
     <div class="mdm-btns">
@@ -1650,56 +1667,214 @@ header{background:linear-gradient(90deg,var(--bg) 55%,rgba(200,113,58,.06) 100%)
 (function(){
 'use strict';
 
-/* ── Images ── */
+/* ────────────────────────────────
+   IMAGES PAR DÉFAUT
+──────────────────────────────── */
 var IMG={
-  o:["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=75",
-     "https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&q=75",
-     "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=75"],
-  c:["https://images.unsplash.com/photo-1567016432779-094069958ea5?w=800&q=75",
-     "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800&q=75"],
-  d:["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=75",
-     "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=75",
-     "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=75"]
+  outdoor:[
+    "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=75",
+    "https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&q=75",
+    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=75"
+  ],
+  canape:[
+    "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=800&q=75",
+    "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800&q=75"
+  ],
+  deco:[
+    "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=75",
+    "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=75",
+    "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=75"
+  ]
 };
-var ALL=IMG.o.concat(IMG.c).concat(IMG.d);
+var ALL=IMG.outdoor.concat(IMG.canape).concat(IMG.deco);
 
-/* config page → [bg, strip[], label] */
+/* ────────────────────────────────
+   CONFIG PAR PAGE
+   bg  = image fond flou par défaut
+   op  = opacité (0-1)
+   s   = images bande (null = pas de bande)
+   lbl = label bande
+──────────────────────────────── */
 var CFG={
-  home      :{bg:IMG.d[1],s:[IMG.d[0],IMG.o[0],IMG.c[0]],lbl:"COLLECTION 2026",op:.12},
-  chiffres  :{bg:IMG.o[1],s:[IMG.o[1],IMG.d[0],IMG.c[0]],lbl:"PERFORMANCES ÉQUIPE",op:.08},
-  formations:{bg:IMG.c[0],s:[IMG.c[0],IMG.o[0],IMG.d[1]],lbl:"FORMATIONS 2026",op:.09},
-  planning  :{bg:IMG.d[1],s:[IMG.d[1],IMG.o[1]],lbl:"PLANNING · ÉTÉ 2026",op:.08},
-  todos     :{bg:IMG.d[0],s:null,op:.06},
-  devis     :{bg:IMG.o[2],s:null,op:.06},
-  litiges   :{bg:IMG.d[2],s:null,op:.05},
-  discussion:{bg:IMG.c[1],s:null,op:.06},
-  admin     :{bg:IMG.d[0],s:[IMG.o[0],IMG.d[0],IMG.c[0]],lbl:"ESPACE MANAGER",op:.07}
+  home      :{bg:IMG.deco[1],   op:.12,s:[IMG.deco[0],IMG.outdoor[0],IMG.canape[0]],lbl:"COLLECTION 2026"},
+  chiffres  :{bg:IMG.outdoor[1],op:.08,s:[IMG.outdoor[1],IMG.deco[0],IMG.canape[0]],lbl:"PERFORMANCES ÉQUIPE"},
+  formations:{bg:IMG.canape[0], op:.09,s:[IMG.canape[0],IMG.outdoor[0],IMG.deco[1]],lbl:"FORMATIONS 2026"},
+  planning  :{bg:IMG.deco[1],   op:.08,s:[IMG.deco[1],IMG.outdoor[1]],lbl:"PLANNING · ÉTÉ 2026"},
+  todos     :{bg:IMG.deco[0],   op:.07,s:null},
+  devis     :{bg:IMG.outdoor[2],op:.07,s:null},
+  litiges   :{bg:IMG.deco[2],   op:.06,s:null},
+  discussion:{bg:IMG.canape[1], op:.07,s:null},
+  admin     :{bg:IMG.deco[0],   op:.07,s:[IMG.outdoor[0],IMG.deco[0],IMG.canape[0]],lbl:"ESPACE MANAGER"}
 };
 
-/* tag → miniature */
+/* tag actualité → miniature */
 var TIMG={
-  "OUTDOOR":IMG.o[0],"CANAPÉ":IMG.c[0],"FORMATION":IMG.d[2],
-  "RÉSULTAT":IMG.o[1],"ANNONCE":IMG.d[0],"RAPPEL":IMG.d[1],
-  "OBJECTIF":IMG.o[1],"RH":IMG.d[1]
+  "OUTDOOR":IMG.outdoor[0],"CANAPÉ":IMG.canape[0],"FORMATION":IMG.deco[2],
+  "RÉSULTAT":IMG.outdoor[1],"ANNONCE":IMG.deco[0],"RAPPEL":IMG.deco[1],
+  "OBJECTIF":IMG.outdoor[1],"RH":IMG.deco[1]
 };
 
-/* Storage */
-var CU=(function(){try{return JSON.parse(localStorage.getItem('mdm_ci')||'{}');}catch(e){return{};}})();
-function sc(){try{localStorage.setItem('mdm_ci',JSON.stringify(CU));}catch(e){}}
+/* ────────────────────────────────
+   STORAGE (clés préfixées mdm_ci)
+──────────────────────────────── */
+var CI={};
+try{CI=JSON.parse(localStorage.getItem('mdm_ci')||'{}');}catch(e){}
+function sc(){try{localStorage.setItem('mdm_ci',JSON.stringify(CI));}catch(e){}}
 
-/* ── Modal ── */
+function getImg(key,def){return CI[key]||def;}
+function setImg(key,src){CI[key]=src;sc();}
+
+/* ────────────────────────────────
+   FOND FLOU GLOBAL
+──────────────────────────────── */
+function setBg(pg){
+  var ov=document.getElementById('mdm-ov');if(!ov)return;
+  var c=CFG[pg];
+  if(!c){ov.style.opacity='0';return;}
+  var src=getImg('bg_'+pg,c.bg);
+  ov.style.backgroundImage='url('+src+')';
+  // transition douce
+  requestAnimationFrame(function(){
+    ov.style.opacity=String(c.op||.07);
+  });
+}
+
+/* ────────────────────────────────
+   BANDE IMAGES (pages avec bande)
+──────────────────────────────── */
+function mkBand(pg){
+  var id='mdm-b-'+pg;
+  if(document.getElementById(id))return;
+  var c=CFG[pg];if(!c||!c.s||!c.s.length)return;
+  var main=document.getElementById('main');if(!main)return;
+  var h2=main.querySelector('h2');if(!h2)return;
+
+  var admin=typeof isA==='function'&&isA();
+  var band=document.createElement('div');
+  band.id=id;band.className='mdm-band';
+
+  var n=c.s.length;
+  var ww=n===1?['100%']:n===2?['56%','44%']:['40%','33%','27%'];
+
+  c.s.forEach(function(def,i){
+    var key='s_'+pg+'_'+i;
+    var src=getImg(key,def);
+    var wrap=document.createElement('div');
+    wrap.style.cssText='flex:0 0 '+ww[i]+';overflow:hidden;';
+    var img=document.createElement('img');
+    img.src=src;img.loading='lazy';img.alt='';
+    img.style.cssText='width:100%;height:88px;object-fit:cover;display:block;filter:brightness(.68) saturate(.78);transition:filter .3s;';
+    if(admin){
+      img.classList.add('can-edit');
+      img.title='Cliquer pour modifier';
+      (function(k,el){
+        img.addEventListener('click',function(e){
+          e.stopPropagation();
+          mdmOpen(k,el.src,el,'Image de la bande');
+        });
+      })(key,img);
+    }
+    wrap.appendChild(img);
+    band.appendChild(wrap);
+  });
+
+  if(c.lbl){
+    var lbl=document.createElement('span');
+    lbl.className='mdm-band-lbl';lbl.textContent=c.lbl;
+    band.appendChild(lbl);
+  }
+  if(admin){
+    var hint=document.createElement('span');
+    hint.className='mdm-band-edit';hint.textContent='✏️ cliquer pour modifier';
+    band.appendChild(hint);
+  }
+
+  main.insertBefore(band,main.firstChild);
+}
+
+/* ────────────────────────────────
+   MINIATURES ACTUALITÉS
+──────────────────────────────── */
+function enrichActu(){
+  var admin=typeof isA==='function'&&isA();
+  document.querySelectorAll('#main .card').forEach(function(card){
+    if(card.querySelector('.mdm-actu-img'))return;
+    var te=card.querySelector('.tag');if(!te)return;
+    var txt=te.textContent.toUpperCase();
+    var src=null;
+    for(var k in TIMG){if(txt.indexOf(k)>=0){src=TIMG[k];break;}}
+    if(!src)return;
+    var key='ti_'+txt.replace(/\W/g,'_').slice(0,30);
+    src=getImg(key,src);
+    var img=document.createElement('img');
+    img.src=src;img.className='mdm-actu-img';img.loading='lazy';img.alt='';
+    if(admin){
+      img.classList.add('can-edit');img.title='Modifier';
+      (function(k,el){
+        img.addEventListener('click',function(e){
+          e.stopPropagation();
+          mdmOpen(k,el.src,el,'Miniature actualité');
+        });
+      })(key,img);
+    }
+    card.insertBefore(img,card.firstChild);
+  });
+}
+
+/* ────────────────────────────────
+   BADGE NAV
+──────────────────────────────── */
+function enrichNav(){
+  var nav=document.getElementById('nav');
+  if(!nav||nav.querySelector('#mdm-nc'))return;
+  var b=document.createElement('span');
+  b.id='mdm-nc';b.textContent='OUTDOOR 2026 ↗';
+  b.onclick=function(){
+    if(typeof PG!=='undefined'){
+      PG='formations';
+      if(typeof rNav==='function')rNav();
+      if(typeof rPg==='function')rPg();
+    }
+  };
+  nav.appendChild(b);
+}
+
+/* ────────────────────────────────
+   BOUTON ADMIN FOND
+──────────────────────────────── */
+function showBgBtn(pg){
+  var btn=document.getElementById('mdm-bg-edit');
+  if(!btn)return;
+  var admin=typeof isA==='function'&&isA();
+  btn.style.display=admin?'flex':'none';
+  btn.setAttribute('data-pg',pg||'');
+}
+
+window.mdmOpenBg=function(){
+  var pg=document.getElementById('mdm-bg-edit').getAttribute('data-pg')||'home';
+  var c=CFG[pg];
+  var src=getImg('bg_'+pg,c?c.bg:IMG.deco[1]);
+  mdmOpen('bg_'+pg,src,null,'Fond de la page "'+pg+'"');
+};
+
+/* ────────────────────────────────
+   MODAL ÉDITEUR
+──────────────────────────────── */
 var _t=null;
 
-window.mdmOpen=function(key,src,el){
+window.mdmOpen=function(key,src,el,label){
   if(typeof isA==='function'&&!isA())return;
   _t={key:key,el:el};
+  document.getElementById('mdm-title').textContent='🖼️ '+(label||'Modifier l\'image');
   // presets
   var b=document.getElementById('mdm-ps-box');
   b.innerHTML=ALL.map(function(s){
-    return '<img class="mdm-ps'+(s===src?' on':'')+'" src="'+s+'" onclick="mdmPs(this,\''+s+'\')">';
+    return '<img class="mdm-ps'+(s===src?' on':'')+
+      '" src="'+s+'" onclick="mdmPs(this,\''+s+'\')" loading="lazy">';
   }).join('');
-  document.getElementById('mdm-prev').src=src;
-  document.getElementById('mdm-url').value='';
+  var prev=document.getElementById('mdm-prev');
+  prev.src=src||ALL[0];
+  document.getElementById('mdm-url').value=src&&src.startsWith('http')?src:'';
   document.getElementById('mdm-modal').classList.add('on');
 };
 
@@ -1728,17 +1903,23 @@ window.mdmFile=function(inp){
   r.onload=function(e){
     document.getElementById('mdm-prev').src=e.target.result;
     document.getElementById('mdm-url').value=e.target.result;
+    document.querySelectorAll('.mdm-ps').forEach(function(p){p.classList.remove('on');});
   };
   r.readAsDataURL(f);
 };
 
 window.mdmOk=function(){
   if(!_t)return;
-  var src=document.getElementById('mdm-prev').src;if(!src)return;
-  CU[_t.key]=src;sc();
+  var src=document.getElementById('mdm-prev').src;
+  if(!src)return;
+  setImg(_t.key,src);
+  // Met à jour l'élément cliqué si existant
   if(_t.el&&_t.el.tagName==='IMG')_t.el.src=src;
-  var pg=typeof PG!=='undefined'?PG:'';
-  setBg(pg);
+  // Rafraîchit le fond si c'est un bg_*
+  if(_t.key&&_t.key.startsWith('bg_')){
+    var pg=_t.key.replace('bg_','');
+    if(pg===(typeof PG!=='undefined'?PG:''))setBg(pg);
+  }
   mdmClose();
   if(typeof toast==='function')toast('Image mise à jour ✅');
 };
@@ -1747,120 +1928,32 @@ document.getElementById('mdm-modal').addEventListener('click',function(e){
   if(e.target===this)mdmClose();
 });
 
-/* ── Fond flou ── */
-function setBg(pg){
-  var ov=document.getElementById('mdm-ov');if(!ov)return;
-  var c=CFG[pg];
-  if(!c){ov.style.opacity='0';return;}
-  ov.style.backgroundImage='url('+(CU['bg_'+pg]||c.bg)+')';
-  ov.style.opacity=String(c.op||.07);
-}
-
-/* ── Bande ── */
-function mkBand(pg){
-  var id='mdm-b-'+pg;
-  if(document.getElementById(id))return;
-  var c=CFG[pg];if(!c||!c.s)return;
-  var main=document.getElementById('main');
-  if(!main)return;
-  var h2=main.querySelector('h2');if(!h2)return;
-
-  var admin=typeof isA==='function'&&isA();
-  var band=document.createElement('div');
-  band.id=id;band.className='mdm-band';
-
-  var ww=c.s.length===1?['100%']:c.s.length===2?['56%','44%']:['40%','33%','27%'];
-  c.s.forEach(function(def,i){
-    var key='s_'+pg+'_'+i;
-    var src=CU[key]||def;
-    var w=document.createElement('div');
-    w.style.cssText='flex:0 0 '+ww[i]+';overflow:hidden;';
-    var img=document.createElement('img');
-    img.src=src;img.loading='lazy';img.alt='';
-    img.style.cssText='width:100%;height:88px;object-fit:cover;display:block;filter:brightness(.68) saturate(.78);transition:filter .3s;';
-    if(admin){
-      img.classList.add('can-edit');
-      img.title='Cliquer pour modifier';
-      (function(k,el){
-        img.addEventListener('click',function(e){e.stopPropagation();mdmOpen(k,el.src,el);});
-        img.addEventListener('mouseover',function(){img.style.filter='brightness(.9) saturate(1.05)';});
-        img.addEventListener('mouseout',function(){img.style.filter='brightness(.68) saturate(.78)';});
-      })(key,img);
-    }
-    w.appendChild(img);band.appendChild(w);
-  });
-
-  if(c.lbl){
-    var lbl=document.createElement('span');
-    lbl.className='mdm-band-lbl';lbl.textContent=c.lbl;
-    band.appendChild(lbl);
-  }
-  if(admin){
-    var hint=document.createElement('span');
-    hint.className='mdm-band-edit';hint.textContent='✏️ cliquer pour modifier';
-    band.appendChild(hint);
-  }
-
-  main.insertBefore(band,main.firstChild);
-}
-
-/* ── Miniatures actualités ── */
-function enrichActu(){
-  var admin=typeof isA==='function'&&isA();
-  document.querySelectorAll('#main .card').forEach(function(card){
-    if(card.querySelector('.mdm-actu-img'))return;
-    var te=card.querySelector('.tag');if(!te)return;
-    var txt=te.textContent.toUpperCase();
-    var src=null;
-    for(var k in TIMG){if(txt.indexOf(k)>=0){src=TIMG[k];break;}}
-    if(!src)return;
-    var key='ti_'+txt.replace(/\W/g,'_').slice(0,30);
-    src=CU[key]||src;
-    var img=document.createElement('img');
-    img.src=src;img.className='mdm-actu-img';img.loading='lazy';img.alt='';
-    if(admin){
-      img.classList.add('can-edit');img.title='Modifier';
-      (function(k,el){
-        img.addEventListener('click',function(e){e.stopPropagation();mdmOpen(k,el.src,el);});
-      })(key,img);
-    }
-    card.insertBefore(img,card.firstChild);
-  });
-}
-
-/* ── Badge nav ── */
-function enrichNav(){
-  var nav=document.getElementById('nav');
-  if(!nav||nav.querySelector('#mdm-nc'))return;
-  var b=document.createElement('span');
-  b.id='mdm-nc';b.textContent='OUTDOOR 2026 ↗';
-  b.onclick=function(){
-    if(typeof PG!=='undefined'){PG='formations';
-      if(typeof rNav==='function')rNav();
-      if(typeof rPg==='function')rPg();}
-  };
-  nav.appendChild(b);
-}
-
-/* ── Hook ── */
-var _rPgOrig=null;
+/* ────────────────────────────────
+   HOOK SUR rPg
+──────────────────────────────── */
+var _orig=null;
 function hook(){
-  if(typeof rPg==='undefined'){setTimeout(hook,200);return;}
-  if(_rPgOrig)return;
-  _rPgOrig=rPg;
+  if(typeof rPg==='undefined'){setTimeout(hook,150);return;}
+  if(_orig)return;
+  _orig=rPg;
   rPg=function(){
-    _rPgOrig();
+    _orig.apply(this,arguments);
     setTimeout(function(){
       var pg=typeof PG!=='undefined'?PG:'home';
       enrichNav();
       setBg(pg);
+      showBgBtn(pg);
       mkBand(pg);
       enrichActu();
-    },75);
+    },80);
   };
 }
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',hook);}
-else{hook();}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',hook);
+}else{
+  hook();
+}
 
 })();
 </script>
