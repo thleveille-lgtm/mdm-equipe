@@ -1509,15 +1509,10 @@ function sbSaveDevis(uid,d){if(!d)return;sbQ("devis","POST",{id:d.id,uid:uid,nom
 function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,dest:n.to,sender:n.from,txt:n.text,type:n.type,read:n.read,date:n.date});}
 </script>
 <!--
-  MDM ÉQUIPE — PATCH VISUEL v5
-  CORRECTIONS :
-  ► Fond flou : image préchargée AVANT d'appliquer l'opacité (plus de blanc)
-  ► Bandes images : recréées à chaque rPg() car le DOM est effacé
-  ► Images persistées : relues depuis localStorage à chaque recréation
-  ► mkBand() : supprime le guard id (le DOM est neuf à chaque navigation)
-  USAGE : coller ce bloc entier juste avant </body>, en REMPLACEMENT du patch v4
+  MDM ÉQUIPE — PATCH VISUEL v6
+  REMPLACE complètement le patch v4 ou v5.
+  Coller juste après le dernier </script> du fichier.
 -->
-
 <style>
 /* ── Fond login ── */
 #login::after{
@@ -1528,64 +1523,74 @@ function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,dest:n.to,sender:n.f
 .light #login::after{opacity:.04;}
 .lbox{z-index:1;}
 
-/* ── Header ── */
+/* ── Header gradient subtil ── */
 header{background:linear-gradient(90deg,var(--bg) 55%,rgba(200,113,58,.06) 100%) !important;}
 
-/* ── Overlay fond flou ── */
+/* ── Overlay fond flou
+   FIX : position fixed inset:0 (couvre TOUT l'écran, header compris)
+   z-index:1 → derrière le contenu (z-index:2+) mais visible
+── */
 #mdm-ov{
-  position:fixed;top:57px;left:0;right:0;bottom:0;
-  pointer-events:none;z-index:0;
-  background-size:cover;background-position:center;
-  filter:blur(32px) saturate(.35) brightness(.22);
-  transform:scale(1.18);
+  position:fixed;
+  inset:0;                  /* top:0 et non top:57px */
+  pointer-events:none;
+  z-index:1;                /* sous header(z200) et nav(z100) */
+  background-size:cover;
+  background-position:center;
+  filter:blur(40px) saturate(.3) brightness(.18);
+  transform:scale(1.2);     /* évite les bords blancs du blur */
   opacity:0;
-  /* PAS de transition CSS sur opacity : on la gère en JS après chargement image */
 }
+
+/* Header et nav au-dessus de l'overlay */
+header{position:relative;z-index:200 !important;}
+nav{position:relative;z-index:100 !important;}
+
+/* Contenu main au-dessus de l'overlay */
+#main{position:relative;z-index:2;}
+#main>*{position:relative;z-index:2;}
 
 /* ── Bouton admin fond ── */
 #mdm-bg-edit{
   position:fixed;bottom:18px;right:15px;
-  background:rgba(200,113,58,.85);color:#fff;
+  background:rgba(200,113,58,.88);color:#fff;
   border:none;border-radius:50%;width:40px;height:40px;
-  font-size:17px;cursor:pointer;z-index:300;
-  box-shadow:0 4px 16px rgba(0,0,0,.45);
+  font-size:17px;cursor:pointer;z-index:9000;
+  box-shadow:0 4px 16px rgba(0,0,0,.5);
   display:none;align-items:center;justify-content:center;
   transition:transform .2s;
 }
-#mdm-bg-edit:hover{transform:scale(1.1);}
+#mdm-bg-edit:hover{transform:scale(1.12);}
 
-/* z-index du contenu main au-dessus de l'overlay */
-#main>*{position:relative;z-index:1;}
-#main{position:relative;}
-nav,header{position:relative;z-index:200;}
-
-/* ── Bandes images ── */
+/* ── Bandes images
+   FIX : pas de margin-top négatif, juste first-child de #main ── */
 .mdm-band{
   display:flex;gap:3px;border-radius:12px;overflow:hidden;
-  margin-bottom:14px;position:relative;z-index:1;
-  animation:fadeUp .35s ease both;
+  margin-bottom:14px;
+  position:relative;z-index:2;
+  animation:fadeUp .4s ease both;
 }
 .mdm-band img{
   flex:1;min-width:0;height:88px;object-fit:cover;display:block;
-  filter:brightness(.65) saturate(.75);transition:filter .3s;
+  filter:brightness(.62) saturate(.72);transition:filter .25s;
 }
 .mdm-band-lbl{
   position:absolute;bottom:7px;left:9px;
-  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.7px;
-  color:rgba(255,255,255,.65);background:rgba(0,0,0,.42);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.8px;
+  color:rgba(255,255,255,.65);background:rgba(0,0,0,.45);
   padding:2px 7px;border-radius:4px;pointer-events:none;
 }
 .mdm-band img.can-edit{cursor:pointer;}
 .mdm-band img.can-edit:hover{
-  filter:brightness(.88) saturate(1.05);
-  outline:2px solid rgba(200,113,58,.7);outline-offset:-2px;
+  filter:brightness(.88) saturate(1);
+  outline:2px solid rgba(200,113,58,.75);outline-offset:-2px;
 }
 
 /* ── Miniatures actualités ── */
 .mdm-actu-img{
-  width:64px;height:47px;object-fit:cover;border-radius:7px;
+  width:60px;height:44px;object-fit:cover;border-radius:7px;
   float:right;margin:0 0 6px 9px;
-  filter:brightness(.78) saturate(.82);
+  filter:brightness(.75) saturate(.8);
 }
 .mdm-actu-img.can-edit{cursor:pointer;}
 .mdm-actu-img.can-edit:hover{filter:brightness(.95);outline:2px solid var(--accent);}
@@ -1593,7 +1598,7 @@ nav,header{position:relative;z-index:200;}
 /* ── Modal éditeur ── */
 #mdm-modal{
   display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.72);z-index:20000;
+  background:rgba(0,0,0,.75);z-index:20000;
   align-items:center;justify-content:center;
 }
 #mdm-modal.on{display:flex;animation:fadeIn .2s ease;}
@@ -1627,13 +1632,13 @@ nav,header{position:relative;z-index:200;}
 .mdm-btns{display:flex;gap:7px;}
 .mdm-ok{flex:1;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
 .mdm-no{flex:1;padding:10px;background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;}
-.mdm-section-lbl{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:5px;display:block;}
+.mdm-lbl{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:5px;display:block;}
 </style>
 
 <!-- Overlay fond flou -->
 <div id="mdm-ov"></div>
 
-<!-- Bouton admin éditeur fond -->
+<!-- Bouton admin -->
 <button id="mdm-bg-edit" title="Modifier l'image de fond" onclick="mdmOpenBg()">🖼️</button>
 
 <!-- Modal éditeur -->
@@ -1641,12 +1646,12 @@ nav,header{position:relative;z-index:200;}
   <div class="mdm-mbox">
     <h4 id="mdm-title">🖼️ Modifier l'image</h4>
     <img id="mdm-prev" src="" alt=""/>
-    <span class="mdm-section-lbl">PRÉRÉGLAGES</span>
+    <span class="mdm-lbl">PRÉRÉGLAGES</span>
     <div class="mdm-presets" id="mdm-ps-box"></div>
-    <span class="mdm-section-lbl">URL PERSONNALISÉE</span>
+    <span class="mdm-lbl">URL PERSONNALISÉE</span>
     <input class="mdm-inp" id="mdm-url" placeholder="https://images.unsplash.com/…" oninput="mdmUrl(this.value)"/>
     <label class="mdm-uplbl">
-      📎 Photo locale (convertie en base64)
+      📎 Photo locale
       <input type="file" accept="image/*" style="display:none" onchange="mdmFile(this)"/>
     </label>
     <div class="mdm-btns">
@@ -1660,7 +1665,7 @@ nav,header{position:relative;z-index:200;}
 (function(){
 'use strict';
 
-/* ── IMAGES PAR DÉFAUT ── */
+/* ── IMAGES ── */
 var IMG={
   outdoor:[
     "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=900&q=80",
@@ -1679,19 +1684,18 @@ var IMG={
 };
 var ALL=IMG.outdoor.concat(IMG.canape).concat(IMG.deco);
 
-/* ── CONFIG PAR PAGE ── */
+/* ── CONFIG PAGE ── */
 var CFG={
-  home      :{bg:IMG.deco[1],   op:.13,s:[IMG.deco[0],IMG.outdoor[0],IMG.canape[0]],lbl:"COLLECTION 2026"},
-  chiffres  :{bg:IMG.outdoor[1],op:.10,s:[IMG.outdoor[1],IMG.deco[0],IMG.canape[0]],lbl:"PERFORMANCES ÉQUIPE"},
-  formations:{bg:IMG.canape[0], op:.11,s:[IMG.canape[0],IMG.outdoor[0],IMG.deco[1]],lbl:"FORMATIONS 2026"},
-  planning  :{bg:IMG.deco[1],   op:.10,s:[IMG.deco[1],IMG.outdoor[1]],lbl:"PLANNING · ÉTÉ 2026"},
-  todos     :{bg:IMG.deco[0],   op:.09,s:null},
-  devis     :{bg:IMG.outdoor[2],op:.09,s:null},
-  litiges   :{bg:IMG.deco[2],   op:.08,s:null},
-  discussion:{bg:IMG.canape[1], op:.09,s:null},
-  admin     :{bg:IMG.deco[0],   op:.09,s:[IMG.outdoor[0],IMG.deco[0],IMG.canape[0]],lbl:"ESPACE MANAGER"}
+  home      :{bg:IMG.deco[1],   op:.14,s:[IMG.deco[0],IMG.outdoor[0],IMG.canape[0]],lbl:"COLLECTION 2026"},
+  chiffres  :{bg:IMG.outdoor[1],op:.12,s:[IMG.outdoor[1],IMG.deco[0],IMG.canape[0]],lbl:"PERFORMANCES ÉQUIPE"},
+  formations:{bg:IMG.canape[0], op:.12,s:[IMG.canape[0],IMG.outdoor[0],IMG.deco[1]],lbl:"FORMATIONS 2026"},
+  planning  :{bg:IMG.deco[1],   op:.11,s:[IMG.deco[1],IMG.outdoor[1]],lbl:"PLANNING · ÉTÉ 2026"},
+  todos     :{bg:IMG.deco[0],   op:.10,s:null},
+  devis     :{bg:IMG.outdoor[2],op:.10,s:null},
+  litiges   :{bg:IMG.deco[2],   op:.09,s:null},
+  discussion:{bg:IMG.canape[1], op:.10,s:null},
+  admin     :{bg:IMG.deco[0],   op:.10,s:[IMG.outdoor[0],IMG.deco[0],IMG.canape[0]],lbl:"ESPACE MANAGER"}
 };
-
 var TIMG={
   "OUTDOOR":IMG.outdoor[0],"CANAPÉ":IMG.canape[0],"FORMATION":IMG.deco[2],
   "RÉSULTAT":IMG.outdoor[1],"ANNONCE":IMG.deco[0],"RAPPEL":IMG.deco[1],
@@ -1702,68 +1706,65 @@ var TIMG={
 var CI={};
 try{CI=JSON.parse(localStorage.getItem('mdm_ci')||'{}');}catch(e){}
 function sc(){try{localStorage.setItem('mdm_ci',JSON.stringify(CI));}catch(e){}}
-function getImg(key,def){return CI[key]||def;}
-function setImg(key,src){CI[key]=src;sc();}
+function gi(k,d){return CI[k]||d;}
+function si(k,v){CI[k]=v;sc();}
 
-/* ── FOND FLOU — FIX PRINCIPAL ──
-   On précharge l'image dans un objet Image() avant d'appliquer l'opacité.
-   Ainsi le fond ne reste jamais blanc. */
-var _lastBgKey='';
+/* ── FOND FLOU
+   Clé du fix : on précharge l'image avant de l'afficher.
+   L'overlay couvre inset:0 (tout l'écran) mais z-index:1
+   donc header(z200) et nav(z100) restent au-dessus. ── */
+var _lastSrc='';
 function setBg(pg){
   var ov=document.getElementById('mdm-ov');
   if(!ov)return;
   var c=CFG[pg];
-  if(!c){
-    ov.style.opacity='0';
-    _lastBgKey='';
-    return;
-  }
-  var src=getImg('bg_'+pg,c.bg);
-  var op=String(c.op||.09);
+  if(!c){ov.style.opacity='0';_lastSrc='';return;}
+  var src=gi('bg_'+pg,c.bg);
+  var op=c.op||0.10;
 
-  // Si même image déjà affichée → juste s'assurer que l'opacité est correcte
-  if(_lastBgKey===src){
-    ov.style.opacity=op;
+  if(_lastSrc===src){
+    ov.style.opacity=String(op);
     return;
   }
 
-  // Précharger l'image PUIS afficher
-  ov.style.opacity='0'; // masque pendant le chargement
-  var tmp=new Image();
-  tmp.onload=function(){
+  /* Masquer → précharger → afficher */
+  ov.style.transition='none';
+  ov.style.opacity='0';
+
+  var img=new Image();
+  img.onload=function(){
     ov.style.backgroundImage='url('+src+')';
-    // Petit délai pour laisser le navigateur composer
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
-        ov.style.transition='opacity .6s ease';
-        ov.style.opacity=op;
+        ov.style.transition='opacity .7s ease';
+        ov.style.opacity=String(op);
+        _lastSrc=src;
       });
     });
-    _lastBgKey=src;
   };
-  tmp.onerror=function(){
-    // En cas d'erreur, on applique quand même
+  img.onerror=function(){
+    /* Fallback sans préchargement */
     ov.style.backgroundImage='url('+src+')';
     ov.style.transition='opacity .4s ease';
-    ov.style.opacity=op;
-    _lastBgKey=src;
+    ov.style.opacity=String(op);
+    _lastSrc=src;
   };
-  tmp.src=src;
+  img.src=src;
 }
 
-/* ── BANDES IMAGES ──
-   FIX : on NE vérifie plus l'id existant.
-   rPg() recrée tout le DOM → on recrée la bande à chaque appel. */
+/* ── BANDE IMAGES
+   Recréée à chaque rPg() — pas de guard sur l'id. ── */
 function mkBand(pg){
   var c=CFG[pg];
   if(!c||!c.s||!c.s.length)return;
   var main=document.getElementById('main');
   if(!main)return;
-  // Supprimer une éventuelle bande déjà insérée (sécurité)
+
+  /* Supprimer l'ancienne si présente */
   var old=main.querySelector('.mdm-band');
   if(old)old.parentNode.removeChild(old);
 
-  var admin=typeof isA==='function'&&isA();
+  var adm=typeof isA==='function'&&isA();
   var band=document.createElement('div');
   band.className='mdm-band';
 
@@ -1772,15 +1773,13 @@ function mkBand(pg){
 
   c.s.forEach(function(def,i){
     var key='s_'+pg+'_'+i;
-    var src=getImg(key,def); // ← relit depuis localStorage à chaque fois
+    var src=gi(key,def);
     var wrap=document.createElement('div');
     wrap.style.cssText='flex:0 0 '+ww[i]+';overflow:hidden;';
     var img=document.createElement('img');
-    img.src=src;
-    img.loading='lazy';
-    img.alt='';
-    img.style.cssText='width:100%;height:88px;object-fit:cover;display:block;filter:brightness(.65) saturate(.75);transition:filter .3s;';
-    if(admin){
+    img.src=src;img.loading='lazy';img.alt='';
+    img.style.cssText='width:100%;height:88px;object-fit:cover;display:block;filter:brightness(.62) saturate(.72);transition:filter .25s;';
+    if(adm){
       img.classList.add('can-edit');
       img.title='Cliquer pour modifier';
       (function(k,el){
@@ -1796,43 +1795,37 @@ function mkBand(pg){
 
   if(c.lbl){
     var lbl=document.createElement('span');
-    lbl.className='mdm-band-lbl';
-    lbl.textContent=c.lbl;
+    lbl.className='mdm-band-lbl';lbl.textContent=c.lbl;
     band.appendChild(lbl);
   }
-  if(admin){
+  if(adm){
     var hint=document.createElement('span');
     hint.className='mdm-band-lbl';
-    hint.style.cssText='left:auto;right:9px;background:rgba(200,113,58,.35);';
+    hint.style.cssText='left:auto;right:9px;background:rgba(200,113,58,.38);pointer-events:none;';
     hint.textContent='✏️ cliquer pour modifier';
     band.appendChild(hint);
   }
 
-  // Insérer au début de #main
+  /* Insérer comme premier enfant de #main */
   main.insertBefore(band,main.firstChild);
 }
 
 /* ── MINIATURES ACTUALITÉS ── */
 function enrichActu(){
-  var admin=typeof isA==='function'&&isA();
+  var adm=typeof isA==='function'&&isA();
   document.querySelectorAll('#main .card').forEach(function(card){
     if(card.querySelector('.mdm-actu-img'))return;
-    var te=card.querySelector('.tag');
-    if(!te)return;
+    var te=card.querySelector('.tag');if(!te)return;
     var txt=te.textContent.toUpperCase();
     var src=null;
     for(var k in TIMG){if(txt.indexOf(k)>=0){src=TIMG[k];break;}}
     if(!src)return;
     var key='ti_'+txt.replace(/\W/g,'_').slice(0,30);
-    src=getImg(key,src); // relit depuis localStorage
+    src=gi(key,src);
     var img=document.createElement('img');
-    img.src=src;
-    img.className='mdm-actu-img';
-    img.loading='lazy';
-    img.alt='';
-    if(admin){
-      img.classList.add('can-edit');
-      img.title='Modifier';
+    img.src=src;img.className='mdm-actu-img';img.loading='lazy';img.alt='';
+    if(adm){
+      img.classList.add('can-edit');img.title='Modifier';
       (function(k,el){
         img.addEventListener('click',function(e){
           e.stopPropagation();
@@ -1844,62 +1837,52 @@ function enrichActu(){
   });
 }
 
-/* ── BOUTON ADMIN FOND ── */
+/* ── BOUTON FOND ADMIN ── */
 function showBgBtn(pg){
-  var btn=document.getElementById('mdm-bg-edit');
-  if(!btn)return;
-  var admin=typeof isA==='function'&&isA();
-  btn.style.display=admin?'flex':'none';
+  var btn=document.getElementById('mdm-bg-edit');if(!btn)return;
+  var adm=typeof isA==='function'&&isA();
+  btn.style.display=adm?'flex':'none';
   btn.setAttribute('data-pg',pg||'');
 }
-
 window.mdmOpenBg=function(){
   var pg=document.getElementById('mdm-bg-edit').getAttribute('data-pg')||'home';
   var c=CFG[pg];
-  var src=getImg('bg_'+pg,c?c.bg:IMG.deco[1]);
-  mdmOpen('bg_'+pg,src,null,'Fond de la page "'+pg+'"');
+  var src=gi('bg_'+pg,c?c.bg:IMG.deco[1]);
+  mdmOpen('bg_'+pg,src,null,'Fond — page "'+pg+'"');
 };
 
-/* ── MODAL ÉDITEUR ── */
+/* ── MODAL ── */
 var _t=null;
-
 window.mdmOpen=function(key,src,el,label){
   if(typeof isA==='function'&&!isA())return;
-  _t={key:key,el:el,pg:typeof PG!=='undefined'?PG:null};
-  document.getElementById('mdm-title').textContent='🖼️ '+(label||"Modifier l'image");
+  _t={key:key,el:el};
+  document.getElementById('mdm-title').textContent='🖼️ '+(label||"Modifier");
   var b=document.getElementById('mdm-ps-box');
   b.innerHTML=ALL.map(function(s){
-    return '<img class="mdm-ps'+(s===src?' on':'')+
-      '" src="'+s+'" onclick="mdmPs(this,\''+s+'\')" loading="lazy">';
+    return '<img class="mdm-ps'+(s===src?' on':'')+'" src="'+s+
+           '" onclick="mdmPs(this,\''+s+'\')" loading="lazy">';
   }).join('');
-  var prev=document.getElementById('mdm-prev');
-  prev.src=src||ALL[0];
+  document.getElementById('mdm-prev').src=src||ALL[0];
   document.getElementById('mdm-url').value=(src&&src.startsWith('http'))?src:'';
   document.getElementById('mdm-modal').classList.add('on');
 };
-
 window.mdmClose=function(){
-  document.getElementById('mdm-modal').classList.remove('on');
-  _t=null;
+  document.getElementById('mdm-modal').classList.remove('on');_t=null;
 };
-
 window.mdmPs=function(el,src){
   document.querySelectorAll('.mdm-ps').forEach(function(p){p.classList.remove('on');});
   el.classList.add('on');
   document.getElementById('mdm-prev').src=src;
   document.getElementById('mdm-url').value=src;
 };
-
 window.mdmUrl=function(v){
   if(v&&(v.startsWith('http')||v.startsWith('data:'))){
     document.getElementById('mdm-prev').src=v;
     document.querySelectorAll('.mdm-ps').forEach(function(p){p.classList.remove('on');});
   }
 };
-
 window.mdmFile=function(inp){
-  var f=inp.files&&inp.files[0];
-  if(!f)return;
+  var f=inp.files&&inp.files[0];if(!f)return;
   var r=new FileReader();
   r.onload=function(e){
     document.getElementById('mdm-prev').src=e.target.result;
@@ -1908,32 +1891,26 @@ window.mdmFile=function(inp){
   };
   r.readAsDataURL(f);
 };
-
 window.mdmOk=function(){
   if(!_t)return;
   var src=document.getElementById('mdm-prev').src;
   if(!src)return;
-  setImg(_t.key,src);
-  // Mettre à jour l'élément img cliqué si dispo
+  si(_t.key,src);
   if(_t.el&&_t.el.tagName==='IMG')_t.el.src=src;
-  // Rafraîchir fond si c'est un bg_*
   if(_t.key&&_t.key.startsWith('bg_')){
+    _lastSrc='';
     var pg=_t.key.replace('bg_','');
-    _lastBgKey=''; // forcer le rechargement
     if(pg===(typeof PG!=='undefined'?PG:''))setBg(pg);
   }
   mdmClose();
-  // Recharger la page courante pour appliquer partout
   if(typeof rPg==='function')rPg();
   if(typeof toast==='function')toast('Image mise à jour ✅');
 };
-
 document.getElementById('mdm-modal').addEventListener('click',function(e){
   if(e.target===this)mdmClose();
 });
 
-/* ── HOOK SUR rPg ──
-   Intercepte rPg() et applique les visuels après chaque rendu. */
+/* ── HOOK rPg ── */
 var _orig=null;
 function hook(){
   if(typeof rPg==='undefined'){setTimeout(hook,200);return;}
@@ -1941,14 +1918,13 @@ function hook(){
   _orig=rPg;
   rPg=function(){
     _orig.apply(this,arguments);
-    // Attendre que le DOM soit réellement mis à jour
     setTimeout(function(){
       var pg=typeof PG!=='undefined'?PG:'home';
       setBg(pg);
       showBgBtn(pg);
       mkBand(pg);
       enrichActu();
-    },120);
+    },150);
   };
 }
 
@@ -1959,6 +1935,7 @@ if(document.readyState==='loading'){
 }
 
 })();
+</script>
 </script>
 </script>
 </html>
