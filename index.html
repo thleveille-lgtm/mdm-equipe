@@ -1509,139 +1509,170 @@ function sbSaveDevis(uid,d){if(!d)return;sbQ("devis","POST",{id:d.id,uid:uid,nom
 function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,dest:n.to,sender:n.from,txt:n.text,type:n.type,read:n.read,date:n.date});}
 </script>
 <!--
-  MDM ÉQUIPE — PATCH VISUEL v6
-  REMPLACE complètement le patch v4 ou v5.
+  MDM ÉQUIPE — PATCH VISUEL v8 FINAL
   Coller juste après le dernier </script> du fichier.
+  Remplace TOUT patch précédent (v4/v5/v6/v7).
 -->
 <style>
-/* ── Fond login ── */
-#login::after{
-  content:'';position:absolute;inset:0;
-  background:url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1400&q=50') center/cover no-repeat;
-  opacity:.09;pointer-events:none;z-index:0;
-}
-.light #login::after{opacity:.04;}
-.lbox{z-index:1;}
 
-/* ── Header gradient subtil ── */
-header{background:linear-gradient(90deg,var(--bg) 55%,rgba(200,113,58,.06) 100%) !important;}
+/* ═══════════════════════════════
+   FOND TRANSPARENT — laisser l'overlay visible
+═══════════════════════════════ */
+html, body { background: var(--bg); }
+#app { background: transparent !important; }
 
-/* ── Overlay fond flou
-   FIX : position fixed inset:0 (couvre TOUT l'écran, header compris)
-   z-index:1 → derrière le contenu (z-index:2+) mais visible
-── */
-#mdm-ov{
-  position:fixed;
-  inset:0;                  /* top:0 et non top:57px */
-  pointer-events:none;
-  z-index:1;                /* sous header(z200) et nav(z100) */
-  background-size:cover;
-  background-position:center;
-  filter:blur(40px) saturate(.3) brightness(.18);
-  transform:scale(1.2);     /* évite les bords blancs du blur */
-  opacity:0;
-}
-
-/* Header et nav au-dessus de l'overlay */
-header{position:relative;z-index:200 !important;}
-nav{position:relative;z-index:100 !important;}
-
-/* Contenu main au-dessus de l'overlay */
-#main{position:relative;z-index:2;}
-#main>*{position:relative;z-index:2;}
-
-/* ── Bouton admin fond ── */
-#mdm-bg-edit{
-  position:fixed;bottom:18px;right:15px;
-  background:rgba(200,113,58,.88);color:#fff;
-  border:none;border-radius:50%;width:40px;height:40px;
-  font-size:17px;cursor:pointer;z-index:9000;
-  box-shadow:0 4px 16px rgba(0,0,0,.5);
-  display:none;align-items:center;justify-content:center;
-  transition:transform .2s;
-}
-#mdm-bg-edit:hover{transform:scale(1.12);}
-
-/* ── Bandes images
-   FIX : pas de margin-top négatif, juste first-child de #main ── */
-.mdm-band{
-  display:flex;gap:3px;border-radius:12px;overflow:hidden;
-  margin-bottom:14px;
-  position:relative;z-index:2;
-  animation:fadeUp .4s ease both;
-}
-.mdm-band img{
-  flex:1;min-width:0;height:88px;object-fit:cover;display:block;
-  filter:brightness(.62) saturate(.72);transition:filter .25s;
-}
-.mdm-band-lbl{
-  position:absolute;bottom:7px;left:9px;
-  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.8px;
-  color:rgba(255,255,255,.65);background:rgba(0,0,0,.45);
-  padding:2px 7px;border-radius:4px;pointer-events:none;
-}
-.mdm-band img.can-edit{cursor:pointer;}
-.mdm-band img.can-edit:hover{
-  filter:brightness(.88) saturate(1);
-  outline:2px solid rgba(200,113,58,.75);outline-offset:-2px;
+/* ═══════════════════════════════
+   OVERLAY PHOTO FLOUE
+   - z-index:2 passe au-dessus du fond blanc de #app
+   - brightness(.52) = photo visible, assombrie
+   - blur(20px) = flou doux, on reconnaît une photo
+   - opacity animée en JS après chargement
+═══════════════════════════════ */
+#mdm-ov {
+  position: fixed !important;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none !important;
+  z-index: 2 !important;
+  background-size: cover !important;
+  background-position: center !important;
+  filter: blur(20px) saturate(.7) brightness(.52) !important;
+  transform: scale(1.06) !important;
+  opacity: 0;
+  transition: opacity .8s ease;
 }
 
-/* ── Miniatures actualités ── */
-.mdm-actu-img{
-  width:60px;height:44px;object-fit:cover;border-radius:7px;
-  float:right;margin:0 0 6px 9px;
-  filter:brightness(.75) saturate(.8);
-}
-.mdm-actu-img.can-edit{cursor:pointer;}
-.mdm-actu-img.can-edit:hover{filter:brightness(.95);outline:2px solid var(--accent);}
+/* Tout le contenu strictement au-dessus */
+header { position: relative !important; z-index: 300 !important; }
+nav    { position: relative !important; z-index: 250 !important; }
+#main  { position: relative !important; z-index: 100 !important; }
+#mc    { position: relative !important; z-index: 700 !important; }
 
-/* ── Modal éditeur ── */
-#mdm-modal{
-  display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.75);z-index:20000;
-  align-items:center;justify-content:center;
+/* Login */
+#login::after {
+  content: ''; position: absolute; inset: 0;
+  background: url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&w=1400&q=60') center/cover no-repeat;
+  opacity: .1; pointer-events: none; z-index: 0;
 }
-#mdm-modal.on{display:flex;animation:fadeIn .2s ease;}
-.mdm-mbox{
-  background:var(--bg2);border:1px solid var(--border2);
-  border-radius:18px;padding:22px;width:92%;max-width:420px;
-  max-height:88vh;overflow-y:auto;animation:popIn .25s ease;
+.lbox { z-index: 1 !important; }
+header { background: linear-gradient(90deg, var(--bg) 55%, rgba(200,113,58,.06) 100%) !important; }
+
+/* ═══════════════════════════════
+   BOUTON ADMIN FOND
+═══════════════════════════════ */
+#mdm-bg-edit {
+  position: fixed; bottom: 18px; right: 15px;
+  background: rgba(200,113,58,.9); color: #fff;
+  border: none; border-radius: 50%; width: 42px; height: 42px;
+  font-size: 18px; cursor: pointer; z-index: 9999;
+  box-shadow: 0 4px 18px rgba(0,0,0,.5);
+  display: none; align-items: center; justify-content: center;
+  transition: transform .2s;
 }
-.mdm-mbox h4{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:12px;}
-#mdm-prev{width:100%;height:110px;object-fit:cover;border-radius:9px;margin-bottom:11px;display:block;filter:brightness(.85);}
-.mdm-presets{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px;}
-.mdm-ps{
-  width:46px;height:46px;object-fit:cover;border-radius:6px;
-  cursor:pointer;border:2px solid transparent;filter:brightness(.72);transition:all .2s;
+#mdm-bg-edit:hover { transform: scale(1.1); }
+
+/* ═══════════════════════════════
+   BANDES IMAGES
+   height:120px — plus hautes et visibles
+   brightness(.78) — on voit clairement la photo
+═══════════════════════════════ */
+.mdm-band {
+  display: flex;
+  gap: 4px;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  position: relative;
+  animation: fadeUp .4s ease both;
 }
-.mdm-ps:hover,.mdm-ps.on{filter:brightness(1);border-color:var(--accent);transform:scale(1.08);}
-.mdm-inp{
-  width:100%;padding:9px 12px;background:var(--bg3);
-  border:1px solid var(--border);border-radius:8px;
-  color:var(--text);font-size:12px;font-family:'DM Mono',monospace;
-  outline:none;margin-bottom:9px;display:block;box-sizing:border-box;
-  transition:border-color .2s;
+.mdm-band-slot {
+  overflow: hidden;
+  flex-shrink: 0;
 }
-.mdm-inp:focus{border-color:var(--accent);}
-.mdm-uplbl{
-  display:block;padding:9px;background:rgba(78,126,168,.13);
-  border:1px dashed rgba(78,126,168,.38);border-radius:7px;
-  color:var(--blue);font-size:12px;text-align:center;
-  cursor:pointer;margin-bottom:10px;
+.mdm-band img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+  filter: brightness(.78) saturate(.85);
+  transition: filter .3s, transform .3s;
 }
-.mdm-btns{display:flex;gap:7px;}
-.mdm-ok{flex:1;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
-.mdm-no{flex:1;padding:10px;background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;}
-.mdm-lbl{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:5px;display:block;}
+.mdm-band img:hover {
+  filter: brightness(.9) saturate(1);
+  transform: scale(1.03);
+}
+.mdm-band-lbl {
+  position: absolute; bottom: 8px; left: 10px;
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px;
+  color: rgba(255,255,255,.85); background: rgba(0,0,0,.5);
+  padding: 2px 8px; border-radius: 4px; pointer-events: none;
+  text-transform: uppercase;
+}
+.mdm-band img.can-edit { cursor: pointer; }
+.mdm-band img.can-edit:hover {
+  outline: 2px solid rgba(200,113,58,.9); outline-offset: -2px;
+}
+.mdm-band-hint {
+  position: absolute; bottom: 8px; right: 10px;
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  color: rgba(255,255,255,.6); background: rgba(200,113,58,.4);
+  padding: 2px 7px; border-radius: 4px; pointer-events: none;
+}
+
+/* ═══════════════════════════════
+   MINIATURES ACTUALITÉS
+═══════════════════════════════ */
+.mdm-actu-img {
+  width: 64px; height: 48px; object-fit: cover; border-radius: 8px;
+  float: right; margin: 0 0 6px 10px;
+  filter: brightness(.82) saturate(.88);
+  transition: filter .2s;
+}
+.mdm-actu-img.can-edit { cursor: pointer; }
+.mdm-actu-img.can-edit:hover { filter: brightness(.97); outline: 2px solid var(--accent); }
+
+/* ═══════════════════════════════
+   MODAL ÉDITEUR IMAGE
+═══════════════════════════════ */
+#mdm-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.75); z-index: 20000;
+  align-items: center; justify-content: center;
+}
+#mdm-modal.on { display: flex; animation: fadeIn .2s ease; }
+.mdm-mbox {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 18px; padding: 22px; width: 92%; max-width: 430px;
+  max-height: 88vh; overflow-y: auto; animation: popIn .25s ease;
+}
+.mdm-mbox h4 { font-family: 'Syne',sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+#mdm-prev { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin-bottom: 11px; display: block; }
+.mdm-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.mdm-ps {
+  width: 48px; height: 48px; object-fit: cover; border-radius: 7px;
+  cursor: pointer; border: 2px solid transparent; filter: brightness(.72); transition: all .2s;
+}
+.mdm-ps:hover, .mdm-ps.on { filter: brightness(1); border-color: var(--accent); transform: scale(1.08); }
+.mdm-inp {
+  width: 100%; padding: 9px 12px; background: var(--bg3);
+  border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-size: 12px; font-family: 'DM Mono',monospace;
+  outline: none; margin-bottom: 9px; display: block; box-sizing: border-box;
+}
+.mdm-inp:focus { border-color: var(--accent); }
+.mdm-uplbl {
+  display: block; padding: 9px; background: rgba(78,126,168,.13);
+  border: 1px dashed rgba(78,126,168,.38); border-radius: 7px;
+  color: var(--blue); font-size: 12px; text-align: center; cursor: pointer; margin-bottom: 10px;
+}
+.mdm-btns { display: flex; gap: 7px; }
+.mdm-ok { flex: 1; padding: 10px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.mdm-no { flex: 1; padding: 10px; background: var(--bg3); color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; cursor: pointer; }
+.mdm-lbl { font-size: 10px; color: var(--muted); font-family: 'DM Mono',monospace; margin-bottom: 5px; display: block; }
 </style>
 
-<!-- Overlay fond flou -->
 <div id="mdm-ov"></div>
+<button id="mdm-bg-edit" title="Modifier le fond" onclick="mdmOpenBg()">🖼️</button>
 
-<!-- Bouton admin -->
-<button id="mdm-bg-edit" title="Modifier l'image de fond" onclick="mdmOpenBg()">🖼️</button>
-
-<!-- Modal éditeur -->
 <div id="mdm-modal">
   <div class="mdm-mbox">
     <h4 id="mdm-title">🖼️ Modifier l'image</h4>
@@ -1650,10 +1681,7 @@ nav{position:relative;z-index:100 !important;}
     <div class="mdm-presets" id="mdm-ps-box"></div>
     <span class="mdm-lbl">URL PERSONNALISÉE</span>
     <input class="mdm-inp" id="mdm-url" placeholder="https://images.unsplash.com/…" oninput="mdmUrl(this.value)"/>
-    <label class="mdm-uplbl">
-      📎 Photo locale
-      <input type="file" accept="image/*" style="display:none" onchange="mdmFile(this)"/>
-    </label>
+    <label class="mdm-uplbl">📎 Photo locale<input type="file" accept="image/*" style="display:none" onchange="mdmFile(this)"/></label>
     <div class="mdm-btns">
       <button class="mdm-ok" onclick="mdmOk()">Appliquer ✓</button>
       <button class="mdm-no" onclick="mdmClose()">Annuler</button>
@@ -1665,277 +1693,279 @@ nav{position:relative;z-index:100 !important;}
 (function(){
 'use strict';
 
-/* ── IMAGES ── */
-var IMG={
-  outdoor:[
-    "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=900&q=80",
-    "https://images.unsplash.com/photo-1600210492493-0946911123ea?w=900&q=80",
-    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80"
+/* ── BIBLIOTHÈQUE D'IMAGES ── */
+var IMG = {
+  outdoor: [
+    "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&w=1200&q=85",
+    "https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&w=1200&q=85",
+    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&w=1200&q=85"
   ],
-  canape:[
-    "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=900&q=80",
-    "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=900&q=80"
+  canape: [
+    "https://images.unsplash.com/photo-1567016432779-094069958ea5?auto=format&w=1200&q=85",
+    "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&w=1200&q=85"
   ],
-  deco:[
-    "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=900&q=80",
-    "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=900&q=80",
-    "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=900&q=80"
+  deco: [
+    "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&w=1200&q=85",
+    "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&w=1200&q=85",
+    "https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&w=1200&q=85"
   ]
 };
-var ALL=IMG.outdoor.concat(IMG.canape).concat(IMG.deco);
+var ALL = IMG.outdoor.concat(IMG.canape).concat(IMG.deco);
 
-/* ── CONFIG PAGE ── */
-var CFG={
-  home      :{bg:IMG.deco[1],   op:.14,s:[IMG.deco[0],IMG.outdoor[0],IMG.canape[0]],lbl:"COLLECTION 2026"},
-  chiffres  :{bg:IMG.outdoor[1],op:.12,s:[IMG.outdoor[1],IMG.deco[0],IMG.canape[0]],lbl:"PERFORMANCES ÉQUIPE"},
-  formations:{bg:IMG.canape[0], op:.12,s:[IMG.canape[0],IMG.outdoor[0],IMG.deco[1]],lbl:"FORMATIONS 2026"},
-  planning  :{bg:IMG.deco[1],   op:.11,s:[IMG.deco[1],IMG.outdoor[1]],lbl:"PLANNING · ÉTÉ 2026"},
-  todos     :{bg:IMG.deco[0],   op:.10,s:null},
-  devis     :{bg:IMG.outdoor[2],op:.10,s:null},
-  litiges   :{bg:IMG.deco[2],   op:.09,s:null},
-  discussion:{bg:IMG.canape[1], op:.10,s:null},
-  admin     :{bg:IMG.deco[0],   op:.10,s:[IMG.outdoor[0],IMG.deco[0],IMG.canape[0]],lbl:"ESPACE MANAGER"}
+/* ── CONFIG PAR PAGE ──
+   op = opacité finale de l'overlay (0.3 à 0.45 = photo clairement visible)
+   s  = images de la bande (null = pas de bande)
+   w  = largeurs en % des slots de la bande
+── */
+var CFG = {
+  home:       { bg: IMG.deco[1],    op: .38, s: [IMG.deco[0], IMG.outdoor[0], IMG.canape[0]], w: ['38%','33%','29%'], lbl: 'COLLECTION 2026' },
+  chiffres:   { bg: IMG.outdoor[0], op: .35, s: [IMG.outdoor[0], IMG.outdoor[1], IMG.deco[0]], w: ['40%','32%','28%'], lbl: 'PERFORMANCES ÉQUIPE' },
+  formations: { bg: IMG.canape[0],  op: .36, s: [IMG.canape[0], IMG.outdoor[2], IMG.deco[1]], w: ['42%','30%','28%'], lbl: 'FORMATIONS 2026' },
+  planning:   { bg: IMG.deco[0],    op: .34, s: [IMG.deco[1], IMG.outdoor[1]], w: ['55%','45%'], lbl: 'PLANNING · ÉTÉ 2026' },
+  todos:      { bg: IMG.deco[2],    op: .30, s: null },
+  devis:      { bg: IMG.outdoor[2], op: .30, s: null },
+  litiges:    { bg: IMG.deco[0],    op: .28, s: null },
+  discussion: { bg: IMG.canape[1],  op: .30, s: null },
+  admin:      { bg: IMG.deco[0],    op: .32, s: [IMG.outdoor[0], IMG.deco[0], IMG.canape[0]], w: ['38%','33%','29%'], lbl: 'ESPACE MANAGER' }
 };
-var TIMG={
-  "OUTDOOR":IMG.outdoor[0],"CANAPÉ":IMG.canape[0],"FORMATION":IMG.deco[2],
-  "RÉSULTAT":IMG.outdoor[1],"ANNONCE":IMG.deco[0],"RAPPEL":IMG.deco[1],
-  "OBJECTIF":IMG.outdoor[1],"RH":IMG.deco[1]
+
+var TIMG = {
+  'OUTDOOR': IMG.outdoor[0], 'CANAPÉ': IMG.canape[0], 'FORMATION': IMG.deco[2],
+  'RÉSULTAT': IMG.outdoor[1], 'ANNONCE': IMG.deco[0], 'RAPPEL': IMG.deco[1],
+  'OBJECTIF': IMG.outdoor[1], 'RH': IMG.deco[1]
 };
 
 /* ── STORAGE ── */
-var CI={};
-try{CI=JSON.parse(localStorage.getItem('mdm_ci')||'{}');}catch(e){}
-function sc(){try{localStorage.setItem('mdm_ci',JSON.stringify(CI));}catch(e){}}
-function gi(k,d){return CI[k]||d;}
-function si(k,v){CI[k]=v;sc();}
+var CI = {};
+try { CI = JSON.parse(localStorage.getItem('mdm_ci') || '{}'); } catch(e) {}
+function sc() { try { localStorage.setItem('mdm_ci', JSON.stringify(CI)); } catch(e) {} }
+function gi(k, d) { return CI[k] || d; }
+function si(k, v) { CI[k] = v; sc(); }
 
 /* ── FOND FLOU
-   Clé du fix : on précharge l'image avant de l'afficher.
-   L'overlay couvre inset:0 (tout l'écran) mais z-index:1
-   donc header(z200) et nav(z100) restent au-dessus. ── */
-var _lastSrc='';
-function setBg(pg){
-  var ov=document.getElementById('mdm-ov');
-  if(!ov)return;
-  var c=CFG[pg];
-  if(!c){ov.style.opacity='0';_lastSrc='';return;}
-  var src=gi('bg_'+pg,c.bg);
-  var op=c.op||0.10;
+   Précharge l'image PUIS applique l'opacité → jamais de blanc
+── */
+var _lastSrc = '';
+function setBg(pg) {
+  var ov = document.getElementById('mdm-ov');
+  if (!ov) return;
+  var c = CFG[pg];
+  if (!c) { ov.style.opacity = '0'; _lastSrc = ''; return; }
+  var src = gi('bg_' + pg, c.bg);
+  var op  = String(c.op || .35);
 
-  if(_lastSrc===src){
-    ov.style.opacity=String(op);
-    return;
-  }
+  if (_lastSrc === src) { ov.style.opacity = op; return; }
 
-  /* Masquer → précharger → afficher */
-  ov.style.transition='none';
-  ov.style.opacity='0';
+  ov.style.transition = 'none';
+  ov.style.opacity = '0';
 
-  var img=new Image();
-  img.onload=function(){
-    ov.style.backgroundImage='url('+src+')';
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        ov.style.transition='opacity .7s ease';
-        ov.style.opacity=String(op);
-        _lastSrc=src;
+  var tmp = new Image();
+  tmp.onload = function() {
+    ov.style.backgroundImage = 'url(' + src + ')';
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        ov.style.transition = 'opacity .8s ease';
+        ov.style.opacity = op;
+        _lastSrc = src;
       });
     });
   };
-  img.onerror=function(){
-    /* Fallback sans préchargement */
-    ov.style.backgroundImage='url('+src+')';
-    ov.style.transition='opacity .4s ease';
-    ov.style.opacity=String(op);
-    _lastSrc=src;
+  tmp.onerror = function() {
+    ov.style.backgroundImage = 'url(' + src + ')';
+    ov.style.transition = 'opacity .5s ease';
+    ov.style.opacity = op;
+    _lastSrc = src;
   };
-  img.src=src;
+  tmp.src = src;
 }
 
-/* ── BANDE IMAGES
-   Recréée à chaque rPg() — pas de guard sur l'id. ── */
-function mkBand(pg){
-  var c=CFG[pg];
-  if(!c||!c.s||!c.s.length)return;
-  var main=document.getElementById('main');
-  if(!main)return;
+/* ── BANDE IMAGES ── */
+function mkBand(pg) {
+  var c = CFG[pg];
+  if (!c || !c.s || !c.s.length) return;
+  var main = document.getElementById('main');
+  if (!main) return;
 
-  /* Supprimer l'ancienne si présente */
-  var old=main.querySelector('.mdm-band');
-  if(old)old.parentNode.removeChild(old);
+  /* Supprimer ancienne bande */
+  var old = main.querySelector('.mdm-band');
+  if (old) old.parentNode.removeChild(old);
 
-  var adm=typeof isA==='function'&&isA();
-  var band=document.createElement('div');
-  band.className='mdm-band';
+  var adm = typeof isA === 'function' && isA();
+  var band = document.createElement('div');
+  band.className = 'mdm-band';
 
-  var n=c.s.length;
-  var ww=n===1?['100%']:n===2?['56%','44%']:['40%','33%','27%'];
+  c.s.forEach(function(def, i) {
+    var key = 's_' + pg + '_' + i;
+    var src = gi(key, def);
+    var w   = (c.w && c.w[i]) ? c.w[i] : Math.floor(100 / c.s.length) + '%';
 
-  c.s.forEach(function(def,i){
-    var key='s_'+pg+'_'+i;
-    var src=gi(key,def);
-    var wrap=document.createElement('div');
-    wrap.style.cssText='flex:0 0 '+ww[i]+';overflow:hidden;';
-    var img=document.createElement('img');
-    img.src=src;img.loading='lazy';img.alt='';
-    img.style.cssText='width:100%;height:88px;object-fit:cover;display:block;filter:brightness(.62) saturate(.72);transition:filter .25s;';
-    if(adm){
+    var slot = document.createElement('div');
+    slot.className = 'mdm-band-slot';
+    slot.style.width = w;
+
+    var img = document.createElement('img');
+    img.src = src;
+    img.loading = 'lazy';
+    img.alt = '';
+
+    if (adm) {
       img.classList.add('can-edit');
-      img.title='Cliquer pour modifier';
-      (function(k,el){
-        img.addEventListener('click',function(e){
+      img.title = 'Cliquer pour modifier';
+      (function(k, el) {
+        img.addEventListener('click', function(e) {
           e.stopPropagation();
-          mdmOpen(k,el.src,el,'Image de la bande');
+          mdmOpen(k, el.src, el, 'Image de la bande');
         });
-      })(key,img);
+      })(key, img);
     }
-    wrap.appendChild(img);
-    band.appendChild(wrap);
+
+    slot.appendChild(img);
+    band.appendChild(slot);
   });
 
-  if(c.lbl){
-    var lbl=document.createElement('span');
-    lbl.className='mdm-band-lbl';lbl.textContent=c.lbl;
+  if (c.lbl) {
+    var lbl = document.createElement('span');
+    lbl.className = 'mdm-band-lbl';
+    lbl.textContent = c.lbl;
     band.appendChild(lbl);
   }
-  if(adm){
-    var hint=document.createElement('span');
-    hint.className='mdm-band-lbl';
-    hint.style.cssText='left:auto;right:9px;background:rgba(200,113,58,.38);pointer-events:none;';
-    hint.textContent='✏️ cliquer pour modifier';
+  if (adm) {
+    var hint = document.createElement('span');
+    hint.className = 'mdm-band-hint';
+    hint.textContent = '✏️ modifier';
     band.appendChild(hint);
   }
 
-  /* Insérer comme premier enfant de #main */
-  main.insertBefore(band,main.firstChild);
+  main.insertBefore(band, main.firstChild);
 }
 
 /* ── MINIATURES ACTUALITÉS ── */
-function enrichActu(){
-  var adm=typeof isA==='function'&&isA();
-  document.querySelectorAll('#main .card').forEach(function(card){
-    if(card.querySelector('.mdm-actu-img'))return;
-    var te=card.querySelector('.tag');if(!te)return;
-    var txt=te.textContent.toUpperCase();
-    var src=null;
-    for(var k in TIMG){if(txt.indexOf(k)>=0){src=TIMG[k];break;}}
-    if(!src)return;
-    var key='ti_'+txt.replace(/\W/g,'_').slice(0,30);
-    src=gi(key,src);
-    var img=document.createElement('img');
-    img.src=src;img.className='mdm-actu-img';img.loading='lazy';img.alt='';
-    if(adm){
-      img.classList.add('can-edit');img.title='Modifier';
-      (function(k,el){
-        img.addEventListener('click',function(e){
+function enrichActu() {
+  var adm = typeof isA === 'function' && isA();
+  document.querySelectorAll('#main .card').forEach(function(card) {
+    if (card.querySelector('.mdm-actu-img')) return;
+    var te = card.querySelector('.tag');
+    if (!te) return;
+    var txt = te.textContent.toUpperCase();
+    var src = null;
+    for (var k in TIMG) { if (txt.indexOf(k) >= 0) { src = TIMG[k]; break; } }
+    if (!src) return;
+    var key = 'ti_' + txt.replace(/\W/g, '_').slice(0, 30);
+    src = gi(key, src);
+    var img = document.createElement('img');
+    img.src = src; img.className = 'mdm-actu-img'; img.loading = 'lazy'; img.alt = '';
+    if (adm) {
+      img.classList.add('can-edit'); img.title = 'Modifier';
+      (function(k, el) {
+        img.addEventListener('click', function(e) {
           e.stopPropagation();
-          mdmOpen(k,el.src,el,'Miniature actualité');
+          mdmOpen(k, el.src, el, 'Miniature actualité');
         });
-      })(key,img);
+      })(key, img);
     }
-    card.insertBefore(img,card.firstChild);
+    card.insertBefore(img, card.firstChild);
   });
 }
 
 /* ── BOUTON FOND ADMIN ── */
-function showBgBtn(pg){
-  var btn=document.getElementById('mdm-bg-edit');if(!btn)return;
-  var adm=typeof isA==='function'&&isA();
-  btn.style.display=adm?'flex':'none';
-  btn.setAttribute('data-pg',pg||'');
+function showBgBtn(pg) {
+  var btn = document.getElementById('mdm-bg-edit');
+  if (!btn) return;
+  var adm = typeof isA === 'function' && isA();
+  btn.style.display = adm ? 'flex' : 'none';
+  btn.setAttribute('data-pg', pg || '');
 }
-window.mdmOpenBg=function(){
-  var pg=document.getElementById('mdm-bg-edit').getAttribute('data-pg')||'home';
-  var c=CFG[pg];
-  var src=gi('bg_'+pg,c?c.bg:IMG.deco[1]);
-  mdmOpen('bg_'+pg,src,null,'Fond — page "'+pg+'"');
+window.mdmOpenBg = function() {
+  var pg  = document.getElementById('mdm-bg-edit').getAttribute('data-pg') || 'home';
+  var c   = CFG[pg];
+  var src = gi('bg_' + pg, c ? c.bg : IMG.deco[1]);
+  mdmOpen('bg_' + pg, src, null, 'Fond — page "' + pg + '"');
 };
 
 /* ── MODAL ── */
-var _t=null;
-window.mdmOpen=function(key,src,el,label){
-  if(typeof isA==='function'&&!isA())return;
-  _t={key:key,el:el};
-  document.getElementById('mdm-title').textContent='🖼️ '+(label||"Modifier");
-  var b=document.getElementById('mdm-ps-box');
-  b.innerHTML=ALL.map(function(s){
-    return '<img class="mdm-ps'+(s===src?' on':'')+'" src="'+s+
-           '" onclick="mdmPs(this,\''+s+'\')" loading="lazy">';
+var _t = null;
+window.mdmOpen = function(key, src, el, label) {
+  if (typeof isA === 'function' && !isA()) return;
+  _t = { key: key, el: el };
+  document.getElementById('mdm-title').textContent = '🖼️ ' + (label || 'Modifier');
+  var b = document.getElementById('mdm-ps-box');
+  b.innerHTML = ALL.map(function(s) {
+    return '<img class="mdm-ps' + (s === src ? ' on' : '') +
+           '" src="' + s + '" onclick="mdmPs(this,\'' + s + '\')" loading="lazy">';
   }).join('');
-  document.getElementById('mdm-prev').src=src||ALL[0];
-  document.getElementById('mdm-url').value=(src&&src.startsWith('http'))?src:'';
+  document.getElementById('mdm-prev').src = src || ALL[0];
+  document.getElementById('mdm-url').value = (src && src.startsWith('http')) ? src : '';
   document.getElementById('mdm-modal').classList.add('on');
 };
-window.mdmClose=function(){
-  document.getElementById('mdm-modal').classList.remove('on');_t=null;
+window.mdmClose = function() {
+  document.getElementById('mdm-modal').classList.remove('on'); _t = null;
 };
-window.mdmPs=function(el,src){
-  document.querySelectorAll('.mdm-ps').forEach(function(p){p.classList.remove('on');});
+window.mdmPs = function(el, src) {
+  document.querySelectorAll('.mdm-ps').forEach(function(p) { p.classList.remove('on'); });
   el.classList.add('on');
-  document.getElementById('mdm-prev').src=src;
-  document.getElementById('mdm-url').value=src;
+  document.getElementById('mdm-prev').src = src;
+  document.getElementById('mdm-url').value = src;
 };
-window.mdmUrl=function(v){
-  if(v&&(v.startsWith('http')||v.startsWith('data:'))){
-    document.getElementById('mdm-prev').src=v;
-    document.querySelectorAll('.mdm-ps').forEach(function(p){p.classList.remove('on');});
+window.mdmUrl = function(v) {
+  if (v && (v.startsWith('http') || v.startsWith('data:'))) {
+    document.getElementById('mdm-prev').src = v;
+    document.querySelectorAll('.mdm-ps').forEach(function(p) { p.classList.remove('on'); });
   }
 };
-window.mdmFile=function(inp){
-  var f=inp.files&&inp.files[0];if(!f)return;
-  var r=new FileReader();
-  r.onload=function(e){
-    document.getElementById('mdm-prev').src=e.target.result;
-    document.getElementById('mdm-url').value=e.target.result;
-    document.querySelectorAll('.mdm-ps').forEach(function(p){p.classList.remove('on');});
+window.mdmFile = function(inp) {
+  var f = inp.files && inp.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function(e) {
+    document.getElementById('mdm-prev').src = e.target.result;
+    document.getElementById('mdm-url').value = e.target.result;
+    document.querySelectorAll('.mdm-ps').forEach(function(p) { p.classList.remove('on'); });
   };
   r.readAsDataURL(f);
 };
-window.mdmOk=function(){
-  if(!_t)return;
-  var src=document.getElementById('mdm-prev').src;
-  if(!src)return;
-  si(_t.key,src);
-  if(_t.el&&_t.el.tagName==='IMG')_t.el.src=src;
-  if(_t.key&&_t.key.startsWith('bg_')){
-    _lastSrc='';
-    var pg=_t.key.replace('bg_','');
-    if(pg===(typeof PG!=='undefined'?PG:''))setBg(pg);
+window.mdmOk = function() {
+  if (!_t) return;
+  var src = document.getElementById('mdm-prev').src;
+  if (!src) return;
+  si(_t.key, src);
+  if (_t.el && _t.el.tagName === 'IMG') _t.el.src = src;
+  if (_t.key && _t.key.startsWith('bg_')) {
+    _lastSrc = '';
+    var pg = _t.key.replace('bg_', '');
+    if (pg === (typeof PG !== 'undefined' ? PG : '')) setBg(pg);
   }
   mdmClose();
-  if(typeof rPg==='function')rPg();
-  if(typeof toast==='function')toast('Image mise à jour ✅');
+  if (typeof rPg === 'function') rPg();
+  if (typeof toast === 'function') toast('Image mise à jour ✅');
 };
-document.getElementById('mdm-modal').addEventListener('click',function(e){
-  if(e.target===this)mdmClose();
+document.getElementById('mdm-modal').addEventListener('click', function(e) {
+  if (e.target === this) mdmClose();
 });
 
 /* ── HOOK rPg ── */
-var _orig=null;
-function hook(){
-  if(typeof rPg==='undefined'){setTimeout(hook,200);return;}
-  if(_orig)return;
-  _orig=rPg;
-  rPg=function(){
-    _orig.apply(this,arguments);
-    setTimeout(function(){
-      var pg=typeof PG!=='undefined'?PG:'home';
+var _orig = null;
+function hook() {
+  if (typeof rPg === 'undefined') { setTimeout(hook, 200); return; }
+  if (_orig) return;
+  _orig = rPg;
+  rPg = function() {
+    _orig.apply(this, arguments);
+    setTimeout(function() {
+      var pg = typeof PG !== 'undefined' ? PG : 'home';
       setBg(pg);
       showBgBtn(pg);
       mkBand(pg);
       enrichActu();
-    },150);
+    }, 150);
   };
 }
 
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',hook);
-}else{
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', hook);
+} else {
   hook();
 }
 
 })();
-</script>
 </script>
 </script>
 </html>
