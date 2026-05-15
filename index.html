@@ -1509,63 +1509,89 @@ function sbSaveDevis(uid,d){if(!d)return;sbQ("devis","POST",{id:d.id,uid:uid,nom
 function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,dest:n.to,sender:n.from,txt:n.text,type:n.type,read:n.read,date:n.date});}
 </script>
 <!--
-  MDM ÉQUIPE — PATCH VISUEL v8 FINAL
-  Coller juste après le dernier </script> du fichier.
-  Remplace TOUT patch précédent (v4/v5/v6/v7).
+  MDM ÉQUIPE — PATCH VISUEL v9
+  Remplace TOUT patch précédent. Coller après le dernier </script>.
 -->
 <style>
 
-/* ═══════════════════════════════
-   FOND — rendre toute la page transparente
-   pour que l'overlay soit visible partout
-═══════════════════════════════ */
-html { background: var(--bg) !important; }
-body { background: transparent !important; }
-#app { background: transparent !important; }
-/* La zone sticky header+nav doit aussi être transparente
-   pour que l'overlay passe en dessous */
-header { background: rgba(15,13,10,.82) !important; backdrop-filter: blur(12px); }
-nav    { background: rgba(26,22,16,.78) !important; backdrop-filter: blur(8px); }
-
-/* ═══════════════════════════════
-   OVERLAY PHOTO FLOUE
-   z-index:0 → html a le vrai bg coloré
-   L'overlay est ENTRE html et #app
-═══════════════════════════════ */
-#mdm-ov {
-  position: fixed !important;
-  top: 0; left: 0; right: 0; bottom: 0;
-  pointer-events: none !important;
-  z-index: 0 !important;
-  background-size: cover !important;
-  background-position: center !important;
-  filter: blur(20px) saturate(.7) brightness(.48) !important;
-  transform: scale(1.06) !important;
-  opacity: 0;
-  transition: opacity .8s ease;
+/* ── L'overlay est sur body directement, pas besoin de z-index complexe ── */
+body {
+  background: var(--bg) !important;
+}
+#app {
+  background: transparent !important;
+  position: relative;
+  z-index: 1;
 }
 
-/* Tout le contenu strictement au-dessus */
-header { position: relative !important; z-index: 300 !important; }
-nav    { position: relative !important; z-index: 250 !important; }
-#main  { position: relative !important; z-index: 100 !important; }
-#mc    { position: relative !important; z-index: 700 !important; }
+/* Header/nav : fond semi-transparent pour laisser voir le fond photo derrière */
+header {
+  background: rgba(15,13,10,.88) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 300 !important;
+}
+nav {
+  background: rgba(26,22,16,.82) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  position: sticky !important;
+  top: 57px !important;
+  z-index: 200 !important;
+}
+.light header { background: rgba(245,240,232,.9) !important; }
+.light nav    { background: rgba(237,232,220,.88) !important; }
+
+/* ── OVERLAY FOND PHOTO ──
+   Attaché à body via JS (background-image sur body)
+   Ici on gère juste le pseudo-élément de body
+── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(22px) saturate(.65) brightness(.45);
+  transform: scale(1.07);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .8s ease;
+  /* L'image sera injectée via JS sur body::before → impossible,
+     on utilise #mdm-ov à la place */
+}
+
+#mdm-ov {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-size: cover;
+  background-position: center;
+  filter: blur(22px) saturate(.65) brightness(.45);
+  transform: scale(1.07);
+  opacity: 0;
+  transition: opacity .9s ease;
+}
+
+#main  { position: relative; z-index: 10; }
+#mc    { position: relative; z-index: 500; }
 
 /* Login */
 #login::after {
   content: ''; position: absolute; inset: 0;
-  background: url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&w=1400&q=60') center/cover no-repeat;
+  background: url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&w=1400&q=60') center/cover;
   opacity: .1; pointer-events: none; z-index: 0;
 }
-.lbox { z-index: 1 !important; }
+.lbox { position: relative; z-index: 1; }
 
-
-/* ═══════════════════════════════
-   BOUTON ADMIN FOND
-═══════════════════════════════ */
+/* ── BOUTON ADMIN ── */
 #mdm-bg-edit {
-  position: fixed; bottom: 18px; right: 15px;
-  background: rgba(200,113,58,.9); color: #fff;
+  position: fixed; bottom: 20px; right: 16px;
+  background: rgba(200,113,58,.92); color: #fff;
   border: none; border-radius: 50%; width: 42px; height: 42px;
   font-size: 18px; cursor: pointer; z-index: 9999;
   box-shadow: 0 4px 18px rgba(0,0,0,.5);
@@ -1574,72 +1600,70 @@ nav    { position: relative !important; z-index: 250 !important; }
 }
 #mdm-bg-edit:hover { transform: scale(1.1); }
 
-/* ═══════════════════════════════
-   BANDES IMAGES
-   height:120px — plus hautes et visibles
-   brightness(.78) — on voit clairement la photo
-═══════════════════════════════ */
+/* ── BANDE IMAGES ──
+   margin-top: 14px → espace visuel sous la nav
+   border-radius arrondi
+   height: 130px → belles photos bien visibles
+── */
 .mdm-band {
   display: flex;
   gap: 4px;
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-top: 14px;      /* espace sous la nav */
+  margin-bottom: 18px;
   position: relative;
+  box-shadow: 0 4px 24px rgba(0,0,0,.25);
   animation: fadeUp .4s ease both;
 }
 .mdm-band-slot {
   overflow: hidden;
   flex-shrink: 0;
+  position: relative;
 }
-.mdm-band img {
+.mdm-band-slot img {
   width: 100%;
-  height: 120px;
+  height: 130px;
   object-fit: cover;
   display: block;
-  filter: brightness(.78) saturate(.85);
-  transition: filter .3s, transform .3s;
+  filter: brightness(.8) saturate(.88);
+  transition: filter .3s, transform .4s;
 }
-.mdm-band img:hover {
-  filter: brightness(.9) saturate(1);
-  transform: scale(1.03);
+.mdm-band-slot img:hover {
+  filter: brightness(.95) saturate(1.05);
+  transform: scale(1.04);
 }
 .mdm-band-lbl {
   position: absolute; bottom: 8px; left: 10px;
-  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px;
-  color: rgba(255,255,255,.85); background: rgba(0,0,0,.5);
-  padding: 2px 8px; border-radius: 4px; pointer-events: none;
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.2px;
+  color: rgba(255,255,255,.9); background: rgba(0,0,0,.55);
+  padding: 3px 8px; border-radius: 5px; pointer-events: none;
   text-transform: uppercase;
 }
-.mdm-band img.can-edit { cursor: pointer; }
-.mdm-band img.can-edit:hover {
-  outline: 2px solid rgba(200,113,58,.9); outline-offset: -2px;
-}
 .mdm-band-hint {
-  position: absolute; bottom: 8px; right: 10px;
+  position: absolute; bottom: 8px; right: 8px;
   font-family: 'DM Mono', monospace; font-size: 9px;
-  color: rgba(255,255,255,.6); background: rgba(200,113,58,.4);
+  color: rgba(255,255,255,.7); background: rgba(200,113,58,.45);
   padding: 2px 7px; border-radius: 4px; pointer-events: none;
 }
+.mdm-band-slot img.can-edit { cursor: pointer; }
+.mdm-band-slot img.can-edit:hover {
+  outline: 2px solid rgba(200,113,58,.9); outline-offset: -2px;
+}
 
-/* ═══════════════════════════════
-   MINIATURES ACTUALITÉS
-═══════════════════════════════ */
+/* ── MINIATURES ACTUALITÉS ── */
 .mdm-actu-img {
   width: 64px; height: 48px; object-fit: cover; border-radius: 8px;
-  float: right; margin: 0 0 6px 10px;
+  float: right; margin: 0 0 7px 10px;
   filter: brightness(.82) saturate(.88);
-  transition: filter .2s;
 }
 .mdm-actu-img.can-edit { cursor: pointer; }
 .mdm-actu-img.can-edit:hover { filter: brightness(.97); outline: 2px solid var(--accent); }
 
-/* ═══════════════════════════════
-   MODAL ÉDITEUR IMAGE
-═══════════════════════════════ */
+/* ── MODAL ÉDITEUR ── */
 #mdm-modal {
   display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.75); z-index: 20000;
+  background: rgba(0,0,0,.78); z-index: 20000;
   align-items: center; justify-content: center;
 }
 #mdm-modal.on { display: flex; animation: fadeIn .2s ease; }
@@ -1651,23 +1675,11 @@ nav    { position: relative !important; z-index: 250 !important; }
 .mdm-mbox h4 { font-family: 'Syne',sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 12px; }
 #mdm-prev { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin-bottom: 11px; display: block; }
 .mdm-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-.mdm-ps {
-  width: 48px; height: 48px; object-fit: cover; border-radius: 7px;
-  cursor: pointer; border: 2px solid transparent; filter: brightness(.72); transition: all .2s;
-}
+.mdm-ps { width: 48px; height: 48px; object-fit: cover; border-radius: 7px; cursor: pointer; border: 2px solid transparent; filter: brightness(.72); transition: all .2s; }
 .mdm-ps:hover, .mdm-ps.on { filter: brightness(1); border-color: var(--accent); transform: scale(1.08); }
-.mdm-inp {
-  width: 100%; padding: 9px 12px; background: var(--bg3);
-  border: 1px solid var(--border); border-radius: 8px;
-  color: var(--text); font-size: 12px; font-family: 'DM Mono',monospace;
-  outline: none; margin-bottom: 9px; display: block; box-sizing: border-box;
-}
+.mdm-inp { width: 100%; padding: 9px 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; font-family: 'DM Mono',monospace; outline: none; margin-bottom: 9px; display: block; box-sizing: border-box; }
 .mdm-inp:focus { border-color: var(--accent); }
-.mdm-uplbl {
-  display: block; padding: 9px; background: rgba(78,126,168,.13);
-  border: 1px dashed rgba(78,126,168,.38); border-radius: 7px;
-  color: var(--blue); font-size: 12px; text-align: center; cursor: pointer; margin-bottom: 10px;
-}
+.mdm-uplbl { display: block; padding: 9px; background: rgba(78,126,168,.13); border: 1px dashed rgba(78,126,168,.38); border-radius: 7px; color: var(--blue); font-size: 12px; text-align: center; cursor: pointer; margin-bottom: 10px; }
 .mdm-btns { display: flex; gap: 7px; }
 .mdm-ok { flex: 1; padding: 10px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .mdm-no { flex: 1; padding: 10px; background: var(--bg3); color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; cursor: pointer; }
@@ -1697,7 +1709,6 @@ nav    { position: relative !important; z-index: 250 !important; }
 (function(){
 'use strict';
 
-/* ── BIBLIOTHÈQUE D'IMAGES ── */
 var IMG = {
   outdoor: [
     "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&w=1200&q=85",
@@ -1716,21 +1727,16 @@ var IMG = {
 };
 var ALL = IMG.outdoor.concat(IMG.canape).concat(IMG.deco);
 
-/* ── CONFIG PAR PAGE ──
-   op = opacité finale de l'overlay (0.3 à 0.45 = photo clairement visible)
-   s  = images de la bande (null = pas de bande)
-   w  = largeurs en % des slots de la bande
-── */
 var CFG = {
-  home:       { bg: IMG.deco[1],    op: .38, s: [IMG.deco[0], IMG.outdoor[0], IMG.canape[0]], w: ['38%','33%','29%'], lbl: 'COLLECTION 2026' },
-  chiffres:   { bg: IMG.outdoor[0], op: .35, s: [IMG.outdoor[0], IMG.outdoor[1], IMG.deco[0]], w: ['40%','32%','28%'], lbl: 'PERFORMANCES ÉQUIPE' },
-  formations: { bg: IMG.canape[0],  op: .36, s: [IMG.canape[0], IMG.outdoor[2], IMG.deco[1]], w: ['42%','30%','28%'], lbl: 'FORMATIONS 2026' },
-  planning:   { bg: IMG.deco[0],    op: .34, s: [IMG.deco[1], IMG.outdoor[1]], w: ['55%','45%'], lbl: 'PLANNING · ÉTÉ 2026' },
-  todos:      { bg: IMG.deco[2],    op: .30, s: null },
-  devis:      { bg: IMG.outdoor[2], op: .30, s: null },
-  litiges:    { bg: IMG.deco[0],    op: .28, s: null },
-  discussion: { bg: IMG.canape[1],  op: .30, s: null },
-  admin:      { bg: IMG.deco[0],    op: .32, s: [IMG.outdoor[0], IMG.deco[0], IMG.canape[0]], w: ['38%','33%','29%'], lbl: 'ESPACE MANAGER' }
+  home:       { bg: IMG.deco[1],    op: .42, s: [IMG.deco[0], IMG.outdoor[0], IMG.canape[0]], w: ['38%','33%','29%'], lbl: 'COLLECTION 2026' },
+  chiffres:   { bg: IMG.outdoor[0], op: .38, s: [IMG.outdoor[0], IMG.outdoor[1], IMG.deco[0]], w: ['40%','32%','28%'], lbl: 'PERFORMANCES ÉQUIPE' },
+  formations: { bg: IMG.canape[0],  op: .40, s: [IMG.canape[0], IMG.outdoor[2], IMG.deco[1]], w: ['42%','30%','28%'], lbl: 'FORMATIONS 2026' },
+  planning:   { bg: IMG.deco[0],    op: .38, s: [IMG.deco[1], IMG.outdoor[1]], w: ['55%','45%'], lbl: 'PLANNING · ÉTÉ 2026' },
+  todos:      { bg: IMG.deco[2],    op: .34, s: null },
+  devis:      { bg: IMG.outdoor[2], op: .34, s: null },
+  litiges:    { bg: IMG.deco[0],    op: .30, s: null },
+  discussion: { bg: IMG.canape[1],  op: .34, s: null },
+  admin:      { bg: IMG.deco[0],    op: .36, s: [IMG.outdoor[0], IMG.deco[0], IMG.canape[0]], w: ['38%','33%','29%'], lbl: 'ESPACE MANAGER' }
 };
 
 var TIMG = {
@@ -1746,17 +1752,25 @@ function sc() { try { localStorage.setItem('mdm_ci', JSON.stringify(CI)); } catc
 function gi(k, d) { return CI[k] || d; }
 function si(k, v) { CI[k] = v; sc(); }
 
-/* ── FOND FLOU
-   Précharge l'image PUIS applique l'opacité → jamais de blanc
+/* ── FOND PHOTO ──
+   On applique l'image sur #mdm-ov.
+   Pour contourner le background blanc de #app,
+   on force #app transparent en JS à chaque appel.
 ── */
 var _lastSrc = '';
 function setBg(pg) {
   var ov = document.getElementById('mdm-ov');
   if (!ov) return;
+
+  /* Forcer #app transparent à chaque navigation */
+  var app = document.getElementById('app');
+  if (app) app.style.background = 'transparent';
+
   var c = CFG[pg];
   if (!c) { ov.style.opacity = '0'; _lastSrc = ''; return; }
+
   var src = gi('bg_' + pg, c.bg);
-  var op  = String(c.op || .35);
+  var op  = String(c.op || .38);
 
   if (_lastSrc === src) { ov.style.opacity = op; return; }
 
@@ -1768,7 +1782,7 @@ function setBg(pg) {
     ov.style.backgroundImage = 'url(' + src + ')';
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
-        ov.style.transition = 'opacity .8s ease';
+        ov.style.transition = 'opacity .9s ease';
         ov.style.opacity = op;
         _lastSrc = src;
       });
@@ -1790,7 +1804,6 @@ function mkBand(pg) {
   var main = document.getElementById('main');
   if (!main) return;
 
-  /* Supprimer ancienne bande */
   var old = main.querySelector('.mdm-band');
   if (old) old.parentNode.removeChild(old);
 
@@ -1822,7 +1835,6 @@ function mkBand(pg) {
         });
       })(key, img);
     }
-
     slot.appendChild(img);
     band.appendChild(slot);
   });
@@ -1840,6 +1852,7 @@ function mkBand(pg) {
     band.appendChild(hint);
   }
 
+  /* Insérer comme premier enfant — le margin-top CSS crée l'espace */
   main.insertBefore(band, main.firstChild);
 }
 
