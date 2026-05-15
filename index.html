@@ -1509,78 +1509,46 @@ function sbSaveDevis(uid,d){if(!d)return;sbQ("devis","POST",{id:d.id,uid:uid,nom
 function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,dest:n.to,sender:n.from,txt:n.text,type:n.type,read:n.read,date:n.date});}
 </script>
 <!--
-  MDM ÉQUIPE — PATCH VISUEL v9
-  Remplace TOUT patch précédent. Coller après le dernier </script>.
+  MDM ÉQUIPE — PATCH VISUEL v10
+  Remplace TOUT le bloc patch v9 (style + divs + scripts du patch).
+  Coller après le dernier </script> du code principal.
+  
+  Changements v10 :
+  - Fond : blur réduit (8px au lieu de 22px) + brightness augmenté (.72)
+  - Images partagées via Supabase table "config" (clé/valeur)
+  - Plus de localStorage pour les images → sync entre PC et mobile
 -->
 <style>
+body { background: var(--bg) !important; }
+#app { background: transparent !important; position: relative; z-index: 1; }
 
-/* ── L'overlay est sur body directement, pas besoin de z-index complexe ── */
-body {
-  background: var(--bg) !important;
-}
-#app {
-  background: transparent !important;
-  position: relative;
-  z-index: 1;
-}
-
-/* Header/nav : fond semi-transparent pour laisser voir le fond photo derrière */
 header {
   background: rgba(15,13,10,.88) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 300 !important;
+  position: sticky !important; top: 0 !important; z-index: 300 !important;
 }
 nav {
   background: rgba(26,22,16,.82) !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
-  position: sticky !important;
-  top: 57px !important;
-  z-index: 200 !important;
+  position: sticky !important; top: 57px !important; z-index: 200 !important;
 }
 .light header { background: rgba(245,240,232,.9) !important; }
 .light nav    { background: rgba(237,232,220,.88) !important; }
 
-/* ── OVERLAY FOND PHOTO ──
-   Attaché à body via JS (background-image sur body)
-   Ici on gère juste le pseudo-élément de body
-── */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background-size: cover;
-  background-position: center;
-  filter: blur(22px) saturate(.65) brightness(.45);
-  transform: scale(1.07);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .8s ease;
-  /* L'image sera injectée via JS sur body::before → impossible,
-     on utilise #mdm-ov à la place */
-}
-
+/* ── FOND PHOTO ── */
 #mdm-ov {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-size: cover;
-  background-position: center;
-  filter: blur(22px) saturate(.65) brightness(.45);
-  transform: scale(1.07);
-  opacity: 0;
-  transition: opacity .9s ease;
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-size: cover; background-position: center;
+  /* v10 : blur réduit à 8px, brightness .72 pour voir la photo */
+  filter: blur(8px) saturate(.75) brightness(.72);
+  transform: scale(1.04);
+  opacity: 0; transition: opacity .9s ease;
 }
-
 #main  { position: relative; z-index: 10; }
 #mc    { position: relative; z-index: 500; }
 
-/* Login */
 #login::after {
   content: ''; position: absolute; inset: 0;
   background: url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&w=1400&q=60') center/cover;
@@ -1600,62 +1568,37 @@ body::before {
 }
 #mdm-bg-edit:hover { transform: scale(1.1); }
 
-/* ── BANDE IMAGES ──
-   margin-top: 14px → espace visuel sous la nav
-   border-radius arrondi
-   height: 130px → belles photos bien visibles
-── */
+/* ── BANDE IMAGES ── */
 .mdm-band {
-  display: flex;
-  gap: 4px;
-  border-radius: 16px;
-  overflow: hidden;
-  margin-top: 14px;      /* espace sous la nav */
-  margin-bottom: 18px;
-  position: relative;
-  box-shadow: 0 4px 24px rgba(0,0,0,.25);
-  animation: fadeUp .4s ease both;
+  display: flex; gap: 4px; border-radius: 16px; overflow: hidden;
+  margin-top: 14px; margin-bottom: 18px; position: relative;
+  box-shadow: 0 4px 24px rgba(0,0,0,.25); animation: fadeUp .4s ease both;
 }
-.mdm-band-slot {
-  overflow: hidden;
-  flex-shrink: 0;
-  position: relative;
-}
+.mdm-band-slot { overflow: hidden; flex-shrink: 0; position: relative; }
 .mdm-band-slot img {
-  width: 100%;
-  height: 130px;
-  object-fit: cover;
-  display: block;
-  filter: brightness(.8) saturate(.88);
-  transition: filter .3s, transform .4s;
+  width: 100%; height: 130px; object-fit: cover; display: block;
+  filter: brightness(.8) saturate(.88); transition: filter .3s, transform .4s;
 }
-.mdm-band-slot img:hover {
-  filter: brightness(.95) saturate(1.05);
-  transform: scale(1.04);
-}
+.mdm-band-slot img:hover { filter: brightness(.95) saturate(1.05); transform: scale(1.04); }
 .mdm-band-lbl {
   position: absolute; bottom: 8px; left: 10px;
-  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.2px;
+  font-family: 'DM Mono',monospace; font-size: 9px; letter-spacing: 1.2px;
   color: rgba(255,255,255,.9); background: rgba(0,0,0,.55);
-  padding: 3px 8px; border-radius: 5px; pointer-events: none;
-  text-transform: uppercase;
+  padding: 3px 8px; border-radius: 5px; pointer-events: none; text-transform: uppercase;
 }
 .mdm-band-hint {
   position: absolute; bottom: 8px; right: 8px;
-  font-family: 'DM Mono', monospace; font-size: 9px;
+  font-family: 'DM Mono',monospace; font-size: 9px;
   color: rgba(255,255,255,.7); background: rgba(200,113,58,.45);
   padding: 2px 7px; border-radius: 4px; pointer-events: none;
 }
 .mdm-band-slot img.can-edit { cursor: pointer; }
-.mdm-band-slot img.can-edit:hover {
-  outline: 2px solid rgba(200,113,58,.9); outline-offset: -2px;
-}
+.mdm-band-slot img.can-edit:hover { outline: 2px solid rgba(200,113,58,.9); outline-offset: -2px; }
 
 /* ── MINIATURES ACTUALITÉS ── */
 .mdm-actu-img {
   width: 64px; height: 48px; object-fit: cover; border-radius: 8px;
-  float: right; margin: 0 0 7px 10px;
-  filter: brightness(.82) saturate(.88);
+  float: right; margin: 0 0 7px 10px; filter: brightness(.82) saturate(.88);
 }
 .mdm-actu-img.can-edit { cursor: pointer; }
 .mdm-actu-img.can-edit:hover { filter: brightness(.97); outline: 2px solid var(--accent); }
@@ -1684,6 +1627,7 @@ body::before {
 .mdm-ok { flex: 1; padding: 10px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .mdm-no { flex: 1; padding: 10px; background: var(--bg3); color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; cursor: pointer; }
 .mdm-lbl { font-size: 10px; color: var(--muted); font-family: 'DM Mono',monospace; margin-bottom: 5px; display: block; }
+.mdm-sync-note { font-size: 11px; color: var(--green); font-family: 'DM Mono',monospace; margin-bottom: 10px; }
 </style>
 
 <div id="mdm-ov"></div>
@@ -1692,12 +1636,13 @@ body::before {
 <div id="mdm-modal">
   <div class="mdm-mbox">
     <h4 id="mdm-title">🖼️ Modifier l'image</h4>
+    <p class="mdm-sync-note">✅ Synchronisé entre tous les appareils</p>
     <img id="mdm-prev" src="" alt=""/>
     <span class="mdm-lbl">PRÉRÉGLAGES</span>
     <div class="mdm-presets" id="mdm-ps-box"></div>
     <span class="mdm-lbl">URL PERSONNALISÉE</span>
     <input class="mdm-inp" id="mdm-url" placeholder="https://images.unsplash.com/…" oninput="mdmUrl(this.value)"/>
-    <label class="mdm-uplbl">📎 Photo locale<input type="file" accept="image/*" style="display:none" onchange="mdmFile(this)"/></label>
+    <label class="mdm-uplbl">📎 Photo locale (upload Supabase)<input type="file" accept="image/*" style="display:none" onchange="mdmFile(this)"/></label>
     <div class="mdm-btns">
       <button class="mdm-ok" onclick="mdmOk()">Appliquer ✓</button>
       <button class="mdm-no" onclick="mdmClose()">Annuler</button>
@@ -1728,15 +1673,15 @@ var IMG = {
 var ALL = IMG.outdoor.concat(IMG.canape).concat(IMG.deco);
 
 var CFG = {
-  home:       { bg: IMG.deco[1],    op: .42, s: [IMG.deco[0], IMG.outdoor[0], IMG.canape[0]], w: ['38%','33%','29%'], lbl: 'COLLECTION 2026' },
-  chiffres:   { bg: IMG.outdoor[0], op: .38, s: [IMG.outdoor[0], IMG.outdoor[1], IMG.deco[0]], w: ['40%','32%','28%'], lbl: 'PERFORMANCES ÉQUIPE' },
-  formations: { bg: IMG.canape[0],  op: .40, s: [IMG.canape[0], IMG.outdoor[2], IMG.deco[1]], w: ['42%','30%','28%'], lbl: 'FORMATIONS 2026' },
-  planning:   { bg: IMG.deco[0],    op: .38, s: [IMG.deco[1], IMG.outdoor[1]], w: ['55%','45%'], lbl: 'PLANNING · ÉTÉ 2026' },
-  todos:      { bg: IMG.deco[2],    op: .34, s: null },
-  devis:      { bg: IMG.outdoor[2], op: .34, s: null },
-  litiges:    { bg: IMG.deco[0],    op: .30, s: null },
-  discussion: { bg: IMG.canape[1],  op: .34, s: null },
-  admin:      { bg: IMG.deco[0],    op: .36, s: [IMG.outdoor[0], IMG.deco[0], IMG.canape[0]], w: ['38%','33%','29%'], lbl: 'ESPACE MANAGER' }
+  home:       { bg: IMG.deco[1],    op: .55, s: [IMG.deco[0], IMG.outdoor[0], IMG.canape[0]], w: ['38%','33%','29%'], lbl: 'COLLECTION 2026' },
+  chiffres:   { bg: IMG.outdoor[0], op: .50, s: [IMG.outdoor[0], IMG.outdoor[1], IMG.deco[0]], w: ['40%','32%','28%'], lbl: 'PERFORMANCES ÉQUIPE' },
+  formations: { bg: IMG.canape[0],  op: .52, s: [IMG.canape[0], IMG.outdoor[2], IMG.deco[1]], w: ['42%','30%','28%'], lbl: 'FORMATIONS 2026' },
+  planning:   { bg: IMG.deco[0],    op: .50, s: [IMG.deco[1], IMG.outdoor[1]], w: ['55%','45%'], lbl: 'PLANNING · ÉTÉ 2026' },
+  todos:      { bg: IMG.deco[2],    op: .45, s: null },
+  devis:      { bg: IMG.outdoor[2], op: .45, s: null },
+  litiges:    { bg: IMG.deco[0],    op: .42, s: null },
+  discussion: { bg: IMG.canape[1],  op: .45, s: null },
+  admin:      { bg: IMG.deco[0],    op: .48, s: [IMG.outdoor[0], IMG.deco[0], IMG.canape[0]], w: ['38%','33%','29%'], lbl: 'ESPACE MANAGER' }
 };
 
 var TIMG = {
@@ -1745,32 +1690,72 @@ var TIMG = {
   'OBJECTIF': IMG.outdoor[1], 'RH': IMG.deco[1]
 };
 
-/* ── STORAGE ── */
-var CI = {};
-try { CI = JSON.parse(localStorage.getItem('mdm_ci') || '{}'); } catch(e) {}
-function sc() { try { localStorage.setItem('mdm_ci', JSON.stringify(CI)); } catch(e) {} }
-function gi(k, d) { return CI[k] || d; }
-function si(k, v) { CI[k] = v; sc(); }
+/* ══════════════════════════════════════
+   SUPABASE CONFIG TABLE
+   Table SQL à créer dans Supabase :
+   
+   create table if not exists config (
+     key text primary key,
+     value text not null,
+     updated_at timestamptz default now()
+   );
+   alter table config enable row level security;
+   create policy "allow all" on config for all using (true) with check (true);
+   
+══════════════════════════════════════ */
 
-/* ── FOND PHOTO ──
-   On applique l'image sur #mdm-ov.
-   Pour contourner le background blanc de #app,
-   on force #app transparent en JS à chaque appel.
-── */
+/* Cache mémoire pour éviter trop de requêtes */
+var _cache = {};
+var _cacheLoaded = false;
+
+/* Charger toute la config au démarrage */
+function loadConfig() {
+  return fetch(SB_URL + '/rest/v1/config?select=key,value', {
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+  })
+  .then(function(r) { return r.ok ? r.json() : []; })
+  .then(function(rows) {
+    if (!Array.isArray(rows)) return;
+    rows.forEach(function(r) { _cache[r.key] = r.value; });
+    _cacheLoaded = true;
+  })
+  .catch(function() { _cacheLoaded = true; });
+}
+
+function gi(key, def) {
+  return _cache[key] || def;
+}
+
+function si(key, val) {
+  _cache[key] = val;
+  /* Upsert dans Supabase */
+  fetch(SB_URL + '/rest/v1/config', {
+    method: 'POST',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates,return=minimal'
+    },
+    body: JSON.stringify({ key: key, value: val })
+  }).catch(function() {});
+}
+
+/* ══════════════════════════════════════
+   FOND PHOTO
+══════════════════════════════════════ */
 var _lastSrc = '';
 function setBg(pg) {
-  var ov = document.getElementById('mdm-ov');
-  if (!ov) return;
-
-  /* Forcer #app transparent à chaque navigation */
+  var ov  = document.getElementById('mdm-ov');
   var app = document.getElementById('app');
   if (app) app.style.background = 'transparent';
+  if (!ov) return;
 
-  var c = CFG[pg];
+  var c   = CFG[pg];
   if (!c) { ov.style.opacity = '0'; _lastSrc = ''; return; }
 
   var src = gi('bg_' + pg, c.bg);
-  var op  = String(c.op || .38);
+  var op  = String(c.op || .5);
 
   if (_lastSrc === src) { ov.style.opacity = op; return; }
 
@@ -1797,17 +1782,20 @@ function setBg(pg) {
   tmp.src = src;
 }
 
-/* ── BANDE IMAGES ── */
+/* ══════════════════════════════════════
+   BANDE IMAGES
+══════════════════════════════════════ */
 function mkBand(pg) {
-  var c = CFG[pg];
-  if (!c || !c.s || !c.s.length) return;
+  var c    = CFG[pg];
   var main = document.getElementById('main');
   if (!main) return;
 
   var old = main.querySelector('.mdm-band');
   if (old) old.parentNode.removeChild(old);
 
-  var adm = typeof isA === 'function' && isA();
+  if (!c || !c.s || !c.s.length) return;
+
+  var adm  = typeof isA === 'function' && isA();
   var band = document.createElement('div');
   band.className = 'mdm-band';
 
@@ -1821,13 +1809,11 @@ function mkBand(pg) {
     slot.style.width = w;
 
     var img = document.createElement('img');
-    img.src = src;
-    img.loading = 'lazy';
-    img.alt = '';
+    img.src = src; img.loading = 'lazy'; img.alt = '';
 
     if (adm) {
       img.classList.add('can-edit');
-      img.title = 'Cliquer pour modifier';
+      img.title = 'Cliquer pour modifier (sync tous appareils)';
       (function(k, el) {
         img.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -1852,11 +1838,12 @@ function mkBand(pg) {
     band.appendChild(hint);
   }
 
-  /* Insérer comme premier enfant — le margin-top CSS crée l'espace */
   main.insertBefore(band, main.firstChild);
 }
 
-/* ── MINIATURES ACTUALITÉS ── */
+/* ══════════════════════════════════════
+   MINIATURES ACTUALITÉS
+══════════════════════════════════════ */
 function enrichActu() {
   var adm = typeof isA === 'function' && isA();
   document.querySelectorAll('#main .card').forEach(function(card) {
@@ -1884,7 +1871,9 @@ function enrichActu() {
   });
 }
 
-/* ── BOUTON FOND ADMIN ── */
+/* ══════════════════════════════════════
+   BOUTON FOND ADMIN
+══════════════════════════════════════ */
 function showBgBtn(pg) {
   var btn = document.getElementById('mdm-bg-edit');
   if (!btn) return;
@@ -1899,11 +1888,35 @@ window.mdmOpenBg = function() {
   mdmOpen('bg_' + pg, src, null, 'Fond — page "' + pg + '"');
 };
 
-/* ── MODAL ── */
+/* ══════════════════════════════════════
+   UPLOAD LOCAL → SUPABASE STORAGE
+══════════════════════════════════════ */
+function uploadToSB(file, cb) {
+  var fname = 'cfg_' + Date.now() + '_' + file.name.replace(/\s/g, '_');
+  if (typeof toast === 'function') toast('Upload en cours...');
+  fetch(SB_URL + '/storage/v1/object/uploads/' + fname, {
+    method: 'POST',
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': file.type, 'x-upsert': 'true' },
+    body: file
+  }).then(function(r) {
+    if (r.ok) {
+      var url = SB_URL + '/storage/v1/object/public/uploads/' + fname;
+      cb(url);
+    } else {
+      if (typeof toast === 'function') toast('Erreur upload');
+    }
+  }).catch(function() {
+    if (typeof toast === 'function') toast('Erreur réseau');
+  });
+}
+
+/* ══════════════════════════════════════
+   MODAL
+══════════════════════════════════════ */
 var _t = null;
 window.mdmOpen = function(key, src, el, label) {
   if (typeof isA === 'function' && !isA()) return;
-  _t = { key: key, el: el };
+  _t = { key: key, el: el, pendingFile: null };
   document.getElementById('mdm-title').textContent = '🖼️ ' + (label || 'Modifier');
   var b = document.getElementById('mdm-ps-box');
   b.innerHTML = ALL.map(function(s) {
@@ -1922,28 +1935,43 @@ window.mdmPs = function(el, src) {
   el.classList.add('on');
   document.getElementById('mdm-prev').src = src;
   document.getElementById('mdm-url').value = src;
+  if (_t) _t.pendingFile = null;
 };
 window.mdmUrl = function(v) {
   if (v && (v.startsWith('http') || v.startsWith('data:'))) {
     document.getElementById('mdm-prev').src = v;
     document.querySelectorAll('.mdm-ps').forEach(function(p) { p.classList.remove('on'); });
+    if (_t) _t.pendingFile = null;
   }
 };
 window.mdmFile = function(inp) {
   var f = inp.files && inp.files[0]; if (!f) return;
+  if (_t) _t.pendingFile = f;
   var r = new FileReader();
   r.onload = function(e) {
     document.getElementById('mdm-prev').src = e.target.result;
-    document.getElementById('mdm-url').value = e.target.result;
     document.querySelectorAll('.mdm-ps').forEach(function(p) { p.classList.remove('on'); });
   };
   r.readAsDataURL(f);
 };
 window.mdmOk = function() {
   if (!_t) return;
+
+  /* Si fichier local → upload Supabase d'abord */
+  if (_t.pendingFile) {
+    uploadToSB(_t.pendingFile, function(url) {
+      applyImg(url);
+    });
+    return;
+  }
+
   var src = document.getElementById('mdm-prev').src;
   if (!src) return;
-  si(_t.key, src);
+  applyImg(src);
+};
+
+function applyImg(src) {
+  si(_t.key, src);  /* Sauvegarde Supabase */
   if (_t.el && _t.el.tagName === 'IMG') _t.el.src = src;
   if (_t.key && _t.key.startsWith('bg_')) {
     _lastSrc = '';
@@ -1952,16 +1980,19 @@ window.mdmOk = function() {
   }
   mdmClose();
   if (typeof rPg === 'function') rPg();
-  if (typeof toast === 'function') toast('Image mise à jour ✅');
-};
+  if (typeof toast === 'function') toast('Image mise à jour ✅ (synchronisée)');
+}
+
 document.getElementById('mdm-modal').addEventListener('click', function(e) {
   if (e.target === this) mdmClose();
 });
 
-/* ── HOOK rPg ── */
+/* ══════════════════════════════════════
+   HOOK rPg — s'applique à chaque navigation
+══════════════════════════════════════ */
 var _orig = null;
-function hook() {
-  if (typeof rPg === 'undefined') { setTimeout(hook, 200); return; }
+function attachHook() {
+  if (typeof rPg === 'undefined') { setTimeout(attachHook, 200); return; }
   if (_orig) return;
   _orig = rPg;
   rPg = function() {
@@ -1976,10 +2007,20 @@ function hook() {
   };
 }
 
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+function init() {
+  /* Charger la config Supabase, PUIS démarrer le hook */
+  loadConfig().then(function() {
+    attachHook();
+  });
+}
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', hook);
+  document.addEventListener('DOMContentLoaded', init);
 } else {
-  hook();
+  init();
 }
 
 })();
