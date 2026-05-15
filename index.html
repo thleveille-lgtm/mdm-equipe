@@ -1508,94 +1508,7 @@ function sbSaveTodo(uid,t){sbQ("todos","POST",{id:t.id,uid:uid,title:t.title,det
 function sbSaveDevis(uid,d){if(!d)return;sbQ("devis","POST",{id:d.id,uid:uid,nom:d.nom,prenom:d.prenom,tel:d.tel,num_cmd:d.numCmd,note:d.note,rappel_date:d.rappelDate,r_sent:d.rSent,comments:d.comments||[]});}
 function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,dest:n.to,sender:n.from,txt:n.text,type:n.type,read:n.read,date:n.date});}
 </script>
-  <!--
-  ═══════════════════════════════════════════════════════════════
-  MDM ÉQUIPE — PATCH VISUEL COLLECTION 2026
-  Colle ce bloc juste avant </body> dans ton fichier HTML principal
-  ═══════════════════════════════════════════════════════════════
--->
-
-<style>
-/* ── Bannière & images ── */
-#mdm-visual-banner{animation:fadeUp .5s ease both;cursor:default;}
-#mdm-visual-banner img{display:block;}
-.mdm-thumb{animation:fadeIn .4s ease both;transition:filter .3s;}
-.card:hover .mdm-thumb{filter:brightness(1) saturate(1.1) !important;}
-#mdm-form-strip,#mdm-plan-strip{animation:fadeUp .4s ease both;}
-
-/* ── Page login : fond image collection fondu ── */
-#login::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  background-image:url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1400&q=50');
-  background-size:cover;
-  background-position:center 40%;
-  opacity:.09;
-  pointer-events:none;
-  z-index:0;
-}
-.light #login::after{opacity:.05;}
-
-/* ── Header : micro-texture chaude ── */
-header{
-  background:linear-gradient(90deg,var(--bg) 60%,rgba(200,113,58,.05) 100%) !important;
-}
-
-/* ── Login box au-dessus du fond ── */
-.lbox{z-index:1;}
-
-/* ── Bouton login : image fondue ── */
-#lbtn{overflow:hidden;position:relative;}
-#lbtn::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background-image:url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=30');
-  background-size:cover;
-  opacity:.12;
-  pointer-events:none;
-}
-
-/* ── Cartes actualités avec bord coloré selon tag ── */
-.mdm-actu-outdoor{border-left:3px solid #6B9E5E !important;}
-.mdm-actu-canape {border-left:3px solid #C9993A !important;}
-.mdm-actu-formation{border-left:3px solid #4E7EA8 !important;}
-.mdm-actu-hot   {border-left:3px solid #C8713A !important;}
-
-/* ── Strip produit dans les cards formation ── */
-.mdm-prod-strip{
-  display:flex;
-  gap:3px;
-  height:75px;
-  border-radius:8px;
-  overflow:hidden;
-  margin:10px 0 0;
-}
-.mdm-prod-strip img{
-  flex:1;
-  min-width:0;
-  object-fit:cover;
-  filter:brightness(.75) saturate(.85);
-  transition:filter .3s;
-}
-.mdm-prod-strip img:hover{filter:brightness(.95) saturate(1.05);}
-
-/* ── Watermark collection dans nav ── */
-#mdm-nav-coll{
-  font-family:'DM Mono',monospace;
-  font-size:9px;
-  color:var(--dim);
-  padding:7px 8px;
-  white-space:nowrap;
-  letter-spacing:.5px;
-  display:none;
-}
-@media(min-width:480px){#mdm-nav-coll{display:inline-block;}}
-</style>
-
-<script>
-<!--
+ <!--
   MDM ÉQUIPE — PATCH VISUEL v3
   ► Colle ce bloc juste AVANT </body>
   ► Remplace l'ancien patch v1 ou v2
@@ -1951,5 +1864,4 @@ else{hook();}
 
 })();
 </script>
-</body>
 </html>
