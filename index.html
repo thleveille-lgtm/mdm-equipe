@@ -1992,16 +1992,21 @@ window.mdmOk = function() {
 };
 
 function applyImg(src) {
-  si(_t.key, src);  /* Sauvegarde Supabase */
-  if (_t.el && _t.el.tagName === 'IMG') _t.el.src = src;
-  if (_t.key && _t.key.startsWith('bg_')) {
-    _lastSrc = '';
-    var pg = _t.key.replace('bg_', '');
-    if (pg === (typeof PG !== 'undefined' ? PG : '')) setBg(pg);
+  si(_t.key, src);
+  if(_t.el && _t.el.tagName==='IMG') _t.el.src=src;
+  if(_t.key && _t.key.startsWith('bg_')){
+    _lastSrc='';
+    var pg=_t.key.replace('bg_','');
+    if(pg==='login'){
+      var loginEl=document.getElementById('login');
+      if(loginEl){loginEl.style.backgroundImage='url('+src+')';loginEl.style.backgroundSize='cover';loginEl.style.backgroundPosition='center';}
+    } else if(pg===(typeof PG!=='undefined'?PG:'')){
+      setBg(pg);
+    }
   }
   mdmClose();
-  if (typeof rPg === 'function') rPg();
-  if (typeof toast === 'function') toast('Image mise à jour ✅ (synchronisée)');
+  if(typeof rPg==='function') rPg();
+  if(typeof toast==='function') toast('Image mise à jour ✅');
 }
 
 document.getElementById('mdm-modal').addEventListener('click', function(e) {
