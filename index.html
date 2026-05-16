@@ -1995,12 +1995,12 @@ function attachHook() {
   rPg = function() {
     _orig.apply(this, arguments);
     setTimeout(function() {
-      var pg = typeof PG !== 'undefined' ? PG : 'home';
-      setBg(pg);
-      showBgBtn(pg);
-      mkBand(pg);
-      enrichActu();
-    }, 150);
+  var pg = typeof PG !== 'undefined' ? PG : 'home';
+  setBg(pg);
+  showBgBtn(pg);
+  mkBand(pg);
+  enrichActu();
+}, 400);
   };
 }
 
