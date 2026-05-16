@@ -1864,9 +1864,21 @@ loadConfig().then(function(){
   var src=gi('bg_login',"https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&w=1400&q=60");
   var loginEl=document.getElementById('login');
   if(loginEl){loginEl.style.backgroundImage='url('+src+')';loginEl.style.backgroundSize='cover';loginEl.style.backgroundPosition='center';}
-  // Bouton visible sur login
+  // Bouton UNIQUEMENT visible si admin connecté ou pas encore connecté (pour config)
+  // Sur la page login : caché par défaut, visible après vérification du prénom
   var btn=document.getElementById('mdm-bg-edit');
-  if(btn){btn.style.display='flex';btn.setAttribute('data-pg','login');}
+  if(btn){btn.style.display='none';}
+});
+
+// Affiche le bouton 🖼️ sur login seulement si prénom = admin
+document.getElementById('lu').addEventListener('input',function(){
+  var val=this.value.trim().toLowerCase();
+  var btn=document.getElementById('mdm-bg-edit');
+  if(!btn)return;
+  var adminUsers=UD.filter(function(u){return u.role==='admin'||u.role==='adjoint';});
+  var isAdm=adminUsers.some(function(u){return u.name.toLowerCase()===val;});
+  btn.style.display=isAdm?'flex':'none';
+  btn.setAttribute('data-pg','login');
 });
 /* ══════════════════════════════════════
    MINIATURES ACTUALITÉS
