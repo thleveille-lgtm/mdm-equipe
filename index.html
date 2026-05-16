@@ -1922,7 +1922,8 @@ function showBgBtn(pg) {
   btn.style.display=adm?'flex':'none';
   btn.setAttribute('data-pg',pg||'');
 }
-window.mdmOpenBg = function() {
+window.mdmOpenBg = function(e) {
+  if(e){e.stopPropagation();e.preventDefault();}
   var isLogin=document.getElementById('login').style.display!=='none';
   var pg=isLogin?'login':(document.getElementById('mdm-bg-edit').getAttribute('data-pg')||'home');
   var c=CFG[pg];
