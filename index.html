@@ -1835,7 +1835,7 @@ function mkBand(pg) {
     band.appendChild(hint);
   }
 
-  main.appendChild(band);
+  main.insertBefore(band, main.firstChild);
 }
 
 /* ══════════════════════════════════════
