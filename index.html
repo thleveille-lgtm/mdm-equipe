@@ -1958,7 +1958,8 @@ function uploadToSB(file, cb) {
 ══════════════════════════════════════ */
 var _t = null;
 window.mdmOpen = function(key, src, el, label) {
-  if (typeof isA === 'function' && !isA()) return;
+  var onLogin = document.getElementById('login').style.display !== 'none';
+  if (!onLogin && typeof isA === 'function' && !isA()) return;
   _t = { key: key, el: el, pendingFile: null };
   document.getElementById('mdm-title').textContent = '🖼️ ' + (label || 'Modifier');
   var b = document.getElementById('mdm-ps-box');
