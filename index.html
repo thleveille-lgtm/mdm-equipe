@@ -1895,11 +1895,11 @@ function enrichActu() {
    BOUTON FOND ADMIN
 ══════════════════════════════════════ */
 function showBgBtn(pg) {
-  var btn = document.getElementById('mdm-bg-edit');
-  if (!btn) return;
-  var adm = typeof isA === 'function' && isA();
-  btn.style.display = adm ? 'flex' : 'none';
-  btn.setAttribute('data-pg', pg || '');
+  var btn=document.getElementById('mdm-bg-edit');
+  if(!btn)return;
+  var adm=typeof isA==='function'&&isA();
+  btn.style.display=adm?'flex':'none';
+  btn.setAttribute('data-pg',pg||'');
 }
 window.mdmOpenBg = function() {
   var isLogin=document.getElementById('login').style.display!=='none';
