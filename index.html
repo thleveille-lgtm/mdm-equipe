@@ -1580,10 +1580,11 @@ nav {
   position: fixed; bottom: 20px; right: 16px;
   background: rgba(200,113,58,.92); color: #fff;
   border: none; border-radius: 50%; width: 42px; height: 42px;
-  font-size: 18px; cursor: pointer; z-index: 9999;
+  font-size: 18px; cursor: pointer; z-index: 99999;
   box-shadow: 0 4px 18px rgba(0,0,0,.5);
   display: none; align-items: center; justify-content: center;
   transition: transform .2s;
+  pointer-events: all !important;
 }
 #mdm-bg-edit:hover { transform: scale(1.1); }
 
