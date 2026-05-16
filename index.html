@@ -1902,10 +1902,11 @@ function showBgBtn(pg) {
   btn.setAttribute('data-pg', pg || '');
 }
 window.mdmOpenBg = function() {
-  var pg  = document.getElementById('mdm-bg-edit').getAttribute('data-pg') || 'home';
-  var c   = CFG[pg];
-  var src = gi('bg_' + pg, c ? c.bg : IMG.deco[1]);
-  mdmOpen('bg_' + pg, src, null, 'Fond — page "' + pg + '"');
+  var isLogin=document.getElementById('login').style.display!=='none';
+  var pg=isLogin?'login':(document.getElementById('mdm-bg-edit').getAttribute('data-pg')||'home');
+  var c=CFG[pg];
+  var src=gi('bg_'+pg,c?c.bg:IMG.deco[1]);
+  mdmOpen('bg_'+pg,src,null,'Fond — '+(isLogin?'page connexion':'"'+pg+'"'));
 };
 
 /* ══════════════════════════════════════
