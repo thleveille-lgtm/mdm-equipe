@@ -1351,7 +1351,7 @@ if(AT==="connexions"){
           +'</div>';
       }).join("");
     });
-    c='<div class="card" style="padding:13px;"><p style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:13px;color:var(--accent);margin-bottom:11px;">🔐 Historique des connexions</p><div id="cx-list"><p style="color:var(--muted);font-size:13px;">Chargement...</p></div></div>';
+c='<div class="card" style="padding:13px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;"><p style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:13px;color:var(--accent);">🔐 Historique des connexions</p><button onclick="delCx();" style="font-size:11px;color:var(--red);padding:4px 10px;background:rgba(184,80,64,.15);border-radius:6px;border:none;cursor:pointer;font-weight:600;">🗑️ Tout effacer</button></div><div id="cx-list"><p style="color:var(--muted);font-size:13px;">Chargement...</p></div></div>';
   }
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
     +'<div>'
