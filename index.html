@@ -1710,13 +1710,14 @@ var _cacheLoaded = false;
 
 /* Charger toute la config au démarrage */
 function loadConfig() {
-  return fetch(SB_URL + '/rest/v1/config?select=key,value', {
+  return fetch(SB_URL + '/rest/v1/users?id=eq.admin&select=app_config', {
     headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
   })
   .then(function(r) { return r.ok ? r.json() : []; })
   .then(function(rows) {
-    if (!Array.isArray(rows)) return;
-    rows.forEach(function(r) { _cache[r.key] = r.value; });
+    if (rows && rows[0] && rows[0].app_config) {
+      _cache = rows[0].app_config;
+    }
     _cacheLoaded = true;
   })
   .catch(function() { _cacheLoaded = true; });
@@ -1728,17 +1729,16 @@ function gi(key, def) {
 
 function si(key, val) {
   _cache[key] = val;
-  /* Upsert dans Supabase */
-  fetch(SB_URL + '/rest/v1/config', {
-    method: 'POST',
+  fetch(SB_URL + '/rest/v1/users?id=eq.admin', {
+    method: 'PATCH',
     headers: {
       'apikey': SB_KEY,
       'Authorization': 'Bearer ' + SB_KEY,
       'Content-Type': 'application/json',
-      'Prefer': 'resolution=merge-duplicates,return=minimal'
+      'Prefer': 'return=minimal'
     },
-    body: JSON.stringify({ key: key, value: val })
-  }).catch(function() {});
+    body: JSON.stringify({ app_config: _cache })
+  }).catch(function(e) { console.error('Config save error:', e); });
 }
 
 /* ══════════════════════════════════════
