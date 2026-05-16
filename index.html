@@ -1507,13 +1507,30 @@ function adminDelAllTodosEveryone(){
 function sbSaveTodo(uid,t){sbQ("todos","POST",{id:t.id,uid:uid,title:t.title,detail:t.desc,deadline:t.deadline,assigned_from:t.from,done:t.done,validated:t.validated,self:t.self||false,comments:t.comments||[]});}
 function sbSaveDevis(uid,d){if(!d)return;sbQ("devis","POST",{id:d.id,uid:uid,nom:d.nom,prenom:d.prenom,tel:d.tel,num_cmd:d.numCmd,note:d.note,rappel_date:d.rappelDate,r_sent:d.rSent,comments:d.comments||[]});}
 function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,dest:n.to,sender:n.from,txt:n.text,type:n.type,read:n.read,date:n.date});}
-  function delCx(){
+ function delCx(){
   if(!confirm("Effacer tout l'historique des connexions ?"))return;
-  sbQ("connexions","DELETE",null,"?created_at=gte.2000-01-01").then(function(){
-    var el=document.getElementById("cx-list");
+  var el=document.getElementById("cx-list");
+  fetch(SB_URL+"/rest/v1/connexions?select=id&limit=500",{
+    headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}
+  })
+  .then(function(r){return r.json();})
+  .then(function(rows){
+    if(!rows||!rows.length){
+      if(el)el.innerHTML='<p style="color:var(--dim);text-align:center;padding:28px;">Aucune connexion.</p>';
+      return;
+    }
+    return Promise.all(rows.map(function(r){
+      return fetch(SB_URL+"/rest/v1/connexions?id=eq."+r.id,{
+        method:"DELETE",
+        headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Prefer":"return=minimal"}
+      });
+    }));
+  })
+  .then(function(){
     if(el)el.innerHTML='<p style="color:var(--dim);text-align:center;padding:28px;">Aucune connexion.</p>';
     toast("Historique effacé ✅");
-  });
+  })
+  .catch(function(){toast("Erreur réseau");});
 }
 </script>
 <!--
