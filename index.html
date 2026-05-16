@@ -1507,6 +1507,14 @@ function adminDelAllTodosEveryone(){
 function sbSaveTodo(uid,t){sbQ("todos","POST",{id:t.id,uid:uid,title:t.title,detail:t.desc,deadline:t.deadline,assigned_from:t.from,done:t.done,validated:t.validated,self:t.self||false,comments:t.comments||[]});}
 function sbSaveDevis(uid,d){if(!d)return;sbQ("devis","POST",{id:d.id,uid:uid,nom:d.nom,prenom:d.prenom,tel:d.tel,num_cmd:d.numCmd,note:d.note,rappel_date:d.rappelDate,r_sent:d.rSent,comments:d.comments||[]});}
 function sbSaveNotif(n){sbQ("notifications","POST",{id:n.id,dest:n.to,sender:n.from,txt:n.text,type:n.type,read:n.read,date:n.date});}
+  function delCx(){
+  if(!confirm("Effacer tout l'historique des connexions ?"))return;
+  sbQ("connexions","DELETE",null,"?id=neq.NEVER").then(function(){
+    var el=document.getElementById("cx-list");
+    if(el)el.innerHTML='<p style="color:var(--dim);text-align:center;padding:28px;">Aucune connexion.</p>';
+    toast("Historique effacé ✅");
+  });
+}
 </script>
 <!--
   MDM ÉQUIPE — PATCH VISUEL v10
