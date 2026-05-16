@@ -1710,13 +1710,13 @@ var _cacheLoaded = false;
 
 /* Charger toute la config au démarrage */
 function loadConfig() {
-  return fetch(SB_URL + '/rest/v1/users?id=eq.admin&select=app_config', {
+  return fetch(SB_URL + '/rest/v1/config?select=key,value', {
     headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
   })
   .then(function(r) { return r.ok ? r.json() : []; })
   .then(function(rows) {
-    if (rows && rows[0] && rows[0].app_config) {
-      _cache = rows[0].app_config;
+    if (rows && rows.length) {
+      rows.forEach(function(row) { _cache[row.key] = row.value; });
     }
     _cacheLoaded = true;
   })
@@ -1729,15 +1729,15 @@ function gi(key, def) {
 
 function si(key, val) {
   _cache[key] = val;
-  fetch(SB_URL + '/rest/v1/users?id=eq.admin', {
-    method: 'PATCH',
+  fetch(SB_URL + '/rest/v1/config', {
+    method: 'POST',
     headers: {
       'apikey': SB_KEY,
       'Authorization': 'Bearer ' + SB_KEY,
       'Content-Type': 'application/json',
-      'Prefer': 'return=minimal'
+      'Prefer': 'resolution=merge-duplicates,return=minimal'
     },
-    body: JSON.stringify({ app_config: _cache })
+    body: JSON.stringify({ key: key, value: val })
   }).catch(function(e) { console.error('Config save error:', e); });
 }
 
