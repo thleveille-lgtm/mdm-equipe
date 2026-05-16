@@ -1860,7 +1860,15 @@ function mkBand(pg) {
 
   setTimeout(function(){ main.insertBefore(band, main.firstChild); }, 800);
 }
-
+// Fond login au chargement
+loadConfig().then(function(){
+  var src=gi('bg_login',"https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&w=1400&q=60");
+  var loginEl=document.getElementById('login');
+  if(loginEl){loginEl.style.backgroundImage='url('+src+')';loginEl.style.backgroundSize='cover';loginEl.style.backgroundPosition='center';}
+  // Bouton visible sur login
+  var btn=document.getElementById('mdm-bg-edit');
+  if(btn){btn.style.display='flex';btn.setAttribute('data-pg','login');}
+});
 /* ══════════════════════════════════════
    MINIATURES ACTUALITÉS
 ══════════════════════════════════════ */
