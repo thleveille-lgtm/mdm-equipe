@@ -1835,8 +1835,7 @@ function mkBand(pg) {
     band.appendChild(hint);
   }
 
-  var ref = main.querySelector('h2') || main.firstChild;
-main.insertBefore(band, ref);
+  main.appendChild(band);
 }
 
 /* ══════════════════════════════════════
